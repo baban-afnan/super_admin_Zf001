@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Transaction extends Model
+
+
+{
+    protected $table = 'transactions'; 
+    
+    protected $fillable = [
+        'transaction_ref', 
+        'payer_name',
+        'referenceId',
+        'user_id', 
+        'amount', 
+        'fee',
+        'net_amount',
+        'description',
+        'type', 
+        'status', 
+        'metadata', 
+        'performed_by',
+        'approved_by',
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

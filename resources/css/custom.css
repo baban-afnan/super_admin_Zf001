@@ -1,0 +1,302 @@
+/* ============================================
+   Custom CSS for BVN Modification View
+   Premium UI Enhancements
+   ============================================ */
+
+:root {
+  --primary-h: 220;
+  --primary-s: 80%;
+  --primary-l: 55%;
+  --primary-color: hsl(220, 80%, 55%);
+  --primary-dark: hsl(220, 80%, 45%);
+  --secondary-h: 210;
+  --secondary-s: 15%;
+  --secondary-l: 95%;
+  --bg-gradient: linear-gradient(135deg, hsl(220, 80%, 45%), hsl(220, 80%, 65%));
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+  box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+}
+
+.header-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 1.5rem 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  margin-bottom: 2rem;
+}
+
+.header-gradient h4 {
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Glass Morphism Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Enhanced Cards */
+.card {
+  border-radius: 0.75rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.card.border-0 {
+  border: none;
+}
+
+.card-header {
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+  padding: 1rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Button Enhancements */
+.btn {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary-outline {
+  border: 2px solid #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.btn-primary-outline:hover {
+  background: #fff;
+  color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.3);
+}
+
+.btn.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Form Controls */
+.form-control,
+.form-select {
+  border-radius: 0.5rem;
+  border: 1px solid #e0e6ed;
+  padding: 0.625rem 1rem;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+  background: #fff;
+}
+
+textarea.form-control {
+  min-height: 120px;
+  background: rgba(248, 249, 250, 0.8);
+  border-radius: 0.5rem;
+  resize: vertical;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.form-label.fw-semibold {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* Badge Enhancements */
+.badge {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+/* Status Colors */
+.bg-info {
+  background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%) !important;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-warning {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+.bg-success {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+.bg-danger {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+}
+
+.bg-secondary {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+}
+
+/* Timeline Styling */
+.timeline-item {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary-color) 0%, transparent 100%);
+  border-radius: 2px;
+}
+
+.border-left-warning {
+  border-left: 4px solid #f5576c !important;
+}
+
+.border-left-primary {
+  border-left: 4px solid #764ba2 !important;
+}
+
+.border-left-info {
+  border-left: 4px solid #5b86e5 !important;
+}
+
+.border-left-success {
+  border-left: 4px solid #00f2fe !important;
+}
+
+.border-left-danger {
+  border-left: 4px solid #fa709a !important;
+}
+
+.border-left-secondary {
+  border-left: 4px solid #fed6e3 !important;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Alert Enhancements */
+.alert {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+  color: #155724;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #721c24;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .header-gradient {
+    padding: 1rem 0;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .btn-primary-outline {
+    font-size: 0.875rem;
+    padding: 0.4rem 1rem;
+  }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Text Utilities */
+.text-muted {
+  color: #6c757d !important;
+}
+
+small.text-muted {
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Icon Enhancements */
+i.fas,
+i.bi,
+i.ti {
+  transition: transform 0.3s ease;
+}
+
+.btn:hover i {
+  transform: scale(1.1);
+}
