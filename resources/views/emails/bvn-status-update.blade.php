@@ -95,7 +95,12 @@
             <div class="details">
                 <p>Service: {{ $service_name }}</p>
                 <p>Field: {{ $field_name }}</p>
-                <p>Field: {{ $bvn }}</p>
+                @if(isset($bvn))
+                <p>BVN: {{ $bvn }}</p>
+                @endif
+                @if(isset($nin))
+                <p>NIN: {{ $nin }}</p>
+                @endif
                 <p>Request ID: #{{ $request_id }}</p>
                 <p>Reference: {{ $reference }}</p>
                 <p>Status: <span class="status-badge status-{{ strtolower($status) }}">{{ $status }}</span></p>

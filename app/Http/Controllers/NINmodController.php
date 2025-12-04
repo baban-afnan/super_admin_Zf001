@@ -261,6 +261,7 @@ class NINmodController extends Controller
             'file_url' => $fileUrl ? Storage::url($fileUrl) : null,
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
+            'nin' => $enrollment->nin,
         ];
 
         Mail::send('emails.bvn-status-update', $data, function($message) use ($user, $serviceName) {

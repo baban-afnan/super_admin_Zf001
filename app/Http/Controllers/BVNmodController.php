@@ -261,6 +261,7 @@ class BVNmodController extends Controller
             'file_url' => $fileUrl ? Storage::url($fileUrl) : null,
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
+            'bvn' => $enrollment->bvn,
         ];
 
         Mail::send('emails.bvn-status-update', $data, function($message) use ($user, $serviceName) {

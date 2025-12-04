@@ -261,6 +261,8 @@ class CRMController extends Controller
             'file_url' => $fileUrl ? Storage::url($fileUrl) : null,
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
+            'ticket_id' => $enrollment->ticket_id,
+            'batch_id' => $enrollment->batch_id,
         ];
 
         Mail::send('emails.crm-status-update', $data, function($message) use ($user, $serviceName) {
