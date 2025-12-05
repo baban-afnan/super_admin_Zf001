@@ -204,13 +204,12 @@
                     </div>
                     <div class="card-footer bg-white border-top-0 py-3">
                         <div class="d-flex justify-content-center">
-                            {{ $data->onEachSide(1)->links('pagination::bootstrap-5') }}
+                            {{ $data->onEachSide(1)->links('vendor.pagination.custom') }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Tabler Icons (if not already included in layout) -->

@@ -244,7 +244,7 @@
                                     <div class="text-muted small">
                                         Showing {{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ $users->total() }} entries
                                     </div>
-                                    {{ $users->links() }}
+                                    {{ $users->links('vendor.pagination.custom') }}
                                 </div>
                             </div>
                         @endif
@@ -252,6 +252,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- IP Blocking Section -->
         <div class="row mt-4">

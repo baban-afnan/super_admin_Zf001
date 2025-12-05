@@ -56,6 +56,7 @@
                         <h5 class="card-title mb-0 fw-bold">
                             <i class="ti ti-info-circle me-2 text-primary"></i>Enrollment Information
                         </h5>
+                        <p class="fw-medium mb-0">{{ $enrollmentInfo->amount }}</p>
                     </div>
                     <div class="card-body">
                         <div class="row g-4">
