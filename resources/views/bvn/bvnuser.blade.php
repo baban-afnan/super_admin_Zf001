@@ -149,7 +149,7 @@
                         <tr>
                             <td>{{ $enrollment->id }}</td>
                             <td>{{ $enrollment->bvn }}</td>
-                            <td>{{ $enrollment->performed_by }}</td>
+                            <td>{{ $user->first_name }} {{ $user->last_name }} {{ $user->middle_name }}</td>
                             <td>{{ $enrollment->email ?? $enrollment->phone_no }}</td>
                             <td>{{ $enrollment->service_field_name ?? $enrollment->phone_no }}</td>
                             <td>

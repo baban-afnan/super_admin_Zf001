@@ -75,7 +75,10 @@ class BvnUserController extends Controller
         // Get distinct bank_names for filter
         $bank_names = $this->getDistinctbank_names();
 
-        return view('bvn.bvnuser', compact('enrollments', 'search', 'statusFilter', 'bank_nameFilter', 'statusCounts', 'bank_names'));
+        // Get authenticated user
+        $user = Auth::user();
+
+        return view('bvn.bvnuser', compact('enrollments', 'search', 'statusFilter', 'bank_nameFilter', 'statusCounts', 'user', 'bank_names'));
     }
 
     /**
