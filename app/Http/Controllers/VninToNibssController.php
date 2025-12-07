@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\BvnUser;
+use App\Models\AgentService;
 use App\Models\User;
 use App\Models\ServiceField;
 use App\Models\Service;
@@ -15,21 +15,22 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class BvnUserController extends Controller
+class VninToNibssController extends Controller
 {
     /**
-     * List all bvn_user records with filters and pagination
+     * List vnin to nibss requests with filters and pagination
      */
     public function index(Request $request)
     {
         $search = $request->input('search');
         $statusFilter = $request->input('status');
-        $bank_nameFilter = $request->input('bank_name');
+        $bankFilter = $request->input('bank');
 
-        // Base query - removed service_type filtering
-        $query = BvnUser::query();
+        // Base query filtering by service_type
+        $query = AgentService::query()
+            ->where('service_type', 'vnin to nibss');
 
-        // Enhanced search: BVN, NIN, transaction_ref, agent name
+        // Enhanced search
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('bvn', 'like', "%$search%")
@@ -44,8 +45,8 @@ class BvnUserController extends Controller
             $query->where('status', $statusFilter);
         }
 
-        if ($bank_nameFilter) {
-            $query->where('bank_name', $bank_nameFilter);
+        if ($bankFilter) {
+            $query->where('bank', $bankFilter);
         }
 
         // Apply custom status order + submission_date
@@ -64,29 +65,26 @@ class BvnUserController extends Controller
             ->orderByDesc('submission_date')
             ->paginate(10);
 
-        // Status counts for all BVN users
+        // Status counts filtered by service_type
         $statusCounts = [
-            'pending'    => BvnUser::where('status', 'pending')->count(),
-            'processing' => BvnUser::where('status', 'processing')->count(),
-            'resolved'   => BvnUser::whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => BvnUser::whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => AgentService::where('service_type', 'vnin to nibss')->where('status', 'pending')->count(),
+            'processing' => AgentService::where('service_type', 'vnin to nibss')->where('status', 'processing')->count(),
+            'resolved'   => AgentService::where('service_type', 'vnin to nibss')->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => AgentService::where('service_type', 'vnin to nibss')->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
-        // Get distinct bank_names for filter
-        $bank_names = $this->getDistinctbank_names();
+        // Get distinct banks for filter
+        $banks = $this->getDistinctBanks();
 
-        // Get authenticated user
-        $user = Auth::user();
-
-        return view('bvn.bvnuser', compact('enrollments', 'search', 'statusFilter', 'bank_nameFilter', 'statusCounts', 'user', 'bank_names'));
+        return view('vnin-nibss.index', compact('enrollments', 'search', 'statusFilter', 'bankFilter', 'statusCounts', 'banks'));
     }
 
     /**
-     * Show details of a single bvn_user record
+     * Show details of a single request
      */
     public function show($id)
     {
-        $enrollmentInfo = BvnUser::findOrFail($id);
+        $enrollmentInfo = AgentService::findOrFail($id);
         $user = User::find($enrollmentInfo->user_id);
 
         $statusHistory = collect([
@@ -99,25 +97,25 @@ class BvnUserController extends Controller
             ]
         ]);
 
-        return view('bvn.bvnuser-view', compact('enrollmentInfo', 'statusHistory', 'user'));
+        return view('vnin-nibss.view', compact('enrollmentInfo', 'statusHistory', 'user'));
     }
 
+
     /**
-     * Update the status of a bvn_user record
+     * Update the status of a request
      */
     public function update(Request $request, $id)
     {
         $request->validate([
             'status' => 'required|in:pending,processing,in-progress,resolved,successful,rejected,failed,query,remark',
             'comment' => 'nullable|string',
-            'agent_code' => 'nullable|string',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120', // 5MB max
         ]);
 
         DB::beginTransaction();
 
         try {
-            $enrollment = BvnUser::findOrFail($id);
+            $enrollment = AgentService::findOrFail($id);
             $oldStatus = $enrollment->status;
             $user = User::find($enrollment->user_id);
 
@@ -132,14 +130,13 @@ class BvnUserController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bvn-user-files', $fileName, 'public');
+                $filePath = $file->storeAs('vnin-files', $fileName, 'public');
                 $fileUrl = $filePath;
             }
 
             // Update enrollment
             $enrollment->status = $request->status;
             $enrollment->comment = $request->comment;
-            $enrollment->agent_code = $request->agent_code;
             $enrollment->file_url = $fileUrl;
             $enrollment->save();
 
@@ -154,11 +151,11 @@ class BvnUserController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('bvnuser.index')
+            return redirect()->route('vnin-nibss.index')
                 ->with('successMessage', 'Status updated successfully and notification sent to user.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('bvnuser.index')
+            return redirect()->route('vnin-nibss.index')
                 ->with('errorMessage', 'Failed to update status: ' . $e->getMessage());
         }
     }
@@ -251,7 +248,7 @@ class BvnUserController extends Controller
     private function sendStatusUpdateEmail($user, $enrollment, $fileUrl = null)
     {
         $service = Service::find($enrollment->service_id);
-        $serviceName = $service ? $service->name : 'BVN User Service';
+        $serviceName = $service ? $service->name : 'VNIN to NIBSS Service';
         
         $serviceField = ServiceField::find($enrollment->service_field_id);
         $fieldName = $serviceField ? $serviceField->field_name : 'Service';
@@ -265,23 +262,25 @@ class BvnUserController extends Controller
             'file_url' => $fileUrl ? Storage::url($fileUrl) : null,
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
+            'bvn' => $enrollment->bvn,
+            'nin' => $enrollment->nin,
         ];
 
-        Mail::send('emails.bvn-user-status-update', $data, function($message) use ($user, $serviceName) {
+        Mail::send('emails.bvn-status-update', $data, function($message) use ($user, $serviceName) {
             $message->to($user->email)
                     ->subject("Status Update: {$serviceName} Request");
         });
     }
 
     /**
-     * Get distinct bank_names from bvn_users table
+     * Get distinct banks from agent_services table
      */
-    private function getDistinctbank_names()
+    private function getDistinctBanks()
     {
-        return BvnUser::whereNotNull('bank_name')
-            ->where('bank_name', '!=', '')
+        return AgentService::whereNotNull('bank')
+            ->where('bank', '!=', '')
             ->distinct()
-            ->pluck('bank_name')
+            ->pluck('bank')
             ->sort()
             ->values();
     }

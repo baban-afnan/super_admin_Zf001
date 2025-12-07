@@ -1,5 +1,5 @@
 <x-app-layout>
- <x-slot name="title">CRM Service</x-slot>
+ <x-slot name="title">TIN Services - Requests </x-slot>
       <div class="page-body">
     <div class="container-fluid">
       <div class="page-title">
@@ -51,7 +51,7 @@
                 <i class="bi bi-x-octagon-fill fs-1 mb-2"></i>
                 <h6 class="text-uppercase fw-bold">Rejected</h6>
                 <h4 class="fw-bold mb-2">{{ $statusCounts['rejected'] ?? 0 }}</h4>
-                <small class="text-uppercase fw-bold">Don't give up — Kept accepting Request</small>
+                <small class="text-uppercase fw-bold">Don’t give up — Kept accepting Request</small>
             </div>
         </div>
     </div>
@@ -60,7 +60,15 @@
 
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">CRM Service Request</h6>
+        <h6 class="m-0 font-weight-bold text-primary">
+            @if(request('type') == 'individual')
+                TIN Individual Requests
+            @elseif(request('type') == 'corporate')
+                TIN Corporate Requests
+            @else
+                All TIN Requests
+            @endif
+        </h6>
         <div class="dropdown no-arrow">
             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-three-dots-vertical text-gray-400"></i>
@@ -81,13 +89,14 @@
             <div class="col-md-6">
                 <form method="GET" class="form-inline search-full col">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by ticket id, batch id, Transaction Ref, Agent Name..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="Search by Req ID, Agent Name..." value="{{ request('search') }}">
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
                     <input type="hidden" name="status" value="{{ request('status') }}">
                     <input type="hidden" name="bank" value="{{ request('bank') }}">
+                    <input type="hidden" name="type" value="{{ request('type') }}">
                 </form>
             </div>
 
@@ -103,7 +112,7 @@
                     </button>
 
                     @if(request('status') || request('search') || request('bank'))
-                        <a href="{{ route('crm.index') }}" class="btn btn-outline-danger">
+                        <a href="{{ route('tin.index', ['type' => request('type')]) }}" class="btn btn-outline-danger">
                             <i class="bi bi-x-circle"></i> Clear
                         </a>
                     @endif
@@ -112,7 +121,6 @@
         </div>
 
         {{-- Errors --}}
-         {{-- Errors --}}
          @if (session('errorMessage'))
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
           <strong>Error!</strong> {{ session('errorMessage') }}
@@ -134,9 +142,11 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>ID</th>
+                        <th>Req ID</th>
+                        <th>Type</th>
+                        <th>Note/Name</th>
                         <th>Agent Name</th>
-                        <th>Ticket ID</th>
-                        <th>Batch ID</th>
+                        <th>Service Field</th>
                         <th>Status</th>
                         <th>Date Created</th>
                         <th>Actions</th>
@@ -147,9 +157,17 @@
                     @forelse ($enrollments as $enrollment)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
+                            <td>{{ $enrollment->reference }}</td>
+                            <td>
+                                @if(Str::contains($enrollment->service_type, 'individual'))
+                                    <span class="badge bg-primary">Individual</span>
+                                @else
+                                    <span class="badge bg-dark">Corporate</span>
+                                @endif
+                            </td>
+                            <td>{{ Str::limit($enrollment->first_name, 30) }} {{ Str::limit($enrollment->last_name, 30) }} </td> 
                             <td>{{ $enrollment->performed_by }}</td>
-                            <td>{{ $enrollment->bank ?? $enrollment->ticket_id}}</td>
-                            <td>{{ $enrollment->service_field_name ?? $enrollment->batch_id }}</td>
+                            <td>{{ $enrollment->service_field_name ?? $enrollment->field_name }}</td>
                             <td>
                                @php
                                     $statusColor = match($enrollment->status) {
@@ -166,14 +184,14 @@
                             </td>
                             <td>{{ \Carbon\Carbon::parse($enrollment->submission_date)->format('M j, Y g:i A') }}</td>
                             <td>
-                                <a href="{{ route('crm.show', $enrollment->id) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ route('tin.show', $enrollment->id) }}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-eye"></i> View
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">No CRM records found.</td>
+                            <td colspan="9" class="text-center py-4">No records found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -184,17 +202,17 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class="page-item {{ $enrollments->onFirstPage() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $enrollments->previousPageUrl() }}">
+                            <a class="page-link" href="{{ $enrollments->appends(request()->all())->previousPageUrl() }}">
                                 <i class="bi bi-chevron-left"></i> Previous
                             </a>
                         </li>
                         @for ($i = 1; $i <= $enrollments->lastPage(); $i++)
                             <li class="page-item {{ $enrollments->currentPage() == $i ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $enrollments->url($i) }}">{{ $i }}</a>
+                                <a class="page-link" href="{{ $enrollments->appends(request()->all())->url($i) }}">{{ $i }}</a>
                             </li>
                         @endfor
                         <li class="page-item {{ !$enrollments->hasMorePages() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $enrollments->nextPageUrl() }}">
+                            <a class="page-link" href="{{ $enrollments->appends(request()->all())->nextPageUrl() }}">
                                 Next <i class="bi bi-chevron-right"></i>
                             </a>
                         </li>
@@ -211,10 +229,21 @@
         <div class="modal-content">
             <form method="GET">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="filterModalLabel">Filter CRM Requests</h5>
+                    <h5 class="modal-title" id="filterModalLabel">Filter Requests</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bankFilter" class="form-label">Bank</label>
+                        <select class="form-select" id="bankFilter" name="bank">
+                            <option value="">All Banks</option>
+                            @foreach($banks as $bank)
+                                <option value="{{ $bank }}" {{ request('bank') == $bank ? 'selected' : '' }}>
+                                    {{ $bank }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="statusFilter" class="form-label">Status</label>
                         <select class="form-select" id="statusFilter" name="status">
@@ -227,6 +256,7 @@
                         </select>
                     </div>
                     <input type="hidden" name="search" value="{{ request('search') }}">
+                     <input type="hidden" name="type" value="{{ request('type') }}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

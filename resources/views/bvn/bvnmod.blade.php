@@ -147,7 +147,7 @@
                   
                     @forelse ($enrollments as $enrollment)
                         <tr>
-                            <td>{{ $enrollment->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $enrollment->bvn }}</td>
                             <td>{{ $enrollment->performed_by }}</td>
                             <td>{{ $enrollment->bank ?? $enrollment->service_name }}</td>

@@ -116,7 +116,7 @@
                         <li><a href="{{ route('bvnmod.index') }}" class="{{ request()->routeIs('bvnmod.*') ? 'active' : '' }}">BVN Modification</a></li>
                         <li><a href="{{ route('crm.index') }}" class="{{ request()->routeIs('crm.*') ? 'active' : '' }}">CRM</a></li>
                         <li><a href="{{ route('bvnuser.index') }}" class="{{ request()->routeIs('bvnuser.*') ? 'active' : '' }}">BVN User</a></li>
-                        <li><a href="#">VNIN & FAS</a></li>
+                        <li><a href="{{ route('vnin-nibss.index') }}" class="{{ request()->routeIs('vnin-nibss.*') ? 'active' : '' }}">VNIN to NIBSS</a></li>
                         <li><a href="#">BVN Search</a></li>
                         <li><a href="#">Approval Request</a></li>
                          <li><a href="{{ route('enrollments.index') }}" class="{{ request()->routeIs('enrollments.*') ? 'active' : '' }}">Upload Enrolment</a></li>
@@ -135,7 +135,7 @@
                         <li><a href="#">NIN Validation</a></li>
                         <li><a href="#">NIN Self Service</a></li>
                         <li><a href="#">NIN IFE</a></li>
-                        <li><a href="#">NIN Modification</a></li>
+                        <li><a href="{{ route('ninmod.index') }}" class="{{ request()->routeIs('ninmod.*') ? 'active' : '' }}">NIN Modification</a></li>
                     </ul>
                 </li>
                 <!-- /NIN Services -->
@@ -148,7 +148,8 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="#">TIN</a></li>
+                        <li><a href="{{ route('tin.index', ['type' => 'individual']) }}" class="{{ request('type') == 'individual' ? 'active' : '' }}">TIN Individual</a></li>
+                        <li><a href="{{ route('tin.index', ['type' => 'corporate']) }}" class="{{ request('type') == 'corporate' ? 'active' : '' }}">TIN Corporate</a></li>
                         <li><a href="#">CAC Registration</a></li>
                         <li><a href="#">Affidavit</a></li>
                         <li><a href="#">VAS</a></li>
@@ -175,13 +176,13 @@
                 </li>
                 
                 <li>
-                    <a href="#">
+                    <a href="{{ route('admin.transactions.index') }}" class="{{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
                         <i class="ti ti-receipt"></i><span>Transactions</span>
                     </a>
                 </li>
                 
                 <li>
-                    <a href="#">
+                    <a href="{{ route('admin.notification.index') }}" class="{{ request()->routeIs('admin.notification.*') ? 'active' : '' }}">
                         <i class="ti ti-user-star"></i><span>Notification</span>
                     </a>
                 </li>
@@ -234,7 +235,7 @@
 
 /* Active state */
 .sidebar-menu li a.active {
-    background: #007bff;
+    background: #e4d48eff;
     color: white;
 }
 

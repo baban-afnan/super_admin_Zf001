@@ -134,8 +134,9 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>ID</th>
+                        <th>Agent Code</th>
                         <th>BVN</th>
-                        <th>Agent Name</th>
+                        <th>Agent State</th>
                         <th>Email</th>
                         <th>SERVICE FIELD</th>
                         <th>Status</th>
@@ -148,8 +149,9 @@
                     @forelse ($enrollments as $enrollment)
                         <tr>
                             <td>{{ $enrollment->id }}</td>
+                            <td>{{ $enrollment->agent_code }}</td>
                             <td>{{ $enrollment->bvn }}</td>
-                            <td>{{ $user->first_name }} {{ $user->last_name }} {{ $user->middle_name }}</td>
+                            <td>{{ $enrollment->state}}</td>
                             <td>{{ $enrollment->email ?? $enrollment->phone_no }}</td>
                             <td>{{ $enrollment->service_field_name ?? $enrollment->phone_no }}</td>
                             <td>

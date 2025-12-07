@@ -81,6 +81,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/verification/{id}', [\App\Http\Controllers\VerificationController::class, 'update'])->name('verification.update');
 });
 
+// VNIN to NIBSS Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/vnin-nibss', [\App\Http\Controllers\VninToNibssController::class, 'index'])->name('vnin-nibss.index');
+    Route::get('/vnin-nibss/{id}', [\App\Http\Controllers\VninToNibssController::class, 'show'])->name('vnin-nibss.show');
+    Route::put('/vnin-nibss/{id}', [\App\Http\Controllers\VninToNibssController::class, 'update'])->name('vnin-nibss.update');
+    Route::post('/vnin-nibss', [\App\Http\Controllers\VninToNibssController::class, 'store'])->name('vnin-nibss.store');
+});
+
+// TIN Services Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/tin', [\App\Http\Controllers\TinController::class, 'index'])->name('tin.index');
+    Route::get('/tin/{id}', [\App\Http\Controllers\TinController::class, 'show'])->name('tin.show');
+    Route::put('/tin/{id}', [\App\Http\Controllers\TinController::class, 'update'])->name('tin.update');
+});
+
 
 
     Route::middleware(['auth', 'verified'])->group(function () {
@@ -135,7 +150,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/bvnmod/view/{id}', [BVNmodController::class, 'update'])->name('bvnmod.update');
 });
 
+// Notification Routes
+Route::prefix('admin/notification')->name('admin.notification.')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('index');
+    Route::post('/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('send');
+    Route::get('/search-users', [\App\Http\Controllers\Admin\NotificationController::class, 'searchUsers'])->name('search-users');
+});
 
+
+
+    // Transaction History
+    Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('admin.transactions.index');
+   
+});
+
+// Test Routes for Notification (Temporary)
+Route::get('/test-notification-payment', function () {
+    $data = [
+        'type' => 'Debit',
+        'amount' => 5000.00,
+        'ref' => 'REF123456789',
+        'bankName' => 'Access Bank'
+    ];
+    return new App\Mail\SendNotification('Transaction Alert', $data);
+});
+
+Route::get('/test-notification-generic', function () {
+    return new App\Mail\SendNotification('Welcome', 'Welcome to our platform!');
 });
 
 require __DIR__.'/auth.php';
