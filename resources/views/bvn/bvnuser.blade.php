@@ -133,7 +133,7 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
+                        <th>S/N</th>
                         <th>Agent Code</th>
                         <th>BVN</th>
                         <th>Agent State</th>
@@ -148,7 +148,7 @@
                   
                     @forelse ($enrollments as $enrollment)
                         <tr>
-                            <td>{{ $enrollment->id }}</td>
+                            <td>{{ $enrollments->firstItem() + $loop->index }}</td>
                             <td>{{ $enrollment->agent_code }}</td>
                             <td>{{ $enrollment->bvn }}</td>
                             <td>{{ $enrollment->state}}</td>
