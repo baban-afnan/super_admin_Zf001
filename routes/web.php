@@ -167,6 +167,7 @@ Route::prefix('admin/notification')->name('admin.notification.')->middleware(['a
 // Admin Support Routes
 Route::prefix('admin/support')->name('admin.support.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [\App\Http\Controllers\Admin\AdminSupportController::class, 'index'])->name('index');
+    Route::get('/{reference}/messages', [\App\Http\Controllers\Admin\AdminSupportController::class, 'fetchMessages'])->name('messages');
     Route::get('/{reference}', [\App\Http\Controllers\Admin\AdminSupportController::class, 'show'])->name('show');
     Route::post('/{reference}/reply', [\App\Http\Controllers\Admin\AdminSupportController::class, 'reply'])->name('reply');
     Route::post('/{reference}/close', [\App\Http\Controllers\Admin\AdminSupportController::class, 'close'])->name('close');

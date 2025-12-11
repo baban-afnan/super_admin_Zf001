@@ -19,6 +19,7 @@
                                 <table class="table table-hover table-striped mb-0 align-middle">
                                     <thead class="bg-light text-primary">
                                         <tr>
+                                            <th>S/N</th>
                                             <th>Ticket ID</th>
                                             <th>Subject</th>
                                             <th>User</th>
@@ -30,6 +31,7 @@
                                     <tbody>
                                         @forelse($tickets as $ticket)
                                             <tr>
+                                                <td>{{ $tickets->firstItem() + $loop->index }}</td>
                                                 <td><span class="fw-bold text-dark">{{ $ticket->ticket_reference }}</span></td>
                                                 <td>{{ Str::limit($ticket->subject, 40) }}</td>
                                                 <td>
@@ -60,7 +62,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted py-5">
+                                                <td colspan="7" class="text-center text-muted py-5">
                                                     <i class="ti ti-ticket fs-1 d-block mb-2"></i>
                                                     No support tickets found.
                                                 </td>

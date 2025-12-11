@@ -16,10 +16,20 @@ class AdminSupportController extends Controller
     public function index()
     {
         $tickets = SupportTicket::with('user')
+            ->orderByRaw("FIELD(status, 'open', 'customer_reply', 'answered', 'closed')")
             ->latest('updated_at')
-            ->paginate(15);
+            ->paginate(10);
 
         return view('admin.support.index', compact('tickets'));
+    }
+
+    public function fetchMessages($reference)
+    {
+        $ticket = SupportTicket::where('ticket_reference', $reference)
+            ->with(['messages.user', 'user'])
+            ->firstOrFail();
+
+        return view('admin.support.partials.messages', compact('ticket'))->render();
     }
 
     public function show($reference)
