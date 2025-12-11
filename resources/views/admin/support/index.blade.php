@@ -73,7 +73,7 @@
                             </div>
                         </div>
                         <div class="card-footer bg-white">
-                            {{ $tickets->links() }}
+                            {{ $tickets->links('vendor.pagination.custom') }}
                         </div>
                     </div>
                 </div>
