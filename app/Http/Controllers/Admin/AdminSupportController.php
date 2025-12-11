@@ -11,8 +11,17 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketClosed;
 
+use Illuminate\Support\Facades\Cache;
+
 class AdminSupportController extends Controller
 {
+    public function typing($reference)
+    {
+        // Store typing status in cache for 10 seconds
+        Cache::put('support_typing_' . $reference . '_admin', true, now()->addSeconds(10));
+        return response()->json(['status' => 'ok']);
+    }
+
     public function index()
     {
         $tickets = SupportTicket::with('user')

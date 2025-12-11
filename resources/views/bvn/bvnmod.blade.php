@@ -183,7 +183,7 @@
 
             {{-- Pagination --}}
            <div class="card-footer bg-white">
-                {{ $tickets->links('vendor.pagination.custom') }}
+                {{ $enrollments->links('vendor.pagination.custom') }}
              </div>
         </div>
     </div>

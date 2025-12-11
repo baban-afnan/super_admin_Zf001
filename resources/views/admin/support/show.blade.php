@@ -59,14 +59,49 @@
                         </div>
                         
                         <script>
+                            // Auto-refresh messages
+                            let messagesContainer = document.getElementById('messages-container');
+                            
                             setInterval(function() {
                                 fetch("{{ route('admin.support.messages', $ticket->ticket_reference) }}")
                                     .then(response => response.text())
                                     .then(html => {
-                                        document.getElementById('messages-container').innerHTML = html;
+                                        // Only update if content changed to prevent jitter
+                                        if (messagesContainer.innerHTML.trim() !== html.trim()) {
+                                            messagesContainer.innerHTML = html;
+                                            // Optional: Scroll to bottom if user is close to bottom?
+                                            // messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+                                        }
                                     })
                                     .catch(error => console.error('Error fetching messages:', error));
                             }, 5000); // Reload every 5 seconds
+
+                            // Typing Indicator Logic
+                            const replyInput = document.querySelector('input[name="message"]');
+                            let typingTimer;
+                            const doneTypingInterval = 2000; // Time in ms (2 seconds)
+
+                            if (replyInput) {
+                                replyInput.addEventListener('keyup', () => {
+                                    clearTimeout(typingTimer);
+                                    
+                                    // Send typing signal
+                                    fetch("{{ route('admin.support.typing', $ticket->ticket_reference) }}", {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                        },
+                                        body: JSON.stringify({})
+                                    }).catch(err => console.error(err));
+
+                                    // typingTimer = setTimeout(doneTyping, doneTypingInterval);
+                                });
+
+                                // function doneTyping() {
+                                //     // Optional: could send a "stopped typing" if needed by backend
+                                // }
+                            }
                         </script>
 
                          <!-- Reply Area -->

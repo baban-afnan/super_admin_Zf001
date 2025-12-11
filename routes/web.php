@@ -170,6 +170,7 @@ Route::prefix('admin/support')->name('admin.support.')->middleware(['auth', 'ver
     Route::get('/{reference}/messages', [\App\Http\Controllers\Admin\AdminSupportController::class, 'fetchMessages'])->name('messages');
     Route::get('/{reference}', [\App\Http\Controllers\Admin\AdminSupportController::class, 'show'])->name('show');
     Route::post('/{reference}/reply', [\App\Http\Controllers\Admin\AdminSupportController::class, 'reply'])->name('reply');
+    Route::post('/{reference}/typing', [\App\Http\Controllers\Admin\AdminSupportController::class, 'typing'])->name('typing');
     Route::post('/{reference}/close', [\App\Http\Controllers\Admin\AdminSupportController::class, 'close'])->name('close');
 });
 

@@ -25,7 +25,9 @@
     <div class="card border-0 shadow-sm" style="max-width: 75%; {{ $message->is_admin_reply ? 'background-color: #e3f2fd; border-top-right-radius: 0;' : 'background-color: #fff; border-top-left-radius: 0;' }}">
         <div class="card-body p-3">
                 @if($message->is_admin_reply)
-                <div class="fw-bold mb-1 text-primary small">Admin Reply</div>
+                <div class="fw-bold mb-1 text-primary small">
+                    {{ $message->user->first_name }} {{ $message->user->last_name }} {{ $message->user->middle_name }}
+                </div>
             @endif
             
             <p class="mb-1 text-dark">{{ $message->message }}</p>
