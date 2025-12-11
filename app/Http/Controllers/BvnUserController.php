@@ -112,6 +112,7 @@ class BvnUserController extends Controller
             'comment' => 'nullable|string',
             'agent_code' => 'nullable|string',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120', // 5MB max
+            'force_refund' => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
@@ -144,8 +145,10 @@ class BvnUserController extends Controller
             $enrollment->save();
 
             // Handle refund logic if rejected
-            if ($request->status === 'rejected' && $oldStatus !== 'rejected') {
-                $this->processRefund($enrollment);
+            if ($request->status === 'rejected') {
+                if ($oldStatus !== 'rejected' || $request->force_refund) {
+                    $this->processRefund($enrollment, $request->force_refund);
+                }
             }
 
             // Send email notification to user
@@ -166,7 +169,7 @@ class BvnUserController extends Controller
     /**
      * Handle refund when an enrollment is rejected
      */
-    private function processRefund($enrollment)
+    private function processRefund($enrollment, $forceRefund = false)
     {
         $serviceFieldId = $enrollment->service_field_id;
         $user = User::find($enrollment->user_id);
@@ -192,7 +195,7 @@ class BvnUserController extends Controller
             ->where('description', 'LIKE', "%Request ID #{$enrollment->id}%")
             ->exists();
 
-        if ($refundExists) {
+        if ($refundExists && !$forceRefund) {
             throw new \Exception('Refund already processed for this request.');
         }
 
@@ -241,6 +244,7 @@ class BvnUserController extends Controller
                 'base_price' => $basePrice,
                 'percentage_refunded' => 80,
                 'amount_debited_by_system' => $debitAmount,
+                'forced_refund' => $forceRefund,
             ]),
         ]);
     }

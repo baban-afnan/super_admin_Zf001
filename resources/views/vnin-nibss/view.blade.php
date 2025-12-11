@@ -56,7 +56,6 @@
                         <h5 class="card-title mb-0 fw-bold">
                             <i class="ti ti-info-circle me-2 text-primary"></i>Request Information
                         </h5>
-                        <p class="fw-medium mb-0">{{ $enrollmentInfo->amount }}</p>
                     </div>
                     <div class="card-body">
                         <div class="row g-4">
@@ -71,6 +70,15 @@
                                             <i class="bi bi-eye"></i>
                                         </button>
                                     @endif
+                                </div>
+                            </div>
+
+                            {{-- Amount Charged --}}
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small text-uppercase fw-bold">Amount Charged</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="ti ti-wallet text-success fs-20 me-2"></i>
+                                    <span class="text-uppercase fw-bold text-dark">₦{{ number_format($enrollmentInfo->amount, 2) }}</span>
                                 </div>
                             </div>
 
@@ -281,6 +289,17 @@
                                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
                             <small class="text-muted">
                                 <i class="ti ti-paperclip me-1"></i>Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max: 5MB)
+                            </small>
+                        </div>
+
+                        {{-- Force Refund --}}
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="force_refund" name="force_refund" value="1">
+                            <label class="form-check-label text-danger fw-bold" for="force_refund">
+                                Force Refund (Process again even if already refunded)
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Check this ONLY if you need to credit the user again manually.
                             </small>
                         </div>
                     </div>

@@ -137,6 +137,9 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
+        // Support Tickets Count (Open or Customer Reply)
+        $supportCount = \App\Models\SupportTicket::whereIn('status', ['open', 'customer_reply'])->count();
+
         // Current month name for display
         $currentMonth = Carbon::now()->format('F Y');
 
@@ -167,7 +170,8 @@ class DashboardController extends Controller
             'pendingPercentage',
             'failedPercentage',
             'totalTransactionAmount',
-            'dailyServiceStats'
+            'dailyServiceStats',
+            'supportCount'
         ));
     }
 }

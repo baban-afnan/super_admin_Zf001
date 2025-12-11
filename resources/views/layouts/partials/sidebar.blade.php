@@ -132,9 +132,8 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="#">NIN Validation</a></li>
-                        <li><a href="#">NIN Self Service</a></li>
-                        <li><a href="#">NIN IFE</a></li>
+                        <li><a href="{{ route('validation.index') }}" class="{{ request()->routeIs('validation.*') ? 'active' : '' }}">NIN Validation</a></li>
+                        <li><a href="{{ route('ninipe.index') }}" class="{{ request()->routeIs('ninipe.*') ? 'active' : '' }}">NIN IPE</a></li>
                         <li><a href="{{ route('ninmod.index') }}" class="{{ request()->routeIs('ninmod.*') ? 'active' : '' }}">NIN Modification</a></li>
                     </ul>
                 </li>
@@ -188,7 +187,7 @@
                 </li>
                 
                 <li>
-                    <a href="#">
+                    <a href="{{ route('admin.support.index') }}" class="{{ request()->routeIs('admin.support.*') ? 'active' : '' }}">
                         <i class="ti ti-message"></i><span>Support</span>
                     </a>
                 </li>

@@ -15,33 +15,22 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class TinController extends Controller
+class NinIpeController extends Controller
 {
     /**
-     * List TIN requests with filters and pagination
+     * List nin_ipe requests with filters and pagination
      */
     public function index(Request $request)
     {
         $search = $request->input('search');
         $statusFilter = $request->input('status');
         $bankFilter = $request->input('bank');
-        $typeFilter = $request->input('type'); // 'individual' or 'corporate'
-
-        // Determine service types to query
-        $serviceTypes = [];
-        if ($typeFilter === 'individual') {
-            $serviceTypes = ['tin_individual'];
-        } elseif ($typeFilter === 'corporate') {
-            $serviceTypes = ['tin_corporate'];
-        } else {
-            $serviceTypes = ['tin_individual', 'tin_corporate'];
-        }
 
         // Base query filtering by service_type
         $query = AgentService::query()
-            ->whereIn('service_type', $serviceTypes);
+            ->where('service_type', 'ipe');
 
-        // Enhanced search
+        // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('bvn', 'like', "%$search%")
@@ -76,24 +65,22 @@ class TinController extends Controller
             ->orderByDesc('submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type(s)
-        $countQuery = AgentService::whereIn('service_type', $serviceTypes);
-        
+        // Status counts filtered by service_type
         $statusCounts = [
-            'pending'    => (clone $countQuery)->where('status', 'pending')->count(),
-            'processing' => (clone $countQuery)->where('status', 'processing')->count(),
-            'resolved'   => (clone $countQuery)->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => (clone $countQuery)->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => AgentService::where('service_type', 'nin_ipe')->where('status', 'pending')->count(),
+            'processing' => AgentService::where('service_type', 'nin_ipe')->where('status', 'processing')->count(),
+            'resolved'   => AgentService::where('service_type', 'nin_ipe')->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => AgentService::where('service_type', 'nin_ipe')->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         // Get distinct banks for filter
         $banks = $this->getDistinctBanks();
 
-        return view('tin.index', compact('enrollments', 'search', 'statusFilter', 'bankFilter', 'statusCounts', 'banks', 'typeFilter'));
+        return view('ninipe.index', compact('enrollments', 'search', 'statusFilter', 'bankFilter', 'statusCounts', 'banks'));
     }
 
     /**
-     * Show details of a single request
+     * Show details of a single nin_ipe request
      */
     public function show($id)
     {
@@ -110,12 +97,11 @@ class TinController extends Controller
             ]
         ]);
 
-        return view('tin.view', compact('enrollmentInfo', 'statusHistory', 'user'));
+        return view('ninipe.view', compact('enrollmentInfo', 'statusHistory', 'user'));
     }
 
-
     /**
-     * Update the status of a request
+     * Update the status of a nin_ipe request
      */
     public function update(Request $request, $id)
     {
@@ -144,7 +130,7 @@ class TinController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('tin-files', $fileName, 'public');
+                $filePath = $file->storeAs('nin-ipe-files', $fileName, 'public');
                 $fileUrl = $filePath;
             }
 
@@ -167,11 +153,11 @@ class TinController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('tin.index', ['type' => Str::contains($enrollment->service_type, 'individual') ? 'individual' : 'corporate'])
+            return redirect()->route('ninipe.index')
                 ->with('successMessage', 'Status updated successfully and notification sent to user.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            return redirect()->route('ninipe.index')
                 ->with('errorMessage', 'Failed to update status: ' . $e->getMessage());
         }
     }
@@ -265,7 +251,7 @@ class TinController extends Controller
     private function sendStatusUpdateEmail($user, $enrollment, $fileUrl = null)
     {
         $service = Service::find($enrollment->service_id);
-        $serviceName = $service ? $service->name : 'TIN Service';
+        $serviceName = $service ? $service->name : 'NIN IPE Service';
         
         $serviceField = ServiceField::find($enrollment->service_field_id);
         $fieldName = $serviceField ? $serviceField->field_name : 'Service';

@@ -60,6 +60,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/nin-modification/{id}', [\App\Http\Controllers\NINmodController::class, 'update'])->name('ninmod.update');
 });
 
+// NIN IPE Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/nin-ipe', [\App\Http\Controllers\NinIpeController::class, 'index'])->name('ninipe.index');
+    Route::get('/nin-ipe/{id}', [\App\Http\Controllers\NinIpeController::class, 'show'])->name('ninipe.show');
+    Route::put('/nin-ipe/{id}', [\App\Http\Controllers\NinIpeController::class, 'update'])->name('ninipe.update');
+});
+
 // Validation Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/validation', [\App\Http\Controllers\ValidationController::class, 'index'])->name('validation.index');
@@ -155,6 +162,14 @@ Route::prefix('admin/notification')->name('admin.notification.')->middleware(['a
     Route::get('/', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('index');
     Route::post('/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('send');
     Route::get('/search-users', [\App\Http\Controllers\Admin\NotificationController::class, 'searchUsers'])->name('search-users');
+});
+
+// Admin Support Routes
+Route::prefix('admin/support')->name('admin.support.')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\AdminSupportController::class, 'index'])->name('index');
+    Route::get('/{reference}', [\App\Http\Controllers\Admin\AdminSupportController::class, 'show'])->name('show');
+    Route::post('/{reference}/reply', [\App\Http\Controllers\Admin\AdminSupportController::class, 'reply'])->name('reply');
+    Route::post('/{reference}/close', [\App\Http\Controllers\Admin\AdminSupportController::class, 'close'])->name('close');
 });
 
 

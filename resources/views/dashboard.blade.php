@@ -71,276 +71,306 @@
         @endif
 
 
-           <!-- Financial Metrics Section -->
-        <div class="card border-0 mt-4">
-            <div class="card-header bg-light border-0">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0">
-                        <i class="ti ti-currency-naira me-2"></i>Financial Overview
+        <!-- Financial Metrics Section -->
+        <div class="row g-3 mt-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="mb-0 fw-bold text-dark">
+                        <i class="ti ti-currency-naira me-2 text-primary"></i>Financial Overview
                     </h4>
-                    <span class="badge bg-success-transparent">{{ $currentMonth ?? 'Current Month' }}</span>
+                    <span class="badge bg-white text-dark shadow-sm border px-3 py-2">{{ $currentMonth ?? 'Current Month' }}</span>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    
-                    <!-- Total User Balance -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="card border shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="text-white">
-                                        <p class="mb-1 fs-13 opacity-75">Total User Balance</p>
-                                        <h3 class="mb-0 fw-bold">₦{{ number_format($totalUserBalance ?? 0, 2) }}</h3>
-                                    </div>
-                                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-circle">
-                                        <i class="ti ti-users-group fs-24 text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
+
+            <!-- Total User Balance -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Total User Balance</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($totalUserBalance ?? 0, 2) }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-users-group fs-24 text-white"></i>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Monthly Funding -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="card border shadow-sm h-100" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="text-white">
-                                        <p class="mb-1 fs-13 opacity-75">Monthly Funding</p>
-                                        <h3 class="mb-0 fw-bold">₦{{ number_format($monthlyFunding ?? 0, 2) }}</h3>
-                                    </div>
-                                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-circle">
-                                        <i class="ti ti-arrow-down-circle fs-24 text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- Monthly Funding -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Monthly Funding</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($monthlyFunding ?? 0, 2) }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-arrow-down-circle fs-24 text-white"></i>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Monthly Debit -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="card border shadow-sm h-100" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="text-white">
-                                        <p class="mb-1 fs-13 opacity-75">Monthly Debit</p>
-                                        <h3 class="mb-0 fw-bold">₦{{ number_format($monthlyDebit ?? 0, 2) }}</h3>
-                                    </div>
-                                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-circle">
-                                        <i class="ti ti-arrow-up-circle fs-24 text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- Monthly Debit -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Monthly Debit</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($monthlyDebit ?? 0, 2) }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-arrow-up-circle fs-24 text-white"></i>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Monthly Refund -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="card border shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="text-white">
-                                        <p class="mb-1 fs-13 opacity-75">Monthly Refund</p>
-                                        <h3 class="mb-0 fw-bold">₦{{ number_format($monthlyRefund ?? 0, 2) }}</h3>
-                                    </div>
-                                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-circle">
-                                        <i class="ti ti-refresh fs-24 text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- PalmPay Gateway Balance -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.4s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--info-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Palmpay Balance</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($palmpayBalance ?? 0, 2) }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-building-bank fs-24 text-white"></i>
                         </div>
                     </div>
-
-                    <!-- PalmPay Gateway Balance -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <div class="card border shadow-sm h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="text-white">
-                                        <p class="mb-1 fs-13 opacity-75">PalmPay Balance</p>
-                                        <h3 class="mb-0 fw-bold">₦{{ number_format($palmpayBalance ?? 0, 2) }}</h3>
-                                    </div>
-                                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-circle">
-                                        <i class="ti ti-building-bank fs-24 text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- Monthly Statistics Section -->
-        <div class="card border-0 mt-4">
-            <div class="card-header bg-light border-0">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h4 class="mb-0">
-                        <i class="ti ti-chart-bar me-2"></i>Agency Services Statistics
+        <!-- Agency Statistics Section -->
+        <div class="row g-3 mt-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h4 class="mb-0 fw-bold text-dark">
+                        <i class="ti ti-chart-bar me-2 text-primary"></i>Agency Services
                     </h4>
-                    <span class="badge bg-primary-transparent">{{ $currentMonth ?? 'Current Month' }}</span>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    
-                    <!-- Total Agency Services -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('bvnmod.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">Total Services</p>
-                                            <h3 class="mb-0 fw-bold text-primary">{{ $totalAgencyServices ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-primary-transparent rounded-circle">
-                                            <i class="ti ti-briefcase fs-24 text-primary"></i>
-                                        </div>
-                                    </div>
+
+            <!-- Total Agency Services -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.1s;">
+                <a href="{{ route('services.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">Total Services</p>
+                                    <h3 class="mb-0 fw-bold text-primary">{{ $totalAgencyServices ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-primary-transparent text-primary rounded-3">
+                                    <i class="ti ti-briefcase fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- BVN Modification -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('bvnmod.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">BVN Modification</p>
-                                            <h3 class="mb-0 fw-bold text-success">{{ $bvnModificationCount ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-success-transparent rounded-circle">
-                                            <i class="ti ti-edit fs-24 text-success"></i>
-                                        </div>
-                                    </div>
+            <!-- Pending Support -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.2s;">
+                <a href="{{ route('admin.support.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">Pending Support</p>
+                                    <h3 class="mb-0 fw-bold text-danger">{{ $supportCount ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-danger-transparent text-danger rounded-3 position-relative">
+                                    <i class="ti ti-headset fs-24"></i>
+                                    @if(($supportCount ?? 0) > 0)
+                                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                            <span class="visually-hidden">New alerts</span>
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- CRM -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('crm.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">CRM Services</p>
-                                            <h3 class="mb-0 fw-bold text-info">{{ $crmCount ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-info-transparent rounded-circle">
-                                            <i class="ti ti-users fs-24 text-info"></i>
-                                        </div>
-                                    </div>
+            <!-- BVN Modification -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.3s;">
+                <a href="{{ route('bvnmod.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">BVN Modification</p>
+                                    <h3 class="mb-0 fw-bold text-success">{{ $bvnModificationCount ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-success-transparent text-success rounded-3">
+                                    <i class="ti ti-edit fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- Validation -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('validation.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">Validation</p>
-                                            <h3 class="mb-0 fw-bold text-warning">{{ $validationCount ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-warning-transparent rounded-circle">
-                                            <i class="ti ti-shield-check fs-24 text-warning"></i>
-                                        </div>
-                                    </div>
+            <!-- VNIN to NIBSS -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.4s;">
+                <a href="{{ route('vnin-nibss.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">VNIN to NIBSS</p>
+                                    <h3 class="mb-0 fw-bold text-indigo">
+                                        <i class="ti ti-link fs-20"></i>
+                                    </h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-indigo-transparent text-indigo rounded-3">
+                                    <i class="ti ti-link fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- BVN Service -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('bvnservice.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">Agency Service</p>
-                                            <h3 class="mb-0 fw-bold text-purple">{{ $bvnServiceCount ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-purple-transparent rounded-circle">
-                                            <i class="ti ti-id-badge fs-24 text-purple"></i>
-                                        </div>
-                                    </div>
+            <!-- BVN User -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.5s;">
+                <a href="{{ route('bvnuser.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">BVN User</p>
+                                    <h3 class="mb-0 fw-bold text-orange">
+                                        <i class="ti ti-user-scan fs-20"></i>
+                                    </h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-orange-transparent text-orange rounded-3">
+                                    <i class="ti ti-user-scan fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- NIN Modification -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('ninmod.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">NIN Modification</p>
-                                            <h3 class="mb-0 fw-bold text-danger">{{ $ninModificationCount ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-danger-transparent rounded-circle">
-                                            <i class="ti ti-id fs-24 text-danger"></i>
-                                        </div>
-                                    </div>
+            <!-- CRM -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.6s;">
+                <a href="{{ route('crm.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">CRM Services</p>
+                                    <h3 class="mb-0 fw-bold text-info">{{ $crmCount ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-info-transparent text-info rounded-3">
+                                    <i class="ti ti-users fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- Total Verifications -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('verification.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">Total Verifications</p>
-                                            <h3 class="mb-0 fw-bold text-dark">{{ $totalVerifications ?? 0 }}</h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-dark-transparent rounded-circle">
-                                            <i class="ti ti-circle-check fs-24 text-dark"></i>
-                                        </div>
-                                    </div>
+            <!-- Validation -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.7s;">
+                <a href="{{ route('validation.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">Validation</p>
+                                    <h3 class="mb-0 fw-bold text-warning">{{ $validationCount ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-warning-transparent text-warning rounded-3">
+                                    <i class="ti ti-shield-check fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <!-- Wallet Management -->
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                        <a href="{{ route('admin.wallet.index') }}" class="text-decoration-none">
-                            <div class="card border shadow-sm h-100 hover-card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <p class="text-muted mb-1 fs-13">Wallet Management</p>
-                                            <h3 class="mb-0 fw-bold text-teal">
-                                                <i class="ti ti-wallet fs-20"></i>
-                                            </h3>
-                                        </div>
-                                        <div class="avatar avatar-lg bg-teal-transparent rounded-circle">
-                                            <i class="ti ti-wallet fs-24 text-teal"></i>
-                                        </div>
-                                    </div>
+            <!-- Agency Service (Old) -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.8s;">
+                <a href="{{ route('bvnservice.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">Agency Service</p>
+                                    <h3 class="mb-0 fw-bold text-purple">{{ $bvnServiceCount ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-purple-transparent text-purple rounded-3">
+                                    <i class="ti ti-id-badge fs-24"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                </div>
+            <!-- NIN Modification -->
+             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.9s;">
+                <a href="{{ route('ninmod.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">NIN Modification</p>
+                                    <h3 class="mb-0 fw-bold text-danger">{{ $ninModificationCount ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-danger-transparent text-danger rounded-3">
+                                    <i class="ti ti-id fs-24"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Total Verifications -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 1.0s;">
+                <a href="{{ route('verification.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">Total Verifications</p>
+                                    <h3 class="mb-0 fw-bold text-dark">{{ $totalVerifications ?? 0 }}</h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-dark-transparent text-dark rounded-3">
+                                    <i class="ti ti-circle-check fs-24"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Wallet Management -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 1.1s;">
+                <a href="{{ route('admin.wallet.index') }}" class="text-decoration-none">
+                    <div class="card hover-card h-100 border-0 shadow-sm bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="text-muted small fw-semibold text-uppercase mb-1">Wallet Management</p>
+                                    <h3 class="mb-0 fw-bold text-teal">
+                                        <i class="ti ti-wallet fs-24"></i>
+                                    </h3>
+                                </div>
+                                <div class="avatar avatar-lg bg-teal-transparent text-teal rounded-3">
+                                    <i class="ti ti-settings-dollar fs-24"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -539,12 +569,86 @@
      
 
         <style>
+            :root {
+                --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+                --info-gradient: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+                --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+                --purple-gradient: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+                --orange-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+                --teal-gradient: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+                --indigo-gradient: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            }
+
+            /* Custom Color Utilities */
+            .text-purple { color: #8b5cf6 !important; }
+            .bg-purple-transparent { background-color: rgba(139, 92, 246, 0.1) !important; }
+            .text-orange { color: #f97316 !important; }
+            .bg-orange-transparent { background-color: rgba(249, 115, 22, 0.1) !important; }
+            .text-indigo { color: #6366f1 !important; }
+            .bg-indigo-transparent { background-color: rgba(99, 102, 241, 0.1) !important; }
+            .text-teal { color: #14b8a6 !important; }
+            .bg-teal-transparent { background-color: rgba(20, 184, 166, 0.1) !important; }
+
+
+            /* Card Effects */
             .hover-card {
-                transition: all 0.3s ease;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border: 1px solid rgba(0,0,0,0.05);
             }
             .hover-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+                border-color: rgba(99, 102, 241, 0.2);
+            }
+
+            /* Financial Cards */
+            .financial-card {
+                position: relative;
+                overflow: hidden;
+                border: none;
+                border-radius: 1rem;
+                color: white;
+            }
+            .financial-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 150px;
+                height: 150px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(30%, -30%);
+            }
+            .financial-card::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100px;
+                height: 100px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(-30%, 30%);
+            }
+
+            /* Avatar Styles */
+            .avatar-xl { width: 4rem; height: 4rem; }
+            .avatar-lg { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; }
+            
+            /* Stats Typography */
+            .stats-label { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
+            .stats-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+
+            /* Animation */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .fade-in-up {
+                animation: fadeIn 0.5s ease-out forwards;
             }
         </style>
 

@@ -60,21 +60,28 @@
                 <div class="card-body">
                 {{-- Agent & Request IDs Section --}}
                 <div class="row g-3 mb-4 pb-4 border-bottom">
-                    <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase fw-bold mb-2">Agent ID</label>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-primary-subtle text-primary px-3 py-2">{{ $enrollmentInfo->user_id }}</span>
-                        @if (!empty($user))
-                        <button type="button" class="btn btn-sm btn-outline-primary"
-                            data-bs-toggle="modal" data-bs-target="#agentInfoModal">
-                            <i class="ti ti-eye me-1"></i> View Agent
-                        </button>
-                        @endif
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small text-uppercase fw-bold mb-2">Agent ID</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary-subtle text-primary px-3 py-2">{{ $enrollmentInfo->user_id }}</span>
+                            @if (!empty($user))
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal" data-bs-target="#agentInfoModal">
+                                <i class="ti ti-eye me-1"></i> View Agent
+                            </button>
+                            @endif
+                        </div>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small text-uppercase fw-bold mb-2">Request ID</label>
+                        <span class="badge bg-info-subtle text-info px-3 py-2">{{ $enrollmentInfo->reference }}</span>
                     </div>
-                    <div class="col-md-6">
-                    <label class="form-label text-muted small text-uppercase fw-bold mb-2">Request ID</label>
-                    <span class="badge bg-info-subtle text-info px-3 py-2">{{ $enrollmentInfo->reference }}</span>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted small text-uppercase fw-bold mb-2">Amount Charged</label>
+                        <div class="d-flex align-items-center">
+                            <i class="ti ti-wallet text-success fs-20 me-2"></i>
+                            <span class="text-uppercase fw-bold text-dark">₦{{ number_format($enrollmentInfo->amount, 2) }}</span>
+                        </div>
                     </div>
                 </div>
 
@@ -331,6 +338,17 @@
                                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
                             <small class="text-muted">
                                 <i class="ti ti-paperclip me-1"></i>Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max: 5MB)
+                            </small>
+                        </div>
+
+                        {{-- Force Refund --}}
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="force_refund" name="force_refund" value="1">
+                            <label class="form-check-label text-danger fw-bold" for="force_refund">
+                                Force Refund (Process again even if already refunded)
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Check this ONLY if you need to credit the user again manually.
                             </small>
                         </div>
                     </div>
