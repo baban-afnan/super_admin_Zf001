@@ -26,7 +26,11 @@
         <div class="card-body p-3">
                 @if($message->is_admin_reply)
                 <div class="fw-bold mb-1 text-primary small">
-                    {{ $message->user->first_name }} {{ $message->user->last_name }} {{ $message->user->middle_name }}
+                    @if($message->user)
+                        {{ $message->user->first_name }} {{ $message->user->last_name }} {{ $message->user->middle_name }}
+                    @else
+                        Admin
+                    @endif
                 </div>
             @endif
             
