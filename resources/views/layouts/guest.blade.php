@@ -71,6 +71,7 @@
 {{-- JavaScript Validation --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Existing Validation Logic
             const email = document.getElementById('email');
             const emailError = document.getElementById('emailError');
             const password = document.getElementById('password');
@@ -79,75 +80,111 @@
             const passwordStrengthText = document.getElementById('passwordStrengthText');
             const passwordMatchError = document.getElementById('passwordMatchError');
 
-            // Email Validation
-            email.addEventListener('input', () => {
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(email.value.trim())) {
-                    emailError.classList.remove('d-none');
-                } else {
-                    emailError.classList.add('d-none');
-                }
+            if(email) {
+                // Email Validation
+                email.addEventListener('input', () => {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(email.value.trim())) {
+                        if(emailError) emailError.classList.remove('d-none');
+                    } else {
+                        if(emailError) emailError.classList.add('d-none');
+                    }
+                });
+            }
+
+            if(password && passwordStrengthBar) {
+                // Password Strength
+                password.addEventListener('input', () => {
+                    const val = password.value;
+                    let strength = 0;
+
+                    if (val.length >= 8) strength++;
+                    if (/[A-Z]/.test(val)) strength++;
+                    if (/[a-z]/.test(val)) strength++;  // Added lowercase check
+                    if (/[0-9]/.test(val)) strength++;
+                    if (/[^A-Za-z0-9]/.test(val)) strength++;
+                    if (val.length >= 12) strength++;   // Extra point for longer passwords
+
+                    let width = 0, color = '', label = '';
+
+                    switch (strength) {
+                        case 0: 
+                            width = 0; 
+                            color = 'bg-secondary';
+                            label = 'Time to create something special! 🎯'; 
+                            break;
+                        case 1: 
+                            width = 20; 
+                            color = 'bg-danger'; 
+                            label = 'Getting started! Add some magic to make it stronger ✨'; 
+                            break;
+                        case 2: 
+                            width = 40; 
+                            color = 'bg-warning'; 
+                            label = 'Nice progress! Mix it up a bit more! 🌟'; 
+                            break;
+                        case 3: 
+                            width = 60; 
+                            color = 'bg-info'; 
+                            label = 'Looking good! Almost fortress-level security! 🏰'; 
+                            break;
+                        case 4: 
+                            width = 80; 
+                            color = 'bg-success'; 
+                            label = 'Excellent! Your password is getting super strong! 💪'; 
+                            break;
+                        case 5: 
+                            width = 100; 
+                            color = 'bg-success'; 
+                            label = 'Perfect! Your password is now fortress-level secure! 🔒'; 
+                            break;
+                    }
+
+                    passwordStrengthBar.style.width = width + '%';
+                    passwordStrengthBar.className = 'progress-bar ' + color;
+                    passwordStrengthText.textContent = label;
+                });
+            }
+
+            if(confirmPassword && password) {
+                // Password Match
+                confirmPassword.addEventListener('input', () => {
+                    if (confirmPassword.value && confirmPassword.value !== password.value) {
+                        if(passwordMatchError) passwordMatchError.classList.remove('d-none');
+                    } else {
+                        if(passwordMatchError) passwordMatchError.classList.add('d-none');
+                    }
+                });
+            }
+
+            // Global Password Toggle
+            document.querySelectorAll('.toggle-password').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    if (input && input.tagName === 'INPUT') {
+                        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                        input.setAttribute('type', type);
+                        
+                        this.classList.toggle('ti-eye');
+                        this.classList.toggle('ti-eye-off');
+                    }
+                });
             });
 
-            // Password Strength
-            password.addEventListener('input', () => {
-                const val = password.value;
-                let strength = 0;
-
-                if (val.length >= 8) strength++;
-                if (/[A-Z]/.test(val)) strength++;
-                if (/[a-z]/.test(val)) strength++;  // Added lowercase check
-                if (/[0-9]/.test(val)) strength++;
-                if (/[^A-Za-z0-9]/.test(val)) strength++;
-                if (val.length >= 12) strength++;   // Extra point for longer passwords
-
-                let width = 0, color = '', label = '';
-
-                switch (strength) {
-                    case 0: 
-                        width = 0; 
-                        color = 'bg-secondary';
-                        label = 'Time to create something special! 🎯'; 
-                        break;
-                    case 1: 
-                        width = 20; 
-                        color = 'bg-danger'; 
-                        label = 'Getting started! Add some magic to make it stronger ✨'; 
-                        break;
-                    case 2: 
-                        width = 40; 
-                        color = 'bg-warning'; 
-                        label = 'Nice progress! Mix it up a bit more! 🌟'; 
-                        break;
-                    case 3: 
-                        width = 60; 
-                        color = 'bg-info'; 
-                        label = 'Looking good! Almost fortress-level security! 🏰'; 
-                        break;
-                    case 4: 
-                        width = 80; 
-                        color = 'bg-success'; 
-                        label = 'Excellent! Your password is getting super strong! 💪'; 
-                        break;
-                    case 5: 
-                        width = 100; 
-                        color = 'bg-success'; 
-                        label = 'Perfect! Your password is now fortress-level secure! 🔒'; 
-                        break;
-                }
-
-                passwordStrengthBar.style.width = width + '%';
-                passwordStrengthBar.className = 'progress-bar ' + color;
-                passwordStrengthText.textContent = label;
+            // Global Form Submit Processing State
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    const btn = this.querySelector('button[type="submit"]');
+                    if(btn) {
+                        const originalText = btn.innerText;
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+                        
+                        // Optional: Reset button after some time if simple validation fails client-side (though most is realtime)
+                        // Or if use back button.  But for standard submit, page reload will reset it.
+                    }
+                });
             });
 
-            // Password Match
-            confirmPassword.addEventListener('input', () => {
-                if (confirmPassword.value && confirmPassword.value !== password.value) {
-                    passwordMatchError.classList.remove('d-none');
-                } else {
-                    passwordMatchError.classList.add('d-none');
-                }
-            });
         });
     </script>

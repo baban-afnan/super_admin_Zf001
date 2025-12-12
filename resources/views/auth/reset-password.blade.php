@@ -77,7 +77,7 @@
                         required 
                         autocomplete="new-password"
                         class="form-control @error('password_confirmation') is-invalid @enderror">
-                    <span class="ti toggle-passwords ti-eye-off position-absolute end-0 top-50 translate-middle-y me-3 cursor-pointer"></span>
+                    <span class="ti toggle-password ti-eye-off position-absolute end-0 top-50 translate-middle-y me-3 cursor-pointer"></span>
                     @error('password_confirmation')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -88,7 +88,7 @@
 
                 {{-- Submit Button --}}
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary w-100">Reset Password</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Reset Password</button>
                 </div>
 
                 {{-- Back to Login --}}

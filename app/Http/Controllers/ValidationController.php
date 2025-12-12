@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use App\Models\Transaction;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use App\Models\AgentService;
 use App\Models\User;

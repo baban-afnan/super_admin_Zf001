@@ -41,7 +41,7 @@
 
                 {{-- Submit Button --}}
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
                         Email Password Reset Link
                     </button>
                 </div>

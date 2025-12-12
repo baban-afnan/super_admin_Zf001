@@ -28,7 +28,7 @@
                 {{-- Resend Verification Link --}}
                 <form method="POST" action="{{ route('verification.send') }}" class="w-100 mb-3">
                     @csrf
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
                         <i class="ti ti-refresh me-1"></i> Resend Verification Email
                     </button>
                 </form>

@@ -40,7 +40,7 @@
 
                 {{-- Confirm Button --}}
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary w-100">Confirm</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Confirm</button>
                 </div>
 
                 {{-- Back to Login --}}

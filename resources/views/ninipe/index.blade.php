@@ -136,7 +136,6 @@
                         <th>ID</th>
                         <th>Tracking ID</th>
                         <th>Agent Name</th>
-                        <th>Clearance</th>
                         <th>Status</th>
                         <th>Date Created</th>
                         <th>Actions</th>
