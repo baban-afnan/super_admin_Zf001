@@ -22,14 +22,60 @@ class AdminSupportController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = SupportTicket::with('user')
-            ->orderByRaw("FIELD(status, 'open', 'customer_reply', 'answered', 'closed')")
+        $query = SupportTicket::with('user');
+
+        // Search
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_reference', 'like', "%{$search}%")
+                  ->orWhere('subject', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by Status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        $tickets = $query->orderByRaw("FIELD(status, 'open', 'customer_reply', 'answered', 'closed')")
             ->latest('updated_at')
             ->paginate(10);
 
-        return view('admin.support.index', compact('tickets'));
+        // Statistics
+        $totalTickets = SupportTicket::count();
+        
+        // Monthly Received (All tickets created this month)
+        $monthlyReceived = SupportTicket::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+            
+        // Monthly Open (Created this month and still open)
+        $monthlyOpen = SupportTicket::where('status', 'open')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        // Monthly Closed (Created this month and closed)
+        $monthlyClosed = SupportTicket::where('status', 'closed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        // Customer Reply (Updated this month with status customer_reply)
+        $customer_reply = SupportTicket::where('status', 'customer_reply')
+            ->whereMonth('updated_at', now()->month)
+            ->whereYear('updated_at', now()->year)
+            ->count();
+
+        return view('admin.support.index', compact('tickets', 'totalTickets', 'monthlyReceived', 'monthlyOpen', 'monthlyClosed', 'customer_reply'));
     }
 
     public function fetchMessages($reference)
@@ -105,5 +151,20 @@ class AdminSupportController extends Controller
         }
 
         return back()->with('success', 'Ticket closed and notification sent to user.');
+    }
+    public function updates(Request $request, $reference)
+    {
+        $ticket = SupportTicket::where('ticket_reference', $reference)->firstOrFail();
+        
+        $messages = [];
+        if ($request->has('last_message_id')) {
+            $messages = $ticket->messages()
+                ->where('id', '>', $request->last_message_id)
+                ->get();
+        }
+
+        return response()->json([
+            'messages' => $messages
+        ]);
     }
 }

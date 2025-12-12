@@ -44,9 +44,7 @@
                     @endphp
 
                     @if($isImage)
-                        <a href="{{ Storage::url($message->attachment) }}" target="_blank">
-                            <img src="{{ Storage::url($message->attachment) }}" alt="Attachment" class="img-fluid rounded border" style="max-height: 200px;">
-                        </a>
+                        <img src="{{ Storage::url($message->attachment) }}" alt="Attachment" class="img-fluid rounded border" style="max-height: 200px;">
                     @elseif(strtolower($extension) === 'pdf')
                         <iframe src="{{ Storage::url($message->attachment) }}" style="width: 100%; height: 300px;" class="border rounded"></iframe>
                         <div class="text-end mt-1">
@@ -77,3 +75,5 @@
     @endif
 </div>
 @endforeach
+
+

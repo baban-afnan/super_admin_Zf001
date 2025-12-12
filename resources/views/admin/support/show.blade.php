@@ -60,17 +60,33 @@
                         
                         <script>
                             // Auto-refresh messages
-                            let messagesContainer = document.getElementById('messages-container');
+                            const messagesContainer = document.getElementById('messages-container');
                             
+                            function scrollMessagesToBottom() {
+                                if (messagesContainer) {
+                                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                }
+                            }
+
+                            // Scroll on initial load
+                            document.addEventListener('DOMContentLoaded', scrollMessagesToBottom);
+                            // Also try immediate scroll just in case DOM is ready
+                            scrollMessagesToBottom();
+
                             setInterval(function() {
                                 fetch("{{ route('admin.support.messages', $ticket->ticket_reference) }}")
                                     .then(response => response.text())
                                     .then(html => {
                                         // Only update if content changed to prevent jitter
                                         if (messagesContainer.innerHTML.trim() !== html.trim()) {
+                                            const wasAtBottom = Math.abs(messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 50;
+                                            
                                             messagesContainer.innerHTML = html;
-                                            // Optional: Scroll to bottom if user is close to bottom?
-                                            // messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+                                            
+                                            // Scroll to bottom if new message arrived or user was already at bottom
+                                            if (wasAtBottom) {
+                                                scrollMessagesToBottom();
+                                            }
                                         }
                                     })
                                     .catch(error => console.error('Error fetching messages:', error));
@@ -94,13 +110,7 @@
                                         },
                                         body: JSON.stringify({})
                                     }).catch(err => console.error(err));
-
-                                    // typingTimer = setTimeout(doneTyping, doneTypingInterval);
                                 });
-
-                                // function doneTyping() {
-                                //     // Optional: could send a "stopped typing" if needed by backend
-                                // }
                             }
                         </script>
 

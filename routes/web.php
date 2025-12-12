@@ -21,6 +21,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
+    Route::post('/profile/pin', [ProfileController::class, 'updatePin'])->name('profile.pin');
 });
 
 //Bvn report upload
@@ -171,6 +173,7 @@ Route::prefix('admin/support')->name('admin.support.')->middleware(['auth', 'ver
     Route::get('/{reference}', [\App\Http\Controllers\Admin\AdminSupportController::class, 'show'])->name('show');
     Route::post('/{reference}/reply', [\App\Http\Controllers\Admin\AdminSupportController::class, 'reply'])->name('reply');
     Route::post('/{reference}/typing', [\App\Http\Controllers\Admin\AdminSupportController::class, 'typing'])->name('typing');
+    Route::get('/{reference}/updates', [\App\Http\Controllers\Admin\AdminSupportController::class, 'updates'])->name('updates');
     Route::post('/{reference}/close', [\App\Http\Controllers\Admin\AdminSupportController::class, 'close'])->name('close');
 });
 
