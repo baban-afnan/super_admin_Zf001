@@ -22,7 +22,7 @@ class ValidationController extends Controller
 
         // Base query filtering by service_type
         $query = AgentService::query()
-            ->where('service_type', 'Validation');
+            ->where('service_type', 'NIN_VALIDATION');
 
         // Enhanced search
         if ($search) {
