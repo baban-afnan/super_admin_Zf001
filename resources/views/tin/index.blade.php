@@ -143,7 +143,6 @@
                     <tr>
                         <th>ID</th>
                         <th>Req ID</th>
-                        <th>Type</th>
                         <th>Note/Name</th>
                         <th>Agent Name</th>
                         <th>Service Field</th>
@@ -158,13 +157,6 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $enrollment->reference }}</td>
-                            <td>
-                                @if(Str::contains($enrollment->service_type, 'individual'))
-                                    <span class="badge bg-primary">Individual</span>
-                                @else
-                                    <span class="badge bg-dark">Corporate</span>
-                                @endif
-                            </td>
                             <td>{{ Str::limit($enrollment->first_name, 30) }} {{ Str::limit($enrollment->last_name, 30) }} </td> 
                             <td>{{ $enrollment->performed_by }}</td>
                             <td>{{ $enrollment->service_field_name ?? $enrollment->field_name }}</td>
