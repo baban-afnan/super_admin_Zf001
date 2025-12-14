@@ -30,11 +30,11 @@ class TinController extends Controller
         // Determine service types to query
         $serviceTypes = [];
         if ($typeFilter === 'individual') {
-            $serviceTypes = ['tin_individual'];
+            $serviceTypes = ['TIN INDIVIDUAL'];
         } elseif ($typeFilter === 'corporate') {
-            $serviceTypes = ['tin_corporate'];
+            $serviceTypes = ['TIN CORPORATE'];
         } else {
-            $serviceTypes = ['tin_individual', 'tin_corporate'];
+            $serviceTypes = ['TIN INDIVIDUAL', 'TIN CORPORATE'];
         }
 
         // Base query filtering by service_type
