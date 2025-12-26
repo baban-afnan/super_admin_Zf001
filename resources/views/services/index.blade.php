@@ -1,5 +1,6 @@
 <x-app-layout>
-    @slot('title', 'Services Management')
+      <title>Arewa Smart - Services Management</title>
+
 
     <div class="content">
         <!-- Page Header -->
@@ -84,29 +85,38 @@
         <h5 class="card-title mb-0 fw-bold">System Services</h5>
         <div class="d-flex my-xl-auto right-content align-items-center flex-wrap row-gap-3">
             <div class="me-3">
-                <div class="input-icon-end position-relative">
-                    <input type="text" class="form-control date-range bookingrange" placeholder="dd/mm/yyyy - dd/mm/yyyy">
-                    <span class="input-icon-addon">
-                        <i class="ti ti-chevron-down"></i>
-                    </span>
-                </div>
+                <form action="{{ route('services.index') }}" method="GET">
+                    <div class="input-icon-end position-relative">
+                        <input type="text" name="search" class="form-control" placeholder="Search services..." value="{{ request('search') }}">
+                        <span class="input-icon-addon">
+                            <i class="ti ti-search"></i>
+                        </span>
+                        @if(request('status'))
+                            <input type="hidden" name="status" value="{{ request('status') }}">
+                        @endif
+                        @if(request('sort'))
+                            <input type="hidden" name="sort" value="{{ request('sort') }}">
+                        @endif
+                    </div>
+                </form>
             </div>
             <div class="dropdown me-3">
                 <a href="javascript:void(0);" class="dropdown-toggle btn btn-white d-inline-flex align-items-center border" data-bs-toggle="dropdown">
-                    Select Status
+                    {{ request('status') ? ucfirst(request('status')) : 'Select Status' }}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end p-3">
-                    <li><a href="javascript:void(0);" class="dropdown-item rounded-1">Active</a></li>
-                    <li><a href="javascript:void(0);" class="dropdown-item rounded-1">Inactive</a></li>
+                    <li><a href="{{ route('services.index', array_merge(request()->except('page'), ['status' => 'active'])) }}" class="dropdown-item rounded-1">Active</a></li>
+                    <li><a href="{{ route('services.index', array_merge(request()->except('page'), ['status' => 'inactive'])) }}" class="dropdown-item rounded-1">Inactive</a></li>
+                    <li><a href="{{ route('services.index', array_merge(request()->except('page', 'status'))) }}" class="dropdown-item rounded-1">All</a></li>
                 </ul>
             </div>
             <div class="dropdown">
                 <a href="javascript:void(0);" class="dropdown-toggle btn btn-white d-inline-flex align-items-center border" data-bs-toggle="dropdown">
-                    Sort By : Newest
+                    Sort By : {{ request('sort') == 'oldest' ? 'Oldest' : 'Newest' }}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end p-3">
-                    <li><a href="javascript:void(0);" class="dropdown-item rounded-1">Newest</a></li>
-                    <li><a href="javascript:void(0);" class="dropdown-item rounded-1">Oldest</a></li>
+                    <li><a href="{{ route('services.index', array_merge(request()->except('page'), ['sort' => 'newest'])) }}" class="dropdown-item rounded-1">Newest</a></li>
+                    <li><a href="{{ route('services.index', array_merge(request()->except('page'), ['sort' => 'oldest'])) }}" class="dropdown-item rounded-1">Oldest</a></li>
                 </ul>
             </div>
         </div>
@@ -219,7 +229,7 @@
     </div>
 
     <div class="card-footer bg-white border-top-0 py-3">
-        {{ $services->links('pagination::bootstrap-5') }}
+        {{ $services->links('vendor.pagination.custom') }}
     </div>
 </div>
 

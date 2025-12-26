@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'TIN Service Details')
+   <title>Arewa Smart - TIN Service Details</title>
 
     <div class="content">
         <div class="row mb-4">

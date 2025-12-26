@@ -10,9 +10,36 @@ use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $services = Service::withCount(['fields', 'prices'])->latest()->paginate(10);
+        $query = Service::withCount(['fields', 'prices']);
+
+        // Filter by Status
+        if ($request->has('status')) {
+            if ($request->status == 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status == 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Sorting
+        if ($request->sort == 'oldest') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        $services = $query->paginate(10);
         return view('services.index', compact('services'));
     }
 
@@ -87,13 +114,21 @@ class ServiceController extends Controller
     // Field Management
     public function storeField(Request $request, Service $service)
     {
+        // Custom Check for Unique Field Code
+        if (ServiceField::where('field_code', $request->field_code)->exists()) {
+            $lastField = ServiceField::latest('id')->first();
+            $lastCode = $lastField ? $lastField->field_code : 'None';
+            return back()->with('error', "Field code already exists. The last field code used was: {$lastCode}")->withInput();
+        }
+
         $validated = $request->validate([
             'field_name' => 'required|string|max:255',
-            'field_code' => 'required|string|max:255',
+            'field_code' => 'required|string|max:255', // Removed unique check from database level to handle manually? Actually better to double check but the prompt asked for "if exists return error message..."
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
         ]);
+
+        $validated['is_active'] = $request->has('is_active');
 
         $service->fields()->create($validated);
 
@@ -102,13 +137,21 @@ class ServiceController extends Controller
 
     public function updateField(Request $request, ServiceField $field)
     {
+        // Check uniqueness if changed
+        if ($request->field_code !== $field->field_code && ServiceField::where('field_code', $request->field_code)->exists()) {
+             $lastField = ServiceField::latest('id')->first();
+             $lastCode = $lastField ? $lastField->field_code : 'None';
+             return back()->with('error', "Field code already exists. The last field code used was: {$lastCode}")->withInput();
+        }
+
         $validated = $request->validate([
             'field_name' => 'required|string|max:255',
             'field_code' => 'required|string|max:255',
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
         ]);
+
+        $validated['is_active'] = $request->has('is_active');
 
         $field->update($validated);
 
@@ -117,8 +160,17 @@ class ServiceController extends Controller
 
     public function destroyField(ServiceField $field)
     {
-        $field->delete();
-        return back()->with('success', 'Service field deleted successfully.');
+        try {
+            $field->delete();
+            return back()->with('success', 'Service field deleted successfully.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check for integrity constraint violation (SQLState 23000)
+            if ($e->getCode() === "23000") {
+                return back()->with('error', 'Cannot delete this field because it is linked to existing user records or transactions. Please deactivate it instead to preserve data integrity.');
+            }
+            // Rethrow other errors or handle generic failure
+            return back()->with('error', 'An error occurred while attempting to delete the field: ' . $e->getMessage());
+        }
     }
 
     // Price Management

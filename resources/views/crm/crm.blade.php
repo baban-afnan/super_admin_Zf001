@@ -67,10 +67,8 @@
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
                 <div class="dropdown-header">Export Options:</div>
-                <a class="dropdown-item" href="#"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Export as CSV</a>
-                <a class="dropdown-item" href="#"><i class="bi bi-file-excel me-2"></i>Export as Excel</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#"><i class="bi bi-printer me-2"></i>Print Records</a>
+                <a class="dropdown-item" href="{{ route('crm.export.csv') }}"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Export as CSV</a>
+                <a class="dropdown-item" href="{{ route('crm.export.excel') }}"><i class="bi bi-file-excel me-2"></i>Export as Excel</a>
             </div>
         </div>
     </div>
@@ -155,8 +153,11 @@
                                     $statusColor = match($enrollment->status) {
                                         'pending' => 'warning',
                                         'processing' => 'info',
-                                        'resolved' => 'success',
-                                        'rejected' => 'danger',
+                                        'in-progress' => 'primary',
+                                        'resolved', 'successful' => 'success',
+                                        'rejected', 'failed' => 'danger',
+                                        'query' => 'warning',
+                                        'remark' => 'secondary',
                                         default => 'secondary'
                                     };
                                 @endphp
@@ -180,27 +181,9 @@
             </table>
 
             {{-- Pagination --}}
-            @if ($enrollments->lastPage() > 1)
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item {{ $enrollments->onFirstPage() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $enrollments->previousPageUrl() }}">
-                                <i class="bi bi-chevron-left"></i> Previous
-                            </a>
-                        </li>
-                        @for ($i = 1; $i <= $enrollments->lastPage(); $i++)
-                            <li class="page-item {{ $enrollments->currentPage() == $i ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $enrollments->url($i) }}">{{ $i }}</a>
-                            </li>
-                        @endfor
-                        <li class="page-item {{ !$enrollments->hasMorePages() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $enrollments->nextPageUrl() }}">
-                                Next <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            @endif
+            <div class="card-footer bg-white">
+                {{ $enrollments->links('vendor.pagination.custom') }}
+            </div>
         </div>
     </div>
 </div>

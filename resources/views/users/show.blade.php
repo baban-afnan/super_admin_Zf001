@@ -210,7 +210,7 @@
                                 </table>
                             </div>
                             <div class="p-3 border-top">
-                                {{ $transactions->links('pagination::bootstrap-5') }}
+                                {{ $transactions->links('vendor.pagination.custom') }}
                             </div>
                         @else
                             <div class="text-center py-5">

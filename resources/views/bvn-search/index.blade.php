@@ -1,5 +1,5 @@
 <x-app-layout>
-   <title>Arewa Smart - Bvn User</title>
+ <title>Arewa Smart - Bvn search Using Phone number</title>
       <div class="page-body">
     <div class="container-fluid">
       <div class="page-title">
@@ -60,7 +60,7 @@
 
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">BVN User Request</h6>
+        <h6 class="m-0 font-weight-bold text-primary">BVN Search Requests</h6>
         <div class="dropdown no-arrow">
             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-three-dots-vertical text-gray-400"></i>
@@ -81,7 +81,7 @@
             <div class="col-md-6">
                 <form method="GET" class="form-inline search-full col">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by BVN, NIN, Transaction Ref, Agent Name..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="Search by ticket id, batch id, Transaction Ref, Agent Name..." value="{{ request('search') }}">
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
@@ -103,7 +103,7 @@
                     </button>
 
                     @if(request('status') || request('search') || request('bank'))
-                        <a href="{{ route('bvnuser.index') }}" class="btn btn-outline-danger">
+                        <a href="{{ route('bvn-search.index') }}" class="btn btn-outline-danger">
                             <i class="bi bi-x-circle"></i> Clear
                         </a>
                     @endif
@@ -133,12 +133,11 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>S/N</th>
-                        <th>Agent Code</th>
+                        <th>ID</th>
+                        <th>Transaction Ref</th>
+                        <th>Agent Name</th>
+                        <th>Phone Number</th>
                         <th>BVN</th>
-                        <th>Agent State</th>
-                        <th>Email</th>
-                        <th>SERVICE FIELD</th>
                         <th>Status</th>
                         <th>Date Created</th>
                         <th>Actions</th>
@@ -148,12 +147,11 @@
                   
                     @forelse ($enrollments as $enrollment)
                         <tr>
-                            <td>{{ $enrollments->firstItem() + $loop->index }}</td>
-                            <td>{{ $enrollment->agent_code }}</td>
-                            <td>{{ $enrollment->bvn }}</td>
-                            <td>{{ $enrollment->state}}</td>
-                            <td>{{ $enrollment->email ?? $enrollment->phone_no }}</td>
-                            <td>{{ $enrollment->service_field_name ?? $enrollment->phone_no }}</td>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $enrollment->reference }}</td>
+                            <td>{{ $enrollment->performed_by }}</td>
+                            <td>{{ $enrollment->bank ?? $enrollment->number}}</td>
+                            <td>{{ $enrollment->service_field_name ?? $enrollment->bvn }}</td>
                             <td>
                                @php
                                     $statusColor = match($enrollment->status) {
@@ -173,14 +171,14 @@
                             </td>
                             <td>{{ \Carbon\Carbon::parse($enrollment->submission_date)->format('M j, Y g:i A') }}</td>
                             <td>
-                                <a href="{{ route('bvnuser.show', $enrollment->id) }}" class="btn btn-sm btn-primary">
+                                <a href="{{ route('bvn-search.show', $enrollment->id) }}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-eye"></i> View
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">No BVN User records found.</td>
+                            <td colspan="8" class="text-center py-4">No BVN Search records found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -200,7 +198,7 @@
         <div class="modal-content">
             <form method="GET">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="filterModalLabel">Filter BVN User Records</h5>
+                    <h5 class="modal-title" id="filterModalLabel">Filter BVN Search Requests</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">

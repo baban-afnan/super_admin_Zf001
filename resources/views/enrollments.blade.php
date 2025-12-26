@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Arewa Smart - {{ $title ?? 'BVN Enrolment Report' }}</title>
+    <title>Arewa Smart - BVN Enrollment Report Upload</title>
 
     <div class="content">
 

@@ -51,8 +51,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // CRM Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/crm', [\App\Http\Controllers\CRMController::class, 'index'])->name('crm.index');
+    Route::get('/crm/export/csv', [\App\Http\Controllers\CRMController::class, 'exportCsv'])->name('crm.export.csv');
+    Route::get('/crm/export/excel', [\App\Http\Controllers\CRMController::class, 'exportExcel'])->name('crm.export.excel');
     Route::get('/crm/{id}', [\App\Http\Controllers\CRMController::class, 'show'])->name('crm.show');
     Route::put('/crm/{id}', [\App\Http\Controllers\CRMController::class, 'update'])->name('crm.update');
+});
+
+// BVN Search Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/bvn-search', [\App\Http\Controllers\BvnSearchController::class, 'index'])->name('bvn-search.index');
+    Route::get('/bvn-search/{id}', [\App\Http\Controllers\BvnSearchController::class, 'show'])->name('bvn-search.show');
+    Route::put('/bvn-search/{id}', [\App\Http\Controllers\BvnSearchController::class, 'update'])->name('bvn-search.update');
 });
 
 // NIN Modification Routes

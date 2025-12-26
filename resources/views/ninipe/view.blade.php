@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'NIN IPE Details')
+    <title>Arewa Smart - NIN - IPE details</title>
 
     <div class="content">
         <div class="row mb-4">

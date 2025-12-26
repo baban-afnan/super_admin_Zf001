@@ -1,4 +1,5 @@
 <x-app-layout>
+    <title>Arewa Smart - Dashboard</title>
     <div class="mt-4"> 
 
         @php

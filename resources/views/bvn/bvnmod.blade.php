@@ -1,5 +1,5 @@
 <x-app-layout>
- <x-slot name="title">BVN - Modification </x-slot>
+   <title>Arewa Smart - BVN Modification</title>
       <div class="page-body">
     <div class="container-fluid">
       <div class="page-title">
@@ -157,8 +157,11 @@
                                     $statusColor = match($enrollment->status) {
                                         'pending' => 'warning',
                                         'processing' => 'info',
-                                        'resolved' => 'success',
-                                        'rejected' => 'danger',
+                                        'in-progress' => 'primary',
+                                        'resolved', 'successful' => 'success',
+                                        'rejected', 'failed' => 'danger',
+                                        'query' => 'warning',
+                                        'remark' => 'secondary',
                                         default => 'secondary'
                                     };
                                 @endphp

@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Validation Details')
+    <title>Arewa Smart - Validation Details</title>
 
     <div class="content">
         <div class="row mb-4">

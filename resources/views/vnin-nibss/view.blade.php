@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'VNIN to NIBSS Details')
+   <title>Arewa Smart - Vnin to nibss</title>
 
     <div class="content">
         <div class="row mb-4">

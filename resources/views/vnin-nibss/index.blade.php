@@ -1,5 +1,5 @@
 <x-app-layout>
- <x-slot name="title">VNIN to NIBSS - Requests </x-slot>
+   <title>Arewa Smart - Vnin to nibss</title>
       <div class="page-body">
     <div class="container-fluid">
       <div class="page-title">
@@ -158,8 +158,11 @@
                                     $statusColor = match($enrollment->status) {
                                         'pending' => 'warning',
                                         'processing' => 'info',
-                                        'resolved' => 'success',
-                                        'rejected' => 'danger',
+                                        'in-progress' => 'primary',
+                                        'resolved', 'successful' => 'success',
+                                        'rejected', 'failed' => 'danger',
+                                        'query' => 'warning',
+                                        'remark' => 'secondary',
                                         default => 'secondary'
                                     };
                                 @endphp
@@ -183,27 +186,9 @@
             </table>
 
             {{-- Pagination --}}
-            @if ($enrollments->lastPage() > 1)
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item {{ $enrollments->onFirstPage() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $enrollments->previousPageUrl() }}">
-                                <i class="bi bi-chevron-left"></i> Previous
-                            </a>
-                        </li>
-                        @for ($i = 1; $i <= $enrollments->lastPage(); $i++)
-                            <li class="page-item {{ $enrollments->currentPage() == $i ? 'active' : '' }}">
-                                <a class="page-link" href="{{ $enrollments->url($i) }}">{{ $i }}</a>
-                            </li>
-                        @endfor
-                        <li class="page-item {{ !$enrollments->hasMorePages() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $enrollments->nextPageUrl() }}">
-                                Next <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            @endif
+            <div class="card-footer bg-white">
+                {{ $enrollments->links('vendor.pagination.custom') }}
+            </div>
         </div>
     </div>
 </div>

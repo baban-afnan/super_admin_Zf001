@@ -117,8 +117,7 @@
                         <li><a href="{{ route('crm.index') }}" class="{{ request()->routeIs('crm.*') ? 'active' : '' }}">CRM</a></li>
                         <li><a href="{{ route('bvnuser.index') }}" class="{{ request()->routeIs('bvnuser.*') ? 'active' : '' }}">BVN User</a></li>
                         <li><a href="{{ route('vnin-nibss.index') }}" class="{{ request()->routeIs('vnin-nibss.*') ? 'active' : '' }}">VNIN to NIBSS</a></li>
-                        <li><a href="#">BVN Search</a></li>
-                        <li><a href="#">Approval Request</a></li>
+                        <li><a href="{{ route('bvn-search.index') }}">BVN Search</a></li>
                          <li><a href="{{ route('enrollments.index') }}" class="{{ request()->routeIs('enrollments.*') ? 'active' : '' }}">Upload Enrolment</a></li>
                     </ul>
                 </li>
@@ -164,6 +163,24 @@
                         <i class="ti ti-users"></i><span>User Management</span>
                     </a>
                 </li>
+               
+
+                 <!-- Api services -->
+                <li class="submenu">
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-user-check"></i>
+                        <span>API Service</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="#">API request</a></li>
+                        <li><a href="#">Transactions</a></li>
+                        <li><a href="#">Website</a></li>
+                    </ul>
+                </li>
+                <!-- /Api Services -->
+
+
 
                 <!-- Account Section -->
                 <li class="menu-title"><span>Account</span></li>
