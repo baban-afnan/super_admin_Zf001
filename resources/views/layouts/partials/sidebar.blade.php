@@ -173,7 +173,7 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="#">API request</a></li>
+                        <li><a href="{{ route('admin.api-applications.index') }}">API request</a></li>
                         <li><a href="#">Transactions</a></li>
                         <li><a href="#">Website</a></li>
                     </ul>

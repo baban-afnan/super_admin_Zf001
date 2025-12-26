@@ -257,7 +257,8 @@ class NinIpeController extends Controller
         $fieldName = $serviceField ? $serviceField->field_name : 'Service';
 
         $data = [
-            'user_name' => $user->first_name . ' ' . $user->last_name,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
             'service_name' => $serviceName,
             'field_name' => $fieldName,
             'status' => ucfirst($enrollment->status),

@@ -64,7 +64,8 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4">Field Name</th>
+                                        <th class="ps-4">S/N</th>
+                                        <th>Field Name</th>
                                         <th>Code</th>
                                         <th>Base Price</th>
                                         <th>Status</th>
@@ -72,9 +73,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($service->fields as $field)
+                                    @forelse($fields as $field)
                                         <tr>
-                                            <td class="ps-4 fw-medium">{{ $field->field_name }}</td>
+                                            <td class="ps-4 fw-medium text-muted">{{ $fields->firstItem() + $loop->index }}</td>
+                                            <td class="fw-medium">{{ $field->field_name }}</td>
                                             <td><code class="text-primary">{{ $field->field_code }}</code></td>
                                             <td>₦{{ number_format($field->base_price, 2) }}</td>
                                             <td>
@@ -101,13 +103,18 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">No fields defined yet.</td>
+                                            <td colspan="6" class="text-center py-4 text-muted">No fields defined yet.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                    @if($fields->hasPages())
+                        <div class="card-footer bg-white border-top-0 py-3">
+                             {{ $fields->links('vendor.pagination.custom') }}
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -125,16 +132,18 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4">User Type</th>
+                                        <th class="ps-4">S/N</th>
+                                        <th>User Type</th>
                                         <th>Linked Field</th>
                                         <th>Price</th>
                                         <th class="text-end pe-4">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($service->prices as $price)
+                                    @forelse($prices as $price)
                                         <tr>
-                                            <td class="ps-4 text-capitalize fw-medium">{{ $price->user_type }}</td>
+                                            <td class="ps-4 fw-medium text-muted">{{ $prices->firstItem() + $loop->index }}</td>
+                                            <td class="text-capitalize fw-medium">{{ $price->user_type }}</td>
                                             <td>
                                                 @if($price->field)
                                                     <span class="badge bg-light text-dark border">{{ $price->field->field_name }}</span>
@@ -160,13 +169,18 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center py-4 text-muted">No pricing configurations set.</td>
+                                            <td colspan="5" class="text-center py-4 text-muted">No pricing configurations set.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                     @if($prices->hasPages())
+                        <div class="card-footer bg-white border-top-0 py-3">
+                             {{ $prices->links('vendor.pagination.custom') }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -214,7 +228,7 @@
     </div>
 
     <!-- Edit Field Modals (moved outside table) -->
-    @foreach($service->fields as $field)
+    @foreach($fields as $field)
     <div class="modal fade" id="editFieldModal{{ $field->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
@@ -303,7 +317,7 @@
     </div>
 
     <!-- Edit Price Modals (moved outside table) -->
-    @foreach($service->prices as $price)
+    @foreach($prices as $price)
     <div class="modal fade" id="editPriceModal{{ $price->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">

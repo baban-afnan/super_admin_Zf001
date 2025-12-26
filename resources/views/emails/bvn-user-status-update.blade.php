@@ -14,20 +14,23 @@
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
         .header {
+            background-color: #0d6efd;
+            color: #ffffff;
+            padding: 20px;
             text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eeeeee;
         }
         .header h1 {
-            color: #333333;
+            color: #ffffff;
+            margin: 0;
+            font-size: 20px;
         }
         .content {
-            padding: 20px 0;
+            padding: 20px;
         }
         .content p {
             color: #555555;
@@ -43,6 +46,13 @@
             margin: 5px 0;
             font-weight: bold;
         }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            color: #999999;
+            font-size: 12px;
+        }
         .status-badge {
             display: inline-block;
             padding: 5px 12px;
@@ -56,7 +66,6 @@
         .status-rejected, .status-failed { background-color: #fee2e2; color: #991b1b; }
         .status-query { background-color: #fef3c7; color: #92400e; }
         .status-remark { background-color: #e0e7ff; color: #3730a3; }
-        .status-in-progress { background-color: #dbeafe; color: #1e40af; }
         .comment-box {
             background-color: #fffbeb;
             border-left: 4px solid #fbbf24;
@@ -74,13 +83,6 @@
             margin-top: 10px;
             font-weight: bold;
         }
-        .footer {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #eeeeee;
-            color: #999999;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
@@ -89,7 +91,7 @@
             <h1>{{ $service_name }} Status Update</h1>
         </div>
         <div class="content">
-            <p>Hello {{ $user_name }},</p>
+            <p>Hello {{ $first_name . ' ' . $last_name }},</p>
             <p>We have an update regarding your <strong>{{ $service_name }}</strong> request. Below are the details:</p>
             
             <div class="details">

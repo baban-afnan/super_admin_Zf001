@@ -41,17 +41,19 @@
                     @php
                         $extension = pathinfo($message->attachment, PATHINFO_EXTENSION);
                         $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp']);
+                        // Handle both storage (Admin) and public/uploads (User) paths
+                        $attachmentUrl = str_starts_with($message->attachment, 'uploads') ? asset($message->attachment) : Storage::url($message->attachment);
                     @endphp
 
                     @if($isImage)
-                        <img src="{{ Storage::url($message->attachment) }}" alt="Attachment" class="img-fluid rounded border" style="max-height: 200px;">
+                        <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded border" style="max-height: 200px;">
                     @elseif(strtolower($extension) === 'pdf')
-                        <iframe src="{{ Storage::url($message->attachment) }}" style="width: 100%; height: 300px;" class="border rounded"></iframe>
+                        <iframe src="{{ $attachmentUrl }}" style="width: 100%; height: 300px;" class="border rounded"></iframe>
                         <div class="text-end mt-1">
-                            <a href="{{ Storage::url($message->attachment) }}" target="_blank" class="small text-primary">Open Fullscreen</a>
+                            <a href="{{ $attachmentUrl }}" target="_blank" class="small text-primary">Open Fullscreen</a>
                         </div>
                     @else
-                        <a href="{{ Storage::url($message->attachment) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ $attachmentUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
                             <i class="ti ti-paperclip"></i> View Attachment
                         </a>
                     @endif

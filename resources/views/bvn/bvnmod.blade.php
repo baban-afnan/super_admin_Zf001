@@ -12,50 +12,120 @@
 
 <div class="row g-4 mb-4">
 
-    <div class="col-md-3">
-        <div class="card text-white bg-primary h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
-                <i class="bi bi-hourglass-split fs-1 mb-2"></i>
-                <h6 class="text-uppercase fw-bold">Pending</h6>
-                <h4 class="fw-bold mb-0">{{ $statusCounts['pending'] ?? 0 }}</h4>
-                <small class="text-uppercase fw-bold">Work on this request its Urgent!</small>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
+                <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                    <div>
+                        <p class="stats-label mb-1" style="color: white;">Pending</p>
+                        <h3 class="stats-value mb-0">{{ $statusCounts['pending'] ?? 0 }}</h3>
+                        <small class="text-white-50 fs-12 fw-medium">Work on this request its Urgent!</small>
+                    </div>
+                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                        <i class="ti ti-hourglass-empty fs-24 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--info-gradient);">
+                <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                    <div>
+                        <p class="stats-label mb-1" style="color: white;">Processing</p>
+                        <h3 class="stats-value mb-0">{{ $statusCounts['processing'] ?? 0 }}</h3>
+                        <small class="text-white-50 fs-12 fw-medium">Check and confirm The status</small>
+                    </div>
+                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                        <i class="ti ti-settings fs-24 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
+                <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                    <div>
+                        <p class="stats-label mb-1" style="color: white;">Resolved</p>
+                        <h3 class="stats-value mb-0">{{ $statusCounts['resolved'] ?? 0 }}</h3>
+                        <small class="text-white-50 fs-12 fw-medium">You have did a great Job</small>
+                    </div>
+                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                        <i class="ti ti-circle-check fs-24 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
+            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
+                <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                    <div>
+                        <p class="stats-label mb-1" style="color: white;">Rejected</p>
+                        <h3 class="stats-value mb-0">{{ $statusCounts['rejected'] ?? 0 }}</h3>
+                        <small class="text-white-50 fs-12 fw-medium">Don’t give up — Kept accepting Request</small>
+                    </div>
+                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                        <i class="ti ti-circle-x fs-24 text-white"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card text-white bg-info h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
-                <i class="bi bi-gear-fill fs-1 mb-2"></i>
-                <h6 class="text-uppercase fw-bold">Processing</h6>
-                <small class="text-uppercase fw-bold">Check and confirm The status</small>
-                <h4 class="fw-bold mb-0">{{ $statusCounts['processing'] ?? 0 }}</h4>
-            </div>
-        </div>
-    </div>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            --info-gradient: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+        }
 
-    <div class="col-md-3">
-        <div class="card text-white bg-success h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
-                <small class="text-uppercase fw-bold">You have did a great Job</small>
-                <i class="bi bi-check-circle-fill fs-1 mb-2"></i>
-                <h6 class="text-uppercase fw-bold">Resolved</h6>
-                <h4 class="fw-bold mb-0">{{ $statusCounts['resolved'] ?? 0 }}</h4>
-            </div>
-        </div>
-    </div>
+        .financial-card {
+            position: relative;
+            overflow: hidden;
+            border: none;
+            border-radius: 1rem;
+            color: white;
+        }
+        .financial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+        .financial-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(-30%, 30%);
+        }
+        
+        .stats-label { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
+        .stats-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
 
-    <div class="col-md-3">
-        <div class="card text-white bg-danger h-100 shadow-sm border-0">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
-                <i class="bi bi-x-octagon-fill fs-1 mb-2"></i>
-                <h6 class="text-uppercase fw-bold">Rejected</h6>
-                <h4 class="fw-bold mb-2">{{ $statusCounts['rejected'] ?? 0 }}</h4>
-                <small class="text-uppercase fw-bold">Don’t give up — Kept accepting Request</small>
-            </div>
-        </div>
-    </div>
-</div>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .avatar-lg { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; }
+    </style>
 
 
 <div class="card shadow mb-4">

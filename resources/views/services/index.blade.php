@@ -24,32 +24,46 @@
 
         <!-- Stats -->
         <div class="row g-3 mb-4">
-            <div class="col-xl-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <span class="text-muted fw-medium d-block mb-1">Total Services</span>
-                                <h3 class="mb-0 fw-bold text-dark">{{ $services->total() }}</h3>
-                            </div>
-                            <div class="avatar avatar-md bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="ti ti-server fs-4"></i>
-                            </div>
+            <!-- Total Services -->
+            <div class="col-xl-4 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Total Services</p>
+                            <h3 class="stats-value mb-0">{{ $totalServicesCount }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-server fs-24 text-white"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <span class="text-muted fw-medium d-block mb-1">Active Services</span>
-                                <h3 class="mb-0 fw-bold text-dark">{{ \App\Models\Service::where('is_active', true)->count() }}</h3>
-                            </div>
-                            <div class="avatar avatar-md bg-soft-success text-success rounded-circle d-flex align-items-center justify-content-center">
-                                <i class="ti ti-activity fs-4"></i>
-                            </div>
+
+            <!-- Active Services -->
+            <div class="col-xl-4 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Active Services</p>
+                            <h3 class="stats-value mb-0">{{ $activeServicesCount }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-activity fs-24 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inactive Services -->
+            <div class="col-xl-4 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Inactive Services</p>
+                            <h3 class="stats-value mb-0">{{ $inactiveServicesCount }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-server-off fs-24 text-white"></i>
                         </div>
                     </div>
                 </div>
@@ -127,11 +141,7 @@
             <table class="table datatable table-hover align-middle mb-0">
                 <thead class="thead-light bg-light">
                     <tr>
-                        <th class="no-sort ps-4">
-                            <div class="form-check form-check-md">
-                                <input class="form-check-input" type="checkbox" id="select-all">
-                            </div>
-                        </th>
+                        <th class="ps-4">S/N</th>
                         <th>Service Name</th>
                         <th>Description</th>
                         <th>Fields</th>
@@ -145,9 +155,7 @@
                     @forelse($services as $service)
                         <tr>
                             <td class="ps-4">
-                                <div class="form-check form-check-md">
-                                    <input class="form-check-input" type="checkbox">
-                                </div>
+                                <span class="fw-semibold text-muted">{{ $services->firstItem() + $loop->index }}</span>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center file-name-icon">
@@ -357,6 +365,62 @@
         });
     });
     </script>
+
+        <style>
+            :root {
+                --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+                --info-gradient: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+                --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+            }
+
+            /* Financial Cards */
+            .financial-card {
+                position: relative;
+                overflow: hidden;
+                border: none;
+                border-radius: 1rem;
+                color: white;
+            }
+            .financial-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 150px;
+                height: 150px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(30%, -30%);
+            }
+            .financial-card::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100px;
+                height: 100px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(-30%, 30%);
+            }
+            
+            /* Stats Typography */
+            .stats-label { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
+            .stats-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+
+            /* Animation */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .fade-in-up {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+            
+            .avatar-lg { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; }
+        </style>
 
     <!-- Tabler Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">

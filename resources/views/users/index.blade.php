@@ -32,36 +32,119 @@
 
         <!-- Stats Cards -->
         <div class="row g-3 mb-4">
-            @php
-                $stats = [
-                    ['label' => 'Total Users', 'value' => $totalUsers, 'icon' => 'ti-users', 'color' => 'primary', 'progress' => 100],
-                    ['label' => 'Active Users', 'value' => $activeUsers, 'icon' => 'ti-user-check', 'color' => 'success', 'progress' => ($totalUsers > 0 ? ($activeUsers/$totalUsers)*100 : 0)],
-                    ['label' => 'Inactive Users', 'value' => $inactiveUsers, 'icon' => 'ti-user-x', 'color' => 'danger', 'progress' => ($totalUsers > 0 ? ($inactiveUsers/$totalUsers)*100 : 0)],
-                    ['label' => 'Transacting Users', 'value' => $usersWithTransactions, 'icon' => 'ti-credit-card', 'color' => 'info', 'progress' => ($totalUsers > 0 ? ($usersWithTransactions/$totalUsers)*100 : 0)],
-                ];
-            @endphp
-
-            @foreach($stats as $stat)
-                <div class="col-xl-3 col-sm-6">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div>
-                                    <span class="text-muted fw-medium d-block mb-1">{{ $stat['label'] }}</span>
-                                    <h3 class="mb-0 fw-bold text-dark">{{ number_format($stat['value']) }}</h3>
-                                </div>
-                                <div class="avatar avatar-md bg-soft-{{ $stat['color'] }} text-{{ $stat['color'] }} rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="{{ $stat['icon'] }} fs-4"></i>
-                                </div>
-                            </div>
-                            <div class="progress progress-xs" style="height: 4px;">
-                                <div class="progress-bar bg-{{ $stat['color'] }}" role="progressbar" style="width: {{ $stat['progress'] }}%"></div>
-                            </div>
+            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Total Users</p>
+                            <h3 class="stats-value mb-0">{{ number_format($totalUsers) }}</h3>
+                            <small class="text-white-50 fs-12 fw-medium">Registered Accounts</small>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-users fs-24 text-white"></i>
                         </div>
                     </div>
                 </div>
-            @endforeach
+            </div>
+
+            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Active Users</p>
+                            <h3 class="stats-value mb-0">{{ number_format($activeUsers) }}</h3>
+                            <small class="text-white-50 fs-12 fw-medium">Currently Active</small>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-user-check fs-24 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Inactive Users</p>
+                            <h3 class="stats-value mb-0">{{ number_format($inactiveUsers) }}</h3>
+                            <small class="text-white-50 fs-12 fw-medium">Requires Attention</small>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-user-x fs-24 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
+                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--info-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div>
+                            <p class="stats-label mb-1" style="color: white;">Transacting Users</p>
+                            <h3 class="stats-value mb-0">{{ number_format($usersWithTransactions) }}</h3>
+                            <small class="text-white-50 fs-12 fw-medium">With Activity</small>
+                        </div>
+                        <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                            <i class="ti ti-credit-card fs-24 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <style>
+            :root {
+                --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+                --info-gradient: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+                --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+            }
+    
+            .financial-card {
+                position: relative;
+                overflow: hidden;
+                border: none;
+                border-radius: 1rem;
+                color: white;
+            }
+            .financial-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 150px;
+                height: 150px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(30%, -30%);
+            }
+            .financial-card::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100px;
+                height: 100px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(-30%, 30%);
+            }
+            
+            .stats-label { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
+            .stats-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .fade-in-up {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+            
+            .avatar-lg { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; }
+        </style>
 
         <!-- Filter Section -->
         <div class="row mb-4">
@@ -127,7 +210,8 @@
                             <table class="table table-hover text-nowrap align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4">User Details</th>
+                                        <th class="ps-4">S/N</th>
+                                        <th>User Details</th>
                                         <th>Contact Info</th>
                                         <th>Role</th>
                                         <th>Status</th>
@@ -139,7 +223,8 @@
                                 <tbody>
                                     @forelse($users as $user)
                                         <tr>
-                                            <td class="ps-4">
+                                            <td class="ps-4">{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
+                                            <td>
                                                 <div class="d-flex align-items-center">
                                                     <span class="avatar avatar-sm me-2 avatar-rounded bg-primary text-white d-flex align-items-center justify-content-center fw-bold">
                                                         {{ strtoupper(substr($user->first_name, 0, 1)) }}

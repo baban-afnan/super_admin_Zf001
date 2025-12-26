@@ -40,7 +40,13 @@ class ServiceController extends Controller
         }
 
         $services = $query->paginate(10);
-        return view('services.index', compact('services'));
+
+        // Stats
+        $totalServicesCount = Service::count();
+        $activeServicesCount = Service::where('is_active', true)->count();
+        $inactiveServicesCount = Service::where('is_active', false)->count();
+
+        return view('services.index', compact('services', 'totalServicesCount', 'activeServicesCount', 'inactiveServicesCount'));
     }
 
     public function store(Request $request)
@@ -107,8 +113,10 @@ class ServiceController extends Controller
 
     public function show(Service $service)
     {
-        $service->load(['fields', 'prices.field']);
-        return view('services.show', compact('service'));
+        $fields = $service->fields()->paginate(10, ['*'], 'fields_page');
+        $prices = $service->prices()->with('field')->paginate(10, ['*'], 'prices_page');
+
+        return view('services.show', compact('service', 'fields', 'prices'));
     }
 
     // Field Management

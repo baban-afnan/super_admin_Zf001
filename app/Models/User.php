@@ -48,6 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'claim_id',
         'role',
         'password',
+        'api_token',
     ];
 
     /**
@@ -88,5 +89,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function wallet()
     {
         return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * Relationship: A user has many API applications
+     */
+    public function apiApplications()
+    {
+        return $this->hasMany(ApiApplication::class);
     }
 }

@@ -14,20 +14,18 @@
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
-        .header {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eeeeee;
-        }
+       
         .header h1 {
-            color: #333333;
+            color: #ffffff;
+            margin: 0;
+            font-size: 20px;
         }
         .content {
-            padding: 20px 0;
+            padding: 20px;
         }
         .content p {
             color: #555555;
@@ -43,6 +41,13 @@
             margin: 5px 0;
             font-weight: bold;
         }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            color: #999999;
+            font-size: 12px;
+        }
         .status-badge {
             display: inline-block;
             padding: 5px 12px;
@@ -56,7 +61,6 @@
         .status-rejected, .status-failed { background-color: #fee2e2; color: #991b1b; }
         .status-query { background-color: #fef3c7; color: #92400e; }
         .status-remark { background-color: #e0e7ff; color: #3730a3; }
-        .status-in-progress { background-color: #dbeafe; color: #1e40af; }
         .comment-box {
             background-color: #fffbeb;
             border-left: 4px solid #fbbf24;
@@ -74,13 +78,6 @@
             margin-top: 10px;
             font-weight: bold;
         }
-        .footer {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #eeeeee;
-            color: #999999;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
@@ -89,13 +86,15 @@
             <h1>{{ $service_name }} Status Update</h1>
         </div>
         <div class="content">
-            <p>Hello {{ $user_name }},</p>
+            <p>Hello {{ $first_name . ' ' . $last_name }},</p>
             <p>We have an update regarding your <strong>{{ $service_name }}</strong> request. Below are the details:</p>
             
             <div class="details">
                 <p>Service: {{ $service_name }}</p>
                 <p>Ticket ID: {{ $ticket_id }}</p>
+                @if($batch_id)
                 <p>Batch ID: #{{ $batch_id }}</p>
+                @endif
                 <p>Reference: {{ $reference }}</p>
                 <p>Status: <span class="status-badge status-{{ strtolower($status) }}">{{ $status }}</span></p>
             </div>
@@ -103,7 +102,7 @@
             @if($comment)
             <div class="comment-box">
                 <p style="margin: 0; color: #78350f;"><strong>Staff Comment:</strong></p>
-                <p style="margin: 10px 0 0 0; color: #78350f;">{{ $comment }}</p>
+                <div style="margin: 10px 0 0 0; color: #78350f; white-space: pre-wrap; font-family: monospace; font-size: 13px; line-height: 1.4;">{{ $comment }}</div>
             </div>
             @endif
 
@@ -127,6 +126,7 @@
             </p>
 
             <p>Thank you for using our service.</p>
+            <p>For any further assistance, please contact our support team.</p>
         </div>
         <div class="footer">
             <p>&copy; {{ date('Y') }} Arewa Smart. All rights reserved.</p>
