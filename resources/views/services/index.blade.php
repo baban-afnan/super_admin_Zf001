@@ -143,7 +143,6 @@
                     <tr>
                         <th class="ps-4">S/N</th>
                         <th>Service Name</th>
-                        <th>Description</th>
                         <th>Fields</th>
                         <th>Prices</th>
                         <th>Created Date</th>
@@ -175,11 +174,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <span class="text-muted small text-truncate d-block" style="max-width: 200px;">
-                                    {{ $service->description ?? 'N/A' }}
-                                </span>
-                            </td>
+                           
                             <td>
                                 <span class="badge bg-soft-info text-info">{{ $service->fields_count }} Fields</span>
                             </td>

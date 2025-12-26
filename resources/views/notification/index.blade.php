@@ -137,8 +137,9 @@
                                 <td>
                                     @if($announcement->type == 'email')
                                         <span class="d-block text-dark fw-bold text-truncate" style="max-width: 250px;">{{ $announcement->subject }}</span>
+                                        <small class="text-muted fs-11">Click view to read</small>
                                     @else
-                                        <span class="d-block text-muted text-truncate" style="max-width: 250px;">{{ $announcement->message }}</span>
+                                        <span class="text-muted fst-italic">View details to read message</span>
                                     @endif
                                 </td>
                                 <td class="fs-13">{{ $announcement->performed_by ?? 'System' }}</td>
@@ -154,16 +155,22 @@
                                     @endif
                                 </td>
                                 <td class="text-end pe-4">
+                                    <button type="button" class="btn btn-sm btn-soft-primary me-1" 
+                                            data-payload="{{ json_encode($announcement) }}"
+                                            onclick="viewNotification(this)" 
+                                            title="View Details">
+                                        <i class="ti ti-eye"></i>
+                                    </button>
                                     @if($announcement->type == 'announcement')
                                         <form action="{{ route('admin.notification.toggle-status', $announcement->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm {{ $announcement->is_active ? 'btn-soft-danger text-danger' : 'btn-soft-success text-success' }} fw-bold">
-                                                {{ $announcement->is_active ? 'Deactivate' : 'Activate' }}
+                                            <button type="submit" class="btn btn-sm {{ $announcement->is_active ? 'btn-soft-danger text-danger' : 'btn-soft-success text-success' }} fw-bold" title="{{ $announcement->is_active ? 'Deactivate' : 'Activate' }}">
+                                                <i class="ti ti-power"></i>
                                             </button>
                                         </form>
                                     @else
                                         <button class="btn btn-sm btn-light text-muted" disabled>
-                                            <i class="ti ti-check me-1"></i>Sent
+                                            <i class="ti ti-check"></i>
                                         </button>
                                     @endif
                                 </td>
@@ -370,8 +377,82 @@
         </div>
     </div>
 
+    <!-- View Modal -->
+    <div class="modal fade" id="viewNotificationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold text-primary" id="viewModalLabel">Notification Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-uppercase text-muted fw-bold fs-11">Sent Date</small>
+                            <div class="fs-14 fw-bold text-dark" id="viewable_date"></div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-uppercase text-muted fw-bold fs-11">Type</small>
+                            <div class="fs-14 text-dark" id="viewable_type"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-uppercase text-muted fw-bold fs-11">To</small>
+                        <div class="fs-14 text-dark" id="viewable_recipient"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-uppercase text-muted fw-bold fs-11">Subject / Title</small>
+                        <div class="fs-15 fw-bold text-dark" id="viewable_subject"></div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border">
+                        <small class="d-block text-uppercase text-muted fw-bold fs-11 mb-2">Message</small>
+                        <div class="text-dark" id="viewable_message" style="white-space: pre-wrap; font-size: 0.95rem;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script>
+        function viewNotification(element) {
+            const data = JSON.parse(element.getAttribute('data-payload'));
+            // Populate Date
+            const date = new Date(data.created_at);
+            document.getElementById('viewable_date').textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Populate Type
+            const typeBadge = data.type === 'email' 
+                ? '<span class="badge bg-soft-primary text-primary">Email</span>' 
+                : '<span class="badge bg-soft-info text-info">Announcement</span>';
+            document.getElementById('viewable_type').innerHTML = typeBadge;
+
+            // Populate Recipient
+            let recipientText = '';
+            if(data.recipient_type === 'all') recipientText = 'All Users';
+            else if(data.recipient_type === 'role') recipientText = 'Role: ' + (data.recipient_data.charAt(0).toUpperCase() + data.recipient_data.slice(1));
+            else if(data.recipient_type === 'single') recipientText = 'Single User'; // Could pass user name if strictly needed, but data object might check relationship
+            else if(data.recipient_type === 'manual_email') recipientText = data.recipient_data;
+            else recipientText = 'Site Wide';
+            document.getElementById('viewable_recipient').textContent = recipientText;
+
+            // Populate Subject
+            document.getElementById('viewable_subject').textContent = data.subject || 'No Subject (Announcement)';
+
+            // Populate Message
+            document.getElementById('viewable_message').textContent = data.message;
+
+            // Show Modal
+            const modal = new bootstrap.Modal(document.getElementById('viewNotificationModal'));
+            modal.show();
+        }
+
         // Custom styling for radio buttons
         const radioInputs = document.querySelectorAll('.form-check-input[name="type"]');
         radioInputs.forEach(input => {
