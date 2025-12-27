@@ -21,45 +21,68 @@
 
         
         <!-- Welcome Card -->
-        <div class="card border-0">
-            <div class="card-body d-flex align-items-center justify-content-between flex-wrap pb-1">
-                
-                <!-- User Info -->
-                <div class="d-flex align-items-center mb-3">
-                    <span class="avatar avatar-xl flex-shrink-0 position-relative">
-                        <img src="{{ $photo }}" class="rounded-circle" alt="user avatar">
-                        <span class="status-dot bg-success position-absolute" 
-                            style="right:4px;bottom:4px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;" 
-                            title="Active"></span>
-                    </span>
-                    <div class="ms-3">
-                        <h3 class="mb-2">
-                            Welcome Back, {{ $firstName }}{{ $lastName ? ' ' . $lastName : '' }}
-                            <a href="javascript:void(0);" class="edit-icon"><i class="ti ti-edit fs-14"></i></a>
-                        </h3>
-                        <p>Manage your services and activities easily from your dashboard.</p>
+        <div class="card border-0 shadow-sm overflow-hidden mb-4" style="background: linear-gradient(to right, #ffffff, #f8f9fa);">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    
+                    <!-- User Info with Time-based Greeting -->
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative">
+                            <span class="avatar avatar-xl flex-shrink-0">
+                                <img src="{{ $photo }}" class="rounded-circle border border-2 border-white shadow-sm" alt="user avatar">
+                            </span>
+                            <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white rounded-circle">
+                                <span class="visually-hidden">Active</span>
+                            </span>
+                        </div>
+                        <div class="ms-3">
+                            @php
+                                $hour = date('H');
+                                $greeting = 'Good Morning';
+                                if ($hour >= 12 && $hour < 17) {
+                                    $greeting = 'Good Afternoon';
+                                } elseif ($hour >= 17) {
+                                    $greeting = 'Good Evening';
+                                }
+                            @endphp
+                            <h3 class="mb-1 fw-bold text-dark">
+                                {{ $greeting }}, {{ $firstName }}{{ $lastName ? ' ' . $lastName : '' }}
+                                <a href="{{ route('profile.edit') }}" class="btn btn-icon btn-sm btn-ghost-secondary rounded-circle ms-1" data-bs-toggle="tooltip" title="Edit Profile">
+                                    <i class="ti ti-edit fs-18"></i>
+                                </a>
+                            </h3>
+                            <p class="text-muted mb-0 fs-14">
+                                <i class="ti ti-calendar-event me-1 text-primary"></i> 
+                                {{ \Carbon\Carbon::now()->format('l, jS F Y') }}
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Action Buttons -->
-                <div class="d-flex align-items-center flex-wrap mb-2">
-                    <a href="{{ route('services.index') }}" class="btn btn-secondary btn-md me-2 mb-2">
-                        <i class="ti ti-square-rounded-plus me-1"></i>Add Service
-                    </a>
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-primary btn-md me-2 mb-2">
-                        <i class="ti ti-user-plus me-1"></i>Users
-                    </a>
+                    <!-- Action Buttons -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <a href="{{ route('services.index') }}" class="btn btn-white border shadow-sm">
+                            <i class="ti ti-plus me-1 text-primary"></i>
+                            <span>Add Service</span>
+                        </a>
+                        
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-white border shadow-sm">
+                            <i class="ti ti-users me-1 text-info"></i>
+                            <span>Users</span>
+                        </a>
 
-                     <a href="{{route ('enrollments.index')}}" class="btn btn-success btn-md me-2 mb-2">
-                        <i class="ti ti-user-rounded-plus me-1"></i>Add Bvn Report
-                    </a>
+                        <a href="{{ route('enrollments.index') }}" class="btn btn-white border shadow-sm">
+                            <i class="ti ti-file-analytics me-1 text-success"></i>
+                            <span>Add BVN Report</span>
+                        </a>
 
-                    <form action="{{ route('variations.refresh') }}" method="GET">
-                        @csrf
-                        <button type="submit" class="btn btn-info btn-md me-2 mb-2">
-                            🔄 Variations
-                        </button>
-                    </form>
+                        <form action="{{ route('variations.refresh') }}" method="GET" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-primary shadow-sm" data-bs-toggle="tooltip" title="Refresh Breakdown">
+                                <i class="ti ti-refresh me-1 spin-hover"></i>
+                                <span>Sync Variations</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -483,26 +506,40 @@
                 </div>
             </div>
 
-            <div class="row g-3 mb-4">
+            <div class="row g-2 mb-4">
                 <div class="col-4">
-                    <div class="p-3 rounded-3 bg-success-subtle text-center h-100">
-                        <i class="ti ti-circle-check-filled fs-4 text-success mb-2"></i>
-                        <h6 class="fw-bold text-dark mb-1">{{ $completedPercentage }}%</h6>
-                        <span class="fs-11 text-muted text-uppercase fw-semibold">Success</span>
+                    <div class="p-2 rounded-3 bg-success-subtle text-center h-100">
+                        <i class="ti ti-circle-check-filled fs-4 text-success mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-0">{{ $completedPercentage }}%</h6>
+                        <span class="fs-10 text-muted text-uppercase fw-semibold">Success</span>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="p-3 rounded-3 bg-warning-subtle text-center h-100">
-                        <i class="ti ti-clock-filled fs-4 text-warning mb-2"></i>
-                        <h6 class="fw-bold text-dark mb-1">{{ $pendingPercentage }}%</h6>
-                        <span class="fs-11 text-muted text-uppercase fw-semibold">Pending</span>
+                    <div class="p-2 rounded-3 bg-warning-subtle text-center h-100">
+                        <i class="ti ti-clock-filled fs-4 text-warning mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-0">{{ $pendingPercentage }}%</h6>
+                        <span class="fs-10 text-muted text-uppercase fw-semibold">Pending</span>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="p-3 rounded-3 bg-danger-subtle text-center h-100">
-                        <i class="ti ti-circle-x-filled fs-4 text-danger mb-2"></i>
-                        <h6 class="fw-bold text-dark mb-1">{{ $failedPercentage }}%</h6>
-                        <span class="fs-11 text-muted text-uppercase fw-semibold">Failed</span>
+                    <div class="p-2 rounded-3 bg-danger-subtle text-center h-100">
+                        <i class="ti ti-circle-x-filled fs-4 text-danger mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-0">{{ $failedPercentage }}%</h6>
+                        <span class="fs-10 text-muted text-uppercase fw-semibold">Failed</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 rounded-3 bg-info-subtle text-center h-100">
+                        <i class="ti ti-refresh fs-4 text-info mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-0">{{ $refundPercentage }}%</h6>
+                        <span class="fs-10 text-muted text-uppercase fw-semibold">Refund</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 rounded-3 bg-indigo-subtle text-center h-100" style="background-color: rgba(99, 102, 241, 0.1);">
+                        <i class="ti ti-api fs-4 text-indigo mb-1"></i>
+                        <h6 class="fw-bold text-dark mb-0">{{ $apiPercentage }}%</h6>
+                        <span class="fs-10 text-muted text-uppercase fw-semibold">API</span>
                     </div>
                 </div>
             </div>
@@ -526,13 +563,21 @@
         var transactionChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Success', 'Pending', 'Failed'],
+                labels: ['Success', 'Pending', 'Failed', 'Refund', 'API'],
                 datasets: [{
-                    data: [{{ $completedTransactions }}, {{ $pendingTransactions }}, {{ $failedTransactions }}],
+                    data: [
+                        {{ $completedTransactions }}, 
+                        {{ $pendingTransactions }}, 
+                        {{ $failedTransactions }},
+                        {{ $refundTransactions }},
+                        {{ $apiTransactions }}
+                    ],
                     backgroundColor: [
-                        '#28a745', // Success - Green
-                        '#ffc107', // Pending - Yellow
-                        '#dc3545'  // Failed - Red
+                        '#22c55e', // Success - Green
+                        '#f59e0b', // Pending - Yellow
+                        '#ef4444', // Failed - Red
+                        '#3b82f6', // Refund - Blue/Info
+                        '#6366f1'  // API - Indigo
                     ],
                     borderWidth: 0,
                     hoverOffset: 4

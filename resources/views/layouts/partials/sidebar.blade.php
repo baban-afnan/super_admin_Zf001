@@ -81,7 +81,7 @@
         </div>
     </div>
     
-    <div class="sidebar-inner slimscroll">
+    <div class="sidebar-inner">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
                 <!-- Main Menu -->
@@ -225,6 +225,49 @@
 
 
  <style>
+/* Sidebar Scrolling Fix */
+.sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1001; /* Ensure it stays on top */
+    padding-bottom: 0 !important; /* Remove bottom padding if likely to cause issues */
+}
+
+/* Prevent static sections from shrinking */
+.sidebar-logo, 
+.modern-profile, 
+.sidebar-header {
+    flex-shrink: 0 !important;
+}
+
+/* Make the inner menu scrollable */
+.sidebar-inner {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important; /* Override any potential JS fixed height */
+    width: 100%;
+}
+
+/* Custom Scrollbar */
+.sidebar-inner::-webkit-scrollbar {
+    width: 5px;
+}
+.sidebar-inner::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-inner::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 5px;
+}
+.sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
 
   /* Better icon and text spacing */
 .sidebar-menu li a {

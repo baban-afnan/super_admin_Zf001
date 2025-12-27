@@ -105,11 +105,21 @@ class DashboardController extends Controller
         $failedTransactions = \App\Models\Transaction::whereBetween('created_at', [$todayStart, $todayEnd])
             ->whereIn('status', ['failed', 'rejected'])
             ->count();
+            
+        $refundTransactions = \App\Models\Transaction::whereBetween('created_at', [$todayStart, $todayEnd])
+            ->where('type', 'refund')
+            ->count();
+            
+        $apiTransactions = \App\Models\Transaction::whereBetween('created_at', [$todayStart, $todayEnd])
+            ->where('type', 'api')
+            ->count();
 
         // Calculate percentages
         $completedPercentage = $totalTransactions > 0 ? round(($completedTransactions / $totalTransactions) * 100) : 0;
         $pendingPercentage = $totalTransactions > 0 ? round(($pendingTransactions / $totalTransactions) * 100) : 0;
         $failedPercentage = $totalTransactions > 0 ? round(($failedTransactions / $totalTransactions) * 100) : 0;
+        $refundPercentage = $totalTransactions > 0 ? round(($refundTransactions / $totalTransactions) * 100) : 0;
+        $apiPercentage = $totalTransactions > 0 ? round(($apiTransactions / $totalTransactions) * 100) : 0;
 
         // Total transaction amount for today
         $totalTransactionAmount = \App\Models\Transaction::whereBetween('created_at', [$todayStart, $todayEnd])
@@ -169,6 +179,10 @@ class DashboardController extends Controller
             'completedPercentage',
             'pendingPercentage',
             'failedPercentage',
+            'refundTransactions',
+            'apiTransactions',
+            'refundPercentage',
+            'apiPercentage',
             'totalTransactionAmount',
             'dailyServiceStats',
             'supportCount'
