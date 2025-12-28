@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Generator;
 
 class TinController extends Controller
 {
@@ -106,7 +108,7 @@ class TinController extends Controller
                 'comment' => $enrollmentInfo->comment,
                 'submission_date' => $enrollmentInfo->created_at,
                 'updated_at' => $enrollmentInfo->updated_at,
-                'file_url' => $enrollmentInfo->file_url,
+                'file_url' => $this->fileUrlForPublic($enrollmentInfo->file_url),
             ]
         ]);
 
@@ -136,16 +138,19 @@ class TinController extends Controller
             // Handle file upload
             $fileUrl = $enrollment->file_url;
             if ($request->hasFile('file')) {
-                // Delete old file if exists
-                if ($fileUrl && Storage::disk('public')->exists($fileUrl)) {
-                    Storage::disk('public')->delete($fileUrl);
+                // Delete old file if exists. Support stored values being either stored path or public URL.
+                if ($fileUrl) {
+                    $storedPath = $this->storagePathFromUrl($fileUrl);
+                    if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                        Storage::disk('public')->delete($storedPath);
+                    }
                 }
 
-                // Store new file
+                // Store new file on the 'public' disk and save its public URL in the DB column
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
                 $filePath = $file->storeAs('tin-files', $fileName, 'public');
-                $fileUrl = $filePath;
+                $fileUrl = Storage::url($filePath); // store public URL in `file_url` column
             }
 
             // Update enrollment
@@ -277,7 +282,7 @@ class TinController extends Controller
             'field_name' => $fieldName,
             'status' => ucfirst($enrollment->status),
             'comment' => $enrollment->comment,
-            'file_url' => $fileUrl ? Storage::url($fileUrl) : null,
+            'file_url' => $this->fileUrlForPublic($fileUrl),
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
             'bvn' => $enrollment->bvn,
@@ -291,6 +296,51 @@ class TinController extends Controller
     }
 
     /**
+     * Convert a stored DB value (either a public URL or a relative storage path)
+     * to the relative path used by the 'public' disk. Returns null if input empty.
+     */
+    private function storagePathFromUrl($value)
+    {
+        if (!$value) {
+            return null;
+        }
+
+        $path = $value;
+
+        // If it's a full URL, extract path component
+        if (preg_match('#^https?://#', $path)) {
+            $parsed = parse_url($path, PHP_URL_PATH);
+            if ($parsed !== null) {
+                $path = $parsed;
+            }
+        }
+
+        // Remove leading '/storage/' or 'storage/' so it matches disk paths
+        $path = preg_replace('#^/storage/#', '', $path);
+        $path = preg_replace('#^storage/#', '', $path);
+
+        return $path;
+    }
+
+    /**
+     * Return a publicly accessible URL for a stored value. Accepts either a
+     * stored relative path or an already public URL and returns a public URL.
+     */
+    private function fileUrlForPublic($value)
+    {
+        if (!$value) {
+            return null;
+        }
+
+        // If already a full URL or already a '/storage/...' path, return as-is
+        if (preg_match('#^https?://#', $value) || strpos($value, '/storage/') === 0) {
+            return $value;
+        }
+
+        return Storage::url($value);
+    }
+
+    /**
      * Get distinct banks from agent_services table
      */
     private function getDistinctBanks()
@@ -301,5 +351,29 @@ class TinController extends Controller
             ->pluck('bank')
             ->sort()
             ->values();
+    }
+
+    /**
+     * Generate and download TIN certificate
+     */
+    public function downloadCertificate($id)
+    {
+        $enrollmentInfo = AgentService::findOrFail($id);
+        
+        // Generate QR Code
+        // Format: Name, TIN, Date Issued
+        $qrData = sprintf(
+            "Name: %s\nTIN: %s\nDate: %s",
+            $enrollmentInfo->first_name . ' ' . $enrollmentInfo->middle_name . ' ' . $enrollmentInfo->last_name,
+            $enrollmentInfo->nin ?? $enrollmentInfo->number ?? 'N/A', 
+            now()->format('Y-m-d')
+        );
+
+        $qrcode = (new Generator)->format('svg')->size(200)->generate($qrData);
+
+        $pdf = Pdf::loadView('tin.certificate', compact('enrollmentInfo', 'qrcode'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('TIN_Certificate_' . ($enrollmentInfo->reference ?? 'doc') . '.pdf');
     }
 }

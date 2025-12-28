@@ -11,6 +11,9 @@
                             <p class="text-muted mb-0">View and manage TIN {{ Str::contains($enrollmentInfo->service_type, 'individual') ? 'Individual' : 'Corporate' }} request</p>
                         </div>
                         <div class="d-flex gap-2">
+                             <a href="{{ route('tin.certificate', $enrollmentInfo->id) }}" class="btn btn-success">
+                                <i class="ti ti-download me-1"></i> Download Certificate
+                            </a>
                             <a href="{{ route('tin.index', ['type' => Str::contains($enrollmentInfo->service_type, 'individual') ? 'individual' : 'corporate']) }}" class="btn btn-light">
                                 <i class="ti ti-arrow-left me-1"></i> Back to List
                             </a>

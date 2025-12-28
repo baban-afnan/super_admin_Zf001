@@ -112,6 +112,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::get('/tin', [\App\Http\Controllers\TinController::class, 'index'])->name('tin.index');
     Route::get('/tin/{id}', [\App\Http\Controllers\TinController::class, 'show'])->name('tin.show');
     Route::put('/tin/{id}', [\App\Http\Controllers\TinController::class, 'update'])->name('tin.update');
+    Route::get('/tin/{id}/certificate', [\App\Http\Controllers\TinController::class, 'downloadCertificate'])->name('tin.certificate');
 });
 
 
