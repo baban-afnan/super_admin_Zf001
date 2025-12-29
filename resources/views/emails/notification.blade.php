@@ -62,7 +62,7 @@
         }
         .btn {
             display: inline-block;
-            background-color: #0d6efd;
+            background-color: #ec6c02ff;
             color: #ffffff;
             padding: 12px 30px;
             text-decoration: none;

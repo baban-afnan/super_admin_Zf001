@@ -149,8 +149,10 @@ class TinController extends Controller
                 // Store new file on the 'public' disk and save its public URL in the DB column
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('project-files/tin', $fileName, 'public');
-                $fileUrl = Storage::url($filePath); // store public URL in `file_url` column
+                $filePath = $file->storeAs('tin-files', $fileName, 'public');
+                // Store complete URL using APP_URL from config
+                $baseUrl = rtrim(config('app.url'), '/');
+                $fileUrl = $baseUrl . '/storage/tin-files/' . $fileName;
             }
 
             // Update enrollment

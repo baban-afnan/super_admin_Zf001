@@ -133,8 +133,9 @@ class CRMController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('project-files/crm', $fileName, 'public');
-                $fileUrl = Storage::url($filePath);
+                $filePath = $file->storeAs('crm-files', $fileName, 'public');
+                $baseUrl = rtrim(config('app.url'), '/');
+                $fileUrl = $baseUrl . '/storage/crm-files/' . $fileName;
             }
 
             // Update enrollment
@@ -266,7 +267,7 @@ class CRMController extends Controller
             'field_name' => $fieldName,
             'status' => ucfirst($enrollment->status),
             'comment' => $enrollment->comment,
-            'file_url' => $fileUrl ? Storage::url($fileUrl) : null,
+            'file_url' => $fileUrl ? (filter_var($fileUrl, FILTER_VALIDATE_URL) ? $fileUrl : Storage::url($fileUrl)) : null,
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
             'ticket_id' => $enrollment->ticket_id,

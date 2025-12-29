@@ -71,7 +71,7 @@
         }
         .file-download {
             display: inline-block;
-            background-color: #4f46e5;
+            background-color: #ec6c02ff;
             color: #ffffff;
             padding: 10px 20px;
             text-decoration: none;
