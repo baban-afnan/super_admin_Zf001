@@ -41,8 +41,7 @@
                     @php
                         $extension = pathinfo($message->attachment, PATHINFO_EXTENSION);
                         $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp']);
-                        // Handle both storage (Admin) and public/uploads (User) paths
-                        $attachmentUrl = str_starts_with($message->attachment, 'uploads') ? asset($message->attachment) : Storage::url($message->attachment);
+                        $attachmentUrl = $message->attachment;
                     @endphp
 
                     @if($isImage)
