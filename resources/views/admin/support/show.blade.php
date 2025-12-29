@@ -93,7 +93,7 @@
                             }, 5000); // Reload every 5 seconds
 
                             // Typing Indicator Logic
-                            const replyInput = document.querySelector('input[name="message"]');
+                            const replyInput = document.querySelector('[name="message"]');
                             let typingTimer;
                             const doneTypingInterval = 2000; // Time in ms (2 seconds)
 
@@ -117,21 +117,22 @@
                          <!-- Reply Area -->
                         <div class="card-footer bg-white border-top p-3">
                             @if($ticket->status !== 'closed')
-                                <form action="{{ route('admin.support.reply', $ticket->ticket_reference) }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('admin.support.reply', $ticket->ticket_reference) }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-end gap-2">
                                     @csrf
-                                    <div class="input-group">
-                                         <button type="button" class="btn btn-light border" onclick="document.getElementById('adminReplyAttachment').click()">
-                                            <i class="ti ti-paperclip"></i>
-                                        </button>
-                                        <input type="file" name="attachment" id="adminReplyAttachment" class="d-none" accept=".jpg,.jpeg,.png,.pdf">
-                                        
-                                        <input type="text" name="message" class="form-control" placeholder="Type your reply here..." required>
-                                        
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="ti ti-send"></i> Send Reply
-                                        </button>
+                                    <input type="file" name="attachment" id="adminReplyAttachment" class="d-none" accept=".jpg,.jpeg,.png,.pdf">
+                                    
+                                    <button type="button" class="btn btn-light border rounded-circle flex-shrink-0" style="width: 40px; height: 40px;" onclick="document.getElementById('adminReplyAttachment').click()">
+                                        <i class="ti ti-paperclip"></i>
+                                    </button>
+                                    
+                                    <div class="flex-grow-1 position-relative">
+                                        <textarea name="message" id="chatMessage" class="form-control border bg-light" placeholder="Type your reply here..." rows="1" required style="resize: none; overflow-y: hidden; min-height: 40px; border-radius: 20px; padding-top: 10px; padding-bottom: 10px;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                                        <small class="text-muted mt-1 position-absolute start-0 ms-3" style="top: 100%;" id="fileNameDisplay"></small>
                                     </div>
-                                    <small class="text-muted mt-1 d-block" id="fileNameDisplay"></small>
+                                    
+                                    <button type="submit" class="btn btn-primary rounded-circle flex-shrink-0" style="width: 40px; height: 40px;">
+                                        <i class="ti ti-send"></i>
+                                    </button>
                                 </form>
                             @else
                                 <div class="alert alert-secondary mb-0 text-center">
