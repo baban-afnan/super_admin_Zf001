@@ -133,8 +133,8 @@ class BvnUserController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bvn-user-files', $fileName, 'public');
-                $fileUrl = $filePath;
+                $filePath = $file->storeAs('project-files/bvn-user', $fileName, 'public');
+                $fileUrl = Storage::url($filePath);
             }
 
             // Update enrollment

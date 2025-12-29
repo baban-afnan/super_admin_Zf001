@@ -130,8 +130,8 @@ class BVNmodController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bvn-files', $fileName, 'public');
-                $fileUrl = $filePath;
+                $filePath = $file->storeAs('project-files/bvn', $fileName, 'public');
+                $fileUrl = Storage::url($filePath);
             }
 
             // Update enrollment

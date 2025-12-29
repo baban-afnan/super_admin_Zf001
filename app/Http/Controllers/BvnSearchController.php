@@ -131,8 +131,8 @@ class BvnSearchController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bvn-search-files', $fileName, 'public');
-                $fileUrl = $filePath;
+                $filePath = $file->storeAs('project-files/bvn-search', $fileName, 'public');
+                $fileUrl = Storage::url($filePath);
             }
 
             // Update enrollment

@@ -130,8 +130,8 @@ class NinIpeController extends Controller
                 // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('nin-ipe-files', $fileName, 'public');
-                $fileUrl = $filePath;
+                $filePath = $file->storeAs('project-files/nin-ipe', $fileName, 'public');
+                $fileUrl = Storage::url($filePath);
             }
 
             // Update enrollment

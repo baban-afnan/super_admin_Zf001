@@ -20,6 +20,7 @@
         }
        
         .header h1 {
+            background-color: #c2910aff;
             color: #ffffff;
             margin: 0;
             font-size: 20px;
