@@ -300,6 +300,7 @@
                                 <option value="partner">Partner</option>
                                 <option value="business">Business</option>
                                 <option value="staff">Staff</option>
+                                <option value="api">API</option>
                             </select>
                         </div>
                         <div class="mb-3">

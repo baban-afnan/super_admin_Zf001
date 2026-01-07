@@ -186,7 +186,7 @@ class ServiceController extends Controller
     {
         $validated = $request->validate([
             'service_fields_id' => 'nullable|exists:service_fields,id',
-            'user_type' => 'required|in:personal,agent,partner,business,staff',
+            'user_type' => 'required|in:personal,agent,partner,business,staff,api',
             'price' => 'required|numeric|min:0',
         ]);
 

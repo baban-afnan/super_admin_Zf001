@@ -7,6 +7,8 @@ use App\Models\ApiApplication;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApiApplicationApproved;
 
 class ApiApplicationController extends Controller
 {
@@ -58,6 +60,14 @@ class ApiApplicationController extends Controller
             $user->api_token = $token;
             $user->role = 'api';
             $user->save();
+
+            // Notify the user via mail
+            try {
+                Mail::to($user->email)->send(new ApiApplicationApproved($user));
+            } catch (\Exception $e) {
+                // Log the error or handle it gracefully
+                // \Log::error('Failed to send API approval email: ' . $e->getMessage());
+            }
         }
 
         $application->status = $request->status;
