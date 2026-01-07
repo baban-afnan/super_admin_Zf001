@@ -24,7 +24,8 @@ class CheckRole
 
         // Check if user has one of the allowed roles
         if (!in_array($user->role, $roles)) {
-            abort(403, 'Unauthorized access. You do not have permission to access this page.');
+            auth()->logout();
+            return redirect()->route('login')->with('error', 'Unauthorized access. You do not have permission to access this page.');
         }
 
         return $next($request);
