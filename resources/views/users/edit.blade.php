@@ -24,7 +24,7 @@
                         <h5 class="card-title mb-0 fw-bold">User Information</h5>
                     </div>
                     <div class="card-body p-4">
-                        <form action="{{ route('admin.users.update', $user) }}" method="POST">
+                        <form action="{{ route('admin.users.update', $user) }}" method="POST" id="editUserForm">
                             @csrf
                             @method('PUT')
 
@@ -60,10 +60,10 @@
                                 </div>
                             </div>
 
-                              <div class="col-md-6">
+                                <div class="col-md-6">
                                     <label class="form-label fw-medium">Limit</label>
-                                    <input type="text" name="limit" class="form-control" value="{{ old('limit', $user->limit) }}" maxlength="11">
-                                    @error('bvn') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                    <input type="text" name="limit" class="form-control" value="{{ old('limit', $user->limit) }}">
+                                    @error('limit') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
@@ -79,4 +79,43 @@
         <div class="page-header mb-6">
             </div>
    
+    {{-- SweetAlert CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let errorMsg = '';
+                @foreach ($errors->all() as $error)
+                    errorMsg += '{{ $error }}\n';
+                @endforeach
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: errorMsg,
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        document.getElementById('editUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to update this user's information?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    </script>
 </x-app-layout>

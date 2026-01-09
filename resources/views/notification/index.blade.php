@@ -23,23 +23,30 @@
 
         {{-- Alerts --}}
         @if(session('status'))
-            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4">
-                <div class="d-flex align-items-center">
-                    <i class="ti ti-check-circle fs-4 me-3"></i>
-                    <div>{{ session('status') }}</div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: "{{ session('status') }}",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                });
+            </script>
         @endif
 
         @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4">
-                <div class="d-flex align-items-center">
-                    <i class="ti ti-alert-circle fs-4 me-3"></i>
-                    <div>{{ session('error') }}</div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+             <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: "{{ session('error') }}",
+                        confirmButtonText: 'OK'
+                    });
+                });
+            </script>
         @endif
         
         @if ($errors->any())
@@ -155,24 +162,31 @@
                                     @endif
                                 </td>
                                 <td class="text-end pe-4">
-                                    <button type="button" class="btn btn-sm btn-soft-primary me-1" 
-                                            data-payload="{{ json_encode($announcement) }}"
-                                            onclick="viewNotification(this)" 
-                                            title="View Details">
-                                        <i class="ti ti-eye"></i>
-                                    </button>
-                                    @if($announcement->type == 'announcement')
-                                        <form action="{{ route('admin.notification.toggle-status', $announcement->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm {{ $announcement->is_active ? 'btn-soft-danger text-danger' : 'btn-soft-success text-success' }} fw-bold" title="{{ $announcement->is_active ? 'Deactivate' : 'Activate' }}">
-                                                <i class="ti ti-power"></i>
-                                            </button>
-                                        </form>
-                                    @else
-                                        <button class="btn btn-sm btn-light text-muted" disabled>
-                                            <i class="ti ti-check"></i>
+                                     <div class="d-flex justify-content-end gap-1">
+                                        <button type="button" class="btn btn-sm btn-soft-primary" 
+                                                data-payload="{{ json_encode($announcement) }}"
+                                                onclick="viewNotification(this)" 
+                                                title="View Details">
+                                            <i class="ti ti-eye"></i>
                                         </button>
-                                    @endif
+                                        
+                                        @if($announcement->type == 'announcement')
+                                            <form action="{{ route('admin.notification.toggle-status', $announcement->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm {{ $announcement->is_active ? 'btn-soft-warning text-warning' : 'btn-soft-success text-success' }} fw-bold" title="{{ $announcement->is_active ? 'Deactivate' : 'Activate' }}">
+                                                    <i class="ti ti-power"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <button type="button" class="btn btn-sm btn-soft-danger text-danger" onclick="confirmDelete('{{ $announcement->id }}')" title="Delete">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                        <form id="delete-form-{{ $announcement->id }}" action="{{ route('admin.notification.destroy', $announcement->id) }}" method="POST" class="d-none">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -419,8 +433,26 @@
         </div>
     </div>
 
+    {{-- SweetAlert CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @push('scripts')
     <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
         function viewNotification(element) {
             const data = JSON.parse(element.getAttribute('data-payload'));
             // Populate Date

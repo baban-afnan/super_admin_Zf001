@@ -28,7 +28,7 @@ class NINmodController extends Controller
 
         // Base query filtering by service_type
         $query = AgentService::query()
-            ->where('service_type', 'nin_modification');
+         ->whereIn('service_type', ['nin_modification', 'nin modification']);
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {

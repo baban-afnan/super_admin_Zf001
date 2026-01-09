@@ -174,7 +174,7 @@
                     </a>
                     <ul>
                         <li><a href="{{ route('admin.api-applications.index') }}">API request</a></li>
-                        <li><a href="#">Transactions</a></li>
+                        <li><a href="{{ route('admin.transactions.index', ['source' => 'api']) }}" class="{{ request('source') == 'api' ? 'active' : '' }}">Transactions</a></li>
                         <li><a href="#">Website</a></li>
                     </ul>
                 </li>

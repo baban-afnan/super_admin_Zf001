@@ -255,9 +255,11 @@ class UserManagementController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'phone_no' => 'required|string|max:20',
+            'phone_no' => 'required|string|max:20|unique:users,phone_no,' . $user->id,
             'bvn' => 'nullable|string|max:11',
             'limit' => 'nullable|numeric',
+        ], [
+            'phone_no.unique' => 'Phone number already exist on another user'
         ]);
 
         $user->update([
@@ -269,7 +271,7 @@ class UserManagementController extends Controller
             'limit' => $request->limit,
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User details updated successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'User details updated successfully.');
     }
 
     public function destroy(User $user)

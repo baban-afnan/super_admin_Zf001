@@ -17,7 +17,7 @@
                     <div>
                         <p class="stats-label mb-1" style="color: white;">Pending</p>
                         <h3 class="stats-value mb-0">{{ $statusCounts['pending'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">Work on this request its Urgent!</small>
+                        <small class="text-white-50 fs-12 fw-medium">Work on this request, it's Urgent!</small>
                     </div>
                     <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
                         <i class="ti ti-hourglass-empty fs-24 text-white"></i>
@@ -32,7 +32,7 @@
                     <div>
                         <p class="stats-label mb-1" style="color: white;">Processing</p>
                         <h3 class="stats-value mb-0">{{ $statusCounts['processing'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">Check and confirm The status</small>
+                        <small class="text-white-50 fs-12 fw-medium">Check and confirm the status</small>
                     </div>
                     <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
                         <i class="ti ti-settings fs-24 text-white"></i>
@@ -47,7 +47,7 @@
                     <div>
                         <p class="stats-label mb-1" style="color: white;">Resolved</p>
                         <h3 class="stats-value mb-0">{{ $statusCounts['resolved'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">You have did a great Job</small>
+                        <small class="text-white-50 fs-12 fw-medium">You have done a great job</small>
                     </div>
                     <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
                         <i class="ti ti-circle-check fs-24 text-white"></i>
@@ -62,7 +62,7 @@
                     <div>
                         <p class="stats-label mb-1" style="color: white;">Rejected</p>
                         <h3 class="stats-value mb-0">{{ $statusCounts['rejected'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">Don’t give up — Kept accepting Request</small>
+                        <small class="text-white-50 fs-12 fw-medium">Don’t give up — Keep accepting requests</small>
                     </div>
                     <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
                         <i class="ti ti-circle-x fs-24 text-white"></i>
@@ -204,6 +204,7 @@
                         <th>ID</th>
                         <th>Tracking ID</th>
                         <th>Agent Name</th>
+                        <th>Service Name</th>
                         <th>Status</th>
                         <th>Date Created</th>
                         <th>Actions</th>
@@ -216,8 +217,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $enrollment->tracking_id }}</td>
                             <td>{{ $enrollment->performed_by }}</td>
-                            <td>{{ $enrollment->bank ?? $enrollment->service_name }}</td>
-                            <td>{{ $enrollment->service_field_name ?? $enrollment->field_name }}</td>
+                            <td>{{ $enrollment->bank ?? $enrollment->service_type }}</td>
                             <td>
                                @php
                                     $statusColor = match($enrollment->status) {

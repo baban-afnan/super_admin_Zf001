@@ -26,9 +26,9 @@ class NinIpeController extends Controller
         $statusFilter = $request->input('status');
         $bankFilter = $request->input('bank');
 
-        // Base query filtering by service_type
+        // Base query filtering by service_type (handling both 'ipe' and 'nin_ipe' for consistency)
         $query = AgentService::query()
-            ->where('service_type', 'ipe');
+            ->whereIn('service_type', ['ipe', 'nin_ipe']);
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
@@ -67,10 +67,10 @@ class NinIpeController extends Controller
 
         // Status counts filtered by service_type
         $statusCounts = [
-            'pending'    => AgentService::where('service_type', 'nin_ipe')->where('status', 'pending')->count(),
-            'processing' => AgentService::where('service_type', 'nin_ipe')->where('status', 'processing')->count(),
-            'resolved'   => AgentService::where('service_type', 'nin_ipe')->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => AgentService::where('service_type', 'nin_ipe')->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->where('status', 'pending')->count(),
+            'processing' => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->where('status', 'processing')->count(),
+            'resolved'   => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         // Get distinct banks for filter

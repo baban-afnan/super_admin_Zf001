@@ -37,7 +37,8 @@ class BvnSearchController extends Controller
                   ->orWhere('batch_id', 'like', "%$search%")
                   ->orWhere('reference', 'like', "%$search%")
                   ->orWhere('performed_by', 'like', "%$search%")
-                  ->orWhere('user_id', 'like', "%$search%");
+                  ->orWhere('user_id', 'like', "%$search%")
+                  ->orWhere('number', 'like', "%$search%");
             });
         }
 

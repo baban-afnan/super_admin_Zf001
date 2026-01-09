@@ -5,28 +5,36 @@
 
         {{-- Success Message --}}
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-check-circle fs-4 me-3"></i>
-                    <span>{{ session('success') }}</span>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: "{{ session('success') }}",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                });
+            </script>
         @endif
 
         {{-- Error Messages --}}
         @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4">
-                <div class="d-flex">
-                    <i class="fas fa-times-circle fs-4 me-3"></i>
-                    <ul class="mb-0 ps-3">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    let errorMsg = '';
+                    @foreach ($errors->all() as $error)
+                        errorMsg += '{{ $error }}\n';
+                    @endforeach
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg,
+                        confirmButtonText: 'OK'
+                    });
+                });
+            </script>
         @endif
 
         <div class="row">
@@ -214,6 +222,8 @@
 
 
     {{-- JavaScript --}}
+    {{-- SweetAlert CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const allUsers = @json($users);
         let selectedUser = null;
@@ -301,7 +311,20 @@
                 e.preventDefault();
                 return alert("Enter a valid amount");
             }
-            return confirm("Are you sure you want to process this transaction?");
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to process this transaction?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, process it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    e.target.submit();
+                }
+            });
         });
     </script>
 

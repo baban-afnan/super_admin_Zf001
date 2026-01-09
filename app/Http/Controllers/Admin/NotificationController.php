@@ -141,4 +141,17 @@ class NotificationController extends Controller
         $announcement->save();
         return back()->with('status', 'Announcement status updated.');
     }
+
+    public function destroy($id)
+    {
+        $announcement = Announcement::findOrFail($id);
+        
+        // Optional: If attachment exists, delete it
+        if ($announcement->attachment && Storage::disk('public')->exists($announcement->attachment)) {
+            Storage::disk('public')->delete($announcement->attachment);
+        }
+
+        $announcement->delete();
+        return back()->with('status', 'Notification deleted successfully.');
+    }
 }

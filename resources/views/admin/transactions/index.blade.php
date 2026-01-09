@@ -4,8 +4,14 @@
         <div class="page-header d-print-none mb-4">
             <div class="row g-2 align-items-center">
                 <div class="col">
-                    <h3 class="page-title text-primary mb-1 fw-bold">Transaction History</h2>
-                    <div class="text-muted mt-1">Manage and view all system transactions</div>
+                    <h3 class="page-title text-primary mb-1 fw-bold">
+                        @if(request('source') == 'api')
+                            API Transactions
+                        @else
+                            Transaction History
+                        @endif
+                    </h3>
+                    <div class="text-muted mt-1">Manage and view all {{ request('source') == 'api' ? 'API' : 'system' }} transactions</div>
                 </div>
             </div>
         </div>
@@ -145,6 +151,7 @@
                     <div class="row align-items-center g-3">
                          <div class="col-md-6">
                             <form method="GET" action="{{ route('admin.transactions.index') }}" class="input-group">
+                                <input type="hidden" name="source" value="{{ request('source') }}">
                                 <span class="input-group-text bg-white border-end-0">
                                     <i class="ti ti-search text-muted"></i>
                                 </span>
@@ -165,7 +172,7 @@
                                     @endif
                                 </button>
                                 @if(request()->anyFilled(['search', 'type', 'status', 'start_date', 'end_date']))
-                                    <a href="{{ route('admin.transactions.index') }}" class="btn btn-outline-danger" title="Clear All Filters">
+                                    <a href="{{ route('admin.transactions.index', request()->only('source')) }}" class="btn btn-outline-danger" title="Clear All Filters">
                                         <i class="ti ti-x"></i> Clear
                                     </a>
                                 @endif
@@ -295,6 +302,7 @@
             <div class="modal-content border-0 shadow">
                  <form action="{{ route('admin.transactions.index') }}" method="GET">
                     <input type="hidden" name="search" value="{{ request('search') }}">
+                    <input type="hidden" name="source" value="{{ request('source') }}">
                     <div class="modal-header">
                         <h5 class="modal-title fw-bold">Filter Transactions</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

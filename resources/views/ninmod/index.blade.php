@@ -202,8 +202,8 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>ID</th>
-                        <th>NIN</th>
                         <th>Agent Name</th>
+                        <th>NIN</th>
                         <th>MODIFICATION FIELD</th>
                         <th>Status</th>
                         <th>Date Created</th>
@@ -215,8 +215,8 @@
                     @forelse ($enrollments as $enrollment)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $enrollment->nin }}</td>
                             <td>{{ $enrollment->performed_by }}</td>
+                            <td>{{ $enrollment->nin }}</td>
                             <td>{{ $enrollment->service_field_name ?? $enrollment->field_name }}</td>
                             <td>
                                @php

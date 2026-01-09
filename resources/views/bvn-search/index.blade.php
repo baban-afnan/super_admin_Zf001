@@ -149,7 +149,7 @@
             <div class="col-md-6">
                 <form method="GET" class="form-inline search-full col">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by ticket id, batch id, Transaction Ref, Agent Name..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="Search by ticket id, batch id, Ref, Agent Name, Phone..." value="{{ request('search') }}">
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i>
                         </button>

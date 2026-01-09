@@ -182,6 +182,7 @@ Route::prefix('admin/notification')->name('admin.notification.')->middleware(['a
     Route::post('/announcement', [\App\Http\Controllers\Admin\NotificationController::class, 'storeAnnouncement'])->name('store-announcement');
     Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\NotificationController::class, 'toggleStatus'])->name('toggle-status');
     Route::get('/search-users', [\App\Http\Controllers\Admin\NotificationController::class, 'searchUsers'])->name('search-users');
+    Route::delete('/{id}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('destroy');
 });
 
 // Admin Support Routes
