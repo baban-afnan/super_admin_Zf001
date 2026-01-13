@@ -58,7 +58,6 @@ class ApiApplicationController extends Controller
             $token = Str::random(60);
             
             $user->api_token = $token;
-            $user->role = 'api';
             $user->save();
 
             // Notify the user via mail
