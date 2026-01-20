@@ -135,50 +135,56 @@
                     <i class="ti ti-receipt me-2"></i>All Transactions
                 </h5>
                 
-                <div class="d-print-none">
-                     <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
-                        <i class="ti ti-printer me-1"></i> Print
-                    </button>
-                    <button class="btn btn-primary btn-sm ms-2">
-                        <i class="ti ti-download me-1"></i> Export
-                    </button>
-                </div>
+           
             </div>
 
             <div class="card-body p-0">
-                {{-- Search and Actions Toolbar (BVN Style) --}}
-                <div class="p-3 border-bottom bg-light">
-                    <div class="row align-items-center g-3">
-                         <div class="col-md-6">
-                            <form method="GET" action="{{ route('admin.transactions.index') }}" class="input-group">
-                                <input type="hidden" name="source" value="{{ request('source') }}">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="ti ti-search text-muted"></i>
-                                </span>
-                                <input type="text" name="search" class="form-control border-start-0 ps-0" 
-                                    placeholder="Search by Ref, Name, Email..." 
-                                    value="{{ request('search') }}">
-                                <button class="btn btn-primary" type="submit">Search</button>
-                            </form>
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <div class="btn-group">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
-                                    <i class="ti ti-filter me-1"></i> 
-                                    @if(request()->anyFilled(['type', 'status', 'start_date', 'end_date']))
-                                        Filters Active
-                                    @else
-                                        Filters
-                                    @endif
-                                </button>
-                                @if(request()->anyFilled(['search', 'type', 'status', 'start_date', 'end_date']))
-                                    <a href="{{ route('admin.transactions.index', request()->only('source')) }}" class="btn btn-outline-danger" title="Clear All Filters">
-                                        <i class="ti ti-x"></i> Clear
-                                    </a>
-                                @endif
+            <div class="card-body p-0">
+                {{-- Slim Filter Toolbar --}}
+                <div class="px-3 py-3 border-bottom bg-light bg-opacity-50">
+                    <form action="{{ route('admin.transactions.index') }}" method="GET">
+                        <input type="hidden" name="source" value="{{ request('source') }}">
+                        <div class="row g-2 align-items-center justify-content-between">
+                            {{-- Search --}}
+                            <div class="col-md-3">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0 text-muted ps-3"><i class="ti ti-search"></i></span>
+                                    <input type="text" name="search" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search transactions..." value="{{ request('search') }}">
+                                </div>
+                            </div>
+
+                            {{-- Filters --}}
+                            <div class="col-md-9">
+                                <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
+                                    <div class="input-group input-group-sm" style="max-width: 130px;">
+                                        <input type="date" name="start_date" class="form-control form-control-sm text-muted" value="{{ request('start_date') }}" placeholder="From">
+                                    </div>
+                                    <span class="text-muted small">-</span>
+                                    <div class="input-group input-group-sm" style="max-width: 130px;">
+                                        <input type="date" name="end_date" class="form-control form-control-sm text-muted" value="{{ request('end_date') }}" placeholder="To">
+                                    </div>
+                                    
+                                    <select name="type" class="form-select form-select-sm" style="max-width: 140px;">
+                                        <option value="all">All Types</option>
+                                        <option value="credit" {{ request('type') == 'credit' ? 'selected' : '' }}>Credit</option>
+                                        <option value="debit" {{ request('type') == 'debit' ? 'selected' : '' }}>Debit</option>
+                                        <option value="manual_credit" {{ request('type') == 'manual_credit' ? 'selected' : '' }}>Manual Credit</option>
+                                        <option value="manual_debit" {{ request('type') == 'manual_debit' ? 'selected' : '' }}>Manual Debit</option>
+                                        <option value="bonus" {{ request('type') == 'bonus' ? 'selected' : '' }}>Bonus</option>
+                                    </select>
+
+                                    <div class="d-flex gap-1">
+                                        <button type="submit" class="btn btn-sm btn-primary px-3 shadow-sm">
+                                            Filter
+                                        </button>
+                                        <a href="{{ route('admin.transactions.index') }}" class="btn btn-sm btn-light border px-2" data-bs-toggle="tooltip" title="Reset">
+                                            <i class="ti ti-refresh"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
 
                 <div class="table-responsive">
@@ -204,7 +210,9 @@
                                     <td>
                                          <div class="d-flex flex-column">
                                             <span class="fw-bold text-dark">{{ $transaction->transaction_ref }}</span>
-                                                <span class="text-muted small">{{ $transaction->description ?? '' }}</span>
+                                            <span class="text-muted small" data-bs-toggle="tooltip" title="{{ $transaction->description }}">
+                                                {{ \Illuminate\Support\Str::limit($transaction->description ?? '', 10) }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td>
@@ -219,7 +227,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if(in_array($transaction->type, ['credit', 'manual_funding']))
+                                        @if(in_array($transaction->type, ['credit', 'manual_credit', 'bonus']))
                                             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
                                                 <i class="ti ti-arrow-down-left me-1"></i>Credit
                                             </span>
@@ -234,8 +242,8 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="fw-bold {{ in_array($transaction->type, ['credit', 'manual_funding']) ? 'text-success' : 'text-danger' }}">
-                                            {{ in_array($transaction->type, ['credit', 'manual_funding']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                        <span class="fw-bold {{ in_array($transaction->type, ['credit', 'manual_credit', 'bonus', 'refund']) ? 'text-success' : 'text-danger' }}">
+                                            {{ in_array($transaction->type, ['credit', 'manual_credit', 'bonus', 'refund']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                                         </span>
                                     </td>
                                     <td>

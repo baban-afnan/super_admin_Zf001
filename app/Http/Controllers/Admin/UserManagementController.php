@@ -51,12 +51,33 @@ class UserManagementController extends Controller
             $query->where('status', $request->status);
         }
 
+        // State Filter
+        if ($request->filled('state')) {
+            $query->where('state', $request->state);
+        }
+
+        // LGA Filter
+        if ($request->filled('lga')) {
+            $query->where('lga', $request->lga);
+        }
+
         $users = $query->latest()->paginate(10);
         $blockedIps = BlockedIp::with('blocker')->latest()->get();
 
+        // Get unique states and LGAs for filter dropdowns
+        $states = User::whereNotNull('state')->distinct()->pluck('state')->sort()->values();
+        $lgas = User::whereNotNull('lga')
+            ->when($request->filled('state'), function($q) use ($request) {
+                return $q->where('state', $request->state);
+            })
+            ->distinct()
+            ->pluck('lga')
+            ->sort()
+            ->values();
+
         return view('users.index', compact(
             'totalUsers', 'activeUsers', 'inactiveUsers', 'usersWithTransactions',
-            'agents', 'businesses', 'personal', 'users', 'blockedIps'
+            'agents', 'businesses', 'personal', 'users', 'blockedIps', 'states', 'lgas'
         ));
     }
 
@@ -106,8 +127,8 @@ class UserManagementController extends Controller
 
     public function show(User $user)
     {
-        $user->load('wallet');
-        $transactions = $user->transactions()->latest()->paginate(10);
+        $user->load('wallet', 'virtualAccount');
+        $transactions = $user->transactions()->latest()->paginate(15);
         return view('users.show', compact('user', 'transactions'));
     }
 
@@ -120,7 +141,7 @@ class UserManagementController extends Controller
 
     public function updateRole(Request $request, User $user)
     {
-        $request->validate(['role' => 'required|in:personal,agent,partner,business,staff,checker,super_admin']);
+        $request->validate(['role' => 'required|in:personal,agent,partner,business,staff,checker,super_admin,api']);
         $user->update(['role' => $request->role]);
         return back()->with('success', 'User role updated successfully.');
     }

@@ -2,7 +2,6 @@
     @section('title', 'Arewa Smart - Fund/Debit User')
 
     <div class="content">
-
         {{-- Success Message --}}
         @if (session('success'))
             <script>
@@ -13,6 +12,18 @@
                         text: "{{ session('success') }}",
                         timer: 3000,
                         showConfirmButton: false
+                    });
+                });
+            </script>
+        @elseIf (session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: "{{ session('error') }}",
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#d33'
                     });
                 });
             </script>
@@ -29,13 +40,15 @@
                     
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
+                        title: 'Validation Error',
                         text: errorMsg,
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#d33'
                     });
                 });
             </script>
         @endif
+
 
         <div class="row">
             <div class="col-xl-9">
@@ -151,8 +164,8 @@
                                                 <div class="col-md-5">
                                                     <div class="mb-3">
                                                         <select name="type" class="form-control">
-                                                            <option value="credit">Credit (Fund)</option>
-                                                            <option value="debit">Debit</option>
+                                                            <option value="manual_credit">Credit (Fund)</option>
+                                                            <option value="manual_debit">Debit</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -238,7 +251,15 @@
 
         function searchUsers() {
             const q = searchInput.value.trim().toLowerCase();
-            if (q.length < 3) return alert("Enter at least 3 characters");
+            if (q.length < 3) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Search Query Too Short',
+                    text: 'Please enter at least 3 characters to search.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
 
             const results = allUsers.filter(u =>
                 (u.first_name ?? '').toLowerCase().includes(q) ||
@@ -302,30 +323,49 @@
             searchResults.classList.add("d-none");
         }
 
-        document.getElementById("walletForm").addEventListener("submit", e => {
-            if (!selectedUser) {
-                e.preventDefault();
-                return alert("Please select a user first");
-            }
-            if (parseFloat(document.getElementById("amountInput").value) <= 0) {
-                e.preventDefault();
-                return alert("Enter a valid amount");
-            }
+        document.getElementById("walletForm").addEventListener("submit", function(e) {
+        if (!selectedUser) {
             e.preventDefault();
             Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you want to process this transaction?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, process it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    e.target.submit();
-                }
+                icon: 'error',
+                title: 'No User Selected',
+                text: 'Please select a user first by searching and clicking on their name.',
+                confirmButtonColor: '#3085d6'
             });
+            return;
+        }
+
+        const amount = parseFloat(document.getElementById("amountInput").value);
+        if (isNaN(amount) || amount <= 0) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Amount',
+                text: 'Please enter a valid amount greater than zero.',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        e.preventDefault();
+        const type = document.querySelector('select[name="type"]').value;
+        const actionText = type === 'manual_credit' ? 'credit' : 'debit';
+        
+        Swal.fire({
+            title: 'Confirm Transaction',
+            html: `Are you sure you want to <strong>${actionText}</strong> ₦${amount.toLocaleString()} ${actionText === 'credit' ? 'to' : 'from'} <strong>${selectedUser.first_name} ${selectedUser.last_name}</strong>'s wallet?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, process it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
         });
+    });
     </script>
 
 </x-app-layout>

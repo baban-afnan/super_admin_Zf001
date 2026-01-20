@@ -555,6 +555,7 @@
     </div>
 </div>
 </div>
+<div class="container-fluid px-4 mt-4">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

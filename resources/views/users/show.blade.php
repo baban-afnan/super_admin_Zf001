@@ -102,6 +102,15 @@
                             </span>
                         </div>
 
+                        <div class="d-flex justify-content-center gap-2 mb-4">
+                             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#virtualAccountModal">
+                                <i class="ti ti-building-bank me-1"></i>Virtual Account
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info rounded-pill" data-bs-toggle="modal" data-bs-target="#userAddressModal">
+                                <i class="ti ti-map-pin me-1"></i>User Address
+                            </button>
+                        </div>
+
                         <!-- Wallet Balance Section -->
                         <div class="bg-light rounded-3 p-3 mb-4 text-start border">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -163,7 +172,8 @@
                                 <table class="table table-hover text-nowrap align-middle mb-0">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th class="ps-4">Reference</th>
+                                            <th class="ps-4">S/N</th>
+                                            <th>Reference</th>
                                             <th>Type</th>
                                             <th>Amount</th>
                                             <th>Status</th>
@@ -173,7 +183,8 @@
                                     <tbody>
                                         @foreach($transactions as $transaction)
                                             <tr>
-                                                <td class="ps-4">
+                                                <td class="ps-4">{{ $transactions->firstItem() + $loop->index }}</td>
+                                                <td>
                                                     <div class="d-flex flex-column">
                                                         <span class="font-monospace text-primary fw-medium">{{ $transaction->reference }}</span>
                                                         <span class="text-muted small text-wrap" style="max-width: 200px;">{{ Str::limit($transaction->description, 30) }}</span>
@@ -272,11 +283,9 @@
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">Select Role</label>
                             <select name="role" class="form-select form-select-lg">
-                                <option value="personal" {{ $user->role === 'personal' ? 'selected' : '' }}>Personal</option>
-                                <option value="agent" {{ $user->role === 'agent' ? 'selected' : '' }}>Agent</option>
-                                <option value="business" {{ $user->role === 'business' ? 'selected' : '' }}>Business</option>
-                                <option value="staff" {{ $user->role === 'staff' ? 'selected' : '' }}>Staff</option>
-                                <option value="partner" {{ $user->role === 'partner' ? 'selected' : '' }}>Partner</option>
+                                @foreach(['personal','agent','partner','business','staff','checker','super_admin','api'] as $r)
+                                    <option value="{{ $r }}" {{ $user->role === $r ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $r)) }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -314,4 +323,90 @@
             </div>
         </div>
     </div>
+
+    <!-- Virtual Account Modal -->
+    <div class="modal fade" id="virtualAccountModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Virtual Account Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    @if($user->virtualAccount)
+                        <div class="mb-4">
+                            <div class="avatar avatar-lg bg-soft-primary rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center">
+                                <i class="ti ti-building-bank fs-1 text-primary"></i>
+                            </div>
+                            <h6 class="text-muted text-uppercase fs-12 fw-bold mb-1">Bank Name</h6>
+                            <h4 class="fw-bold text-dark mb-4">{{ $user->virtualAccount->bankName ?? 'N/A' }}</h4>
+
+                            <h6 class="text-muted text-uppercase fs-12 fw-bold mb-1">Account Number</h6>
+                            <h2 class="fw-bold text-primary mb-4 font-monospace">{{ $user->virtualAccount->accountNo ?? 'N/A' }}</h2>
+
+                            <h6 class="text-muted text-uppercase fs-12 fw-bold mb-1">Account Name</h6>
+                            <h5 class="fw-bold text-dark">{{ $user->virtualAccount->accountName ?? 'N/A' }}</h5>
+
+                            <div class="mt-3 pt-3 border-top">
+                                <small class="text-muted">Reference: <span class="font-monospace">{{ $user->virtualAccount->accountReference ?? 'N/A' }}</span></small>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="ti ti-alert-circle fs-1 text-warning mb-3"></i>
+                            <h6 class="text-muted">No Virtual Account Found</h6>
+                            <p class="small text-muted mb-0">This user does not have a virtual account yet.</p>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Address Modal -->
+    <div class="modal fade" id="userAddressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom bg-primary text-white">
+                    <h5 class="modal-title fw-bold">User Address Information</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                     <div class="row g-3">
+                        <div class="col-6">
+                            <label class="small text-muted fw-bold text-uppercase d-block mb-2">State</label>
+                            <p class="fw-medium text-dark border p-3 rounded bg-light mb-0">
+                                {{ $user->state ?: 'Not provided' }}
+                            </p>
+                        </div>
+                         <div class="col-6">
+                            <label class="small text-muted fw-bold text-uppercase d-block mb-2">LGA</label>
+                            <p class="fw-medium text-dark border p-3 rounded bg-light mb-0">
+                                {{ $user->lga ?: 'Not provided' }}
+                            </p>
+                        </div>
+                         <div class="col-12">
+                            <label class="small text-muted fw-bold text-uppercase d-block mb-2">Full Address</label>
+                            <p class="fw-medium text-dark border p-3 rounded bg-light mb-0" style="min-height: 60px;">
+                                {{ $user->address ?: 'Not provided' }}
+                            </p>
+                        </div>
+                         <div class="col-12">
+                            <label class="small text-muted fw-bold text-uppercase d-block mb-2">Nearest Bus Stop</label>
+                            <p class="fw-medium text-dark border p-3 rounded bg-light mb-0">
+                                {{ $user->nearest_bus_stop ?: 'Not provided' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="container-fluid px-4 mt-4">
 </x-app-layout>

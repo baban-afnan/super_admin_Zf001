@@ -2,6 +2,52 @@
     @section('title', 'Arewa Smart - Bulk Wallet Action')
 
     <div class="content">
+        {{-- Success Message --}}
+        @if (session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: "{{ session('success') }}",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                });
+            </script>
+        @elseIf (session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: "{{ session('error') }}",
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#d33'
+                    });
+                });
+            </script>
+        @endif
+
+        {{-- Validation Error Messages --}}
+        @if ($errors->any())
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    let errorMsg = '';
+                    @foreach ($errors->all() as $error)
+                        errorMsg += '{{ $error }}\n';
+                    @endforeach
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        text: errorMsg,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#d33'
+                    });
+                });
+            </script>
+        @endif
         <div class="row">
             <div class="col-xl-9">
                 <div class="card">
@@ -20,7 +66,7 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('admin.wallet.bulk-fund') }}" method="POST" onsubmit="return confirm('Are you absolutely sure you want to perform this bulk action on ALL users?');">
+                        <form action="{{ route('admin.wallet.bulk-fund') }}" method="POST" id="bulkFundForm">
                             @csrf
 
                             <div class="border-bottom mb-3">
@@ -51,9 +97,9 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="mb-3">
-                                                        <select name="type" class="form-control">
-                                                            <option value="credit">Credit All Users</option>
-                                                            <option value="debit">Debit All Users</option>
+                                                        <select name="type" id="bulkType" class="form-control">
+                                                            <option value="manual_credit">CREDIT</option>
+                                                            <option value="manual_debit">DEBIT</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -73,6 +119,7 @@
                                                             <input 
                                                                 type="number" 
                                                                 name="amount" 
+                                                                id="bulkAmount"
                                                                 class="form-control" 
                                                                 step="0.01" 
                                                                 min="0.01" 
@@ -118,5 +165,33 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.getElementById("bulkFundForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            const amount = document.getElementById("bulkAmount").value;
+            const type = document.getElementById("bulkType").value;
+            const actionText = type === 'manual_credit' ? 'CREDIT' : 'DEBIT';
+            const alertClass = type === 'manual_credit' ? 'text-success' : 'text-danger';
+
+            Swal.fire({
+                title: 'Confirm Bulk Action',
+                html: `You are about to <strong class="${alertClass}">${actionText}</strong> ALL registered users with ₦<strong>${parseFloat(amount).toLocaleString()}</strong>.<br><br>This action cannot be undone. Are you absolutely sure?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed with ALL users!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    </script>
+    @endpush
 
 </x-app-layout>

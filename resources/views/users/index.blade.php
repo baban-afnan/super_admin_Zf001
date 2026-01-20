@@ -160,22 +160,22 @@
                     <div class="card-body">
                         <form action="{{ route('admin.users.index') }}" method="GET">
                             <div class="row g-3 align-items-center">
-                                <div class="col-lg-4">
+                                <div class="col-lg-3">
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0"><i class="ti ti-search"></i></span>
                                         <input type="text" name="search" class="form-control border-start-0 bg-light" 
                                                placeholder="Search Name, Email, Phone..." value="{{ request('search') }}">
                                     </div>
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-2">
                                     <select name="role" class="form-select bg-light" onchange="this.form.submit()">
                                         <option value="">All Roles</option>
-                                        @foreach(['personal','agent','business','staff','admin'] as $r)
-                                            <option value="{{ $r }}" {{ request('role') == $r ? 'selected' : '' }}>{{ ucfirst($r) }}</option>
+                                        @foreach(['personal','agent','partner','business','staff','checker','super_admin','api'] as $r)
+                                            <option value="{{ $r }}" {{ request('role') == $r ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $r)) }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-2">
                                     <select name="status" class="form-select bg-light" onchange="this.form.submit()">
                                         <option value="">All Statuses</option>
                                         @foreach(['active','inactive','suspended','pending'] as $s)
@@ -184,6 +184,22 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-2">
+                                    <select name="state" class="form-select bg-light" onchange="this.form.submit()">
+                                        <option value="">All States</option>
+                                        @foreach($states as $state)
+                                            <option value="{{ $state }}" {{ request('state') == $state ? 'selected' : '' }}>{{ ucfirst($state) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-lg-2">
+                                    <select name="lga" class="form-select bg-light" onchange="this.form.submit()">
+                                        <option value="">All LGAs</option>
+                                        @foreach($lgas as $lga)
+                                            <option value="{{ $lga }}" {{ request('lga') == $lga ? 'selected' : '' }}>{{ ucfirst($lga) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-lg-1">
                                     <button type="submit" class="btn btn-primary w-100">Filter</button>
                                 </div>
                             </div>
@@ -256,8 +272,8 @@
                                                 <form method="POST" action="{{ route('admin.users.update-role', $user) }}">
                                                     @csrf @method('PATCH')
                                                     <select name="role" class="form-select form-select-sm border-0 bg-transparent fw-medium text-dark" style="width: auto;" onchange="this.form.submit()">
-                                                        @foreach(['personal','agent','partner','business','staff','checker','super_admin'] as $r)
-                                                            <option value="{{ $r }}" @selected($user->role == $r)>{{ ucfirst($r) }}</option>
+                                                        @foreach(['personal','agent','partner','business','staff','checker','super_admin','api'] as $r)
+                                                            <option value="{{ $r }}" @selected($user->role == $r)>{{ ucfirst(str_replace('_', ' ', $r)) }}</option>
                                                         @endforeach
                                                     </select>
                                                 </form>

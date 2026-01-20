@@ -13,16 +13,56 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminWalletController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Show transaction history for manual funding
-        $transactions = Transaction::where('type', 'credit')
-            ->orWhere('type', 'debit')
-            ->with('user')
-            ->latest()
-            ->paginate(20);
+        $query = Transaction::query()
+            ->whereIn('type', ['manual_credit', 'manual_debit']);
 
-        return view('wallet.index', compact('transactions'));
+        // Filter by Type
+        if ($request->filled('type') && in_array($request->type, ['manual_credit', 'manual_debit'])) {
+            $query->where('type', $request->type);
+        }
+
+        // Filter by Date Range
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // Get totals with same filters
+        $total_manual_credit = (clone $query)->where('type', 'manual_credit')->sum('amount');
+        $total_manual_debit = (clone $query)->where('type', 'manual_debit')->sum('amount');
+
+        // Monthly Stats (Current Month)
+        $monthly_manual_credit = Transaction::where('type', 'manual_credit')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
+        
+        $monthly_manual_debit = Transaction::where('type', 'manual_debit')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
+
+        // Palmpay Balance from Cache
+        $palmpayBalance = \Illuminate\Support\Facades\Cache::get('palmpay_gateway_balance', 0);
+
+        // Get transactions
+        $transactions = $query->with('user')
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('wallet.index', [
+            'transactions' => $transactions,
+            'monthly_manual_credit' => $total_manual_credit,
+            'monthly_manual_debit' => $total_manual_debit,
+            'monthlyFunding' => $monthly_manual_credit,
+            'monthlyDebit' => $monthly_manual_debit,
+            'palmpayBalance' => $palmpayBalance,
+        ]);
     }
 
     public function fundView()
@@ -36,7 +76,7 @@ class AdminWalletController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'amount' => 'required|numeric|min:0.01',
-            'type' => 'required|in:credit,debit',
+            'type' => 'required|in:manual_credit,manual_debit',
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -53,15 +93,17 @@ class AdminWalletController extends Controller
             ]);
         }
 
+        if ($request->type === 'debit' && $wallet->balance < $request->amount) {
+            return redirect()->back()->with('error', 'User have insufficient balance');
+        }
+
         DB::transaction(function () use ($wallet, $request, $user) {
-            if ($request->type === 'credit') {
+            if ($request->type === 'manual_credit') {
                 $wallet->increment('balance', $request->amount);
-                $wallet->increment('available_balance', $request->amount);
-                $transactionType = 'credit';
+                $transactionType = 'manual_credit';
             } else {
                 $wallet->decrement('balance', $request->amount);
-                $wallet->decrement('available_balance', $request->amount);
-                $transactionType = 'debit';
+                $transactionType = 'manual_debit';
             }
 
            $reference = 'MNf' . str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
@@ -85,7 +127,8 @@ class AdminWalletController extends Controller
             ]);
         });
 
-        return redirect()->route('admin.wallet.index')->with('success', 'Wallet updated successfully.');
+        $message = $request->type === 'manual_credit' ? 'Wallet funded successfully.' : 'Wallet debited successfully.';
+        return redirect()->route('admin.wallet.index')->with('success', $message);
     }
 
     public function bulkFundView()
@@ -97,7 +140,7 @@ class AdminWalletController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'type' => 'required|in:credit,debit',
+            'type' => 'required|in:manual_credit,manual_debit',
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -110,50 +153,57 @@ class AdminWalletController extends Controller
         // Direct SQL is fastest for "all users"
         
         DB::transaction(function () use ($amount, $type, $description, $adminId) {
-            if ($type === 'credit') {
-                Wallet::query()->update([
-                    'balance' => DB::raw("balance + $amount"),
-                    'available_balance' => DB::raw("available_balance + $amount")
-                ]);
-                $transactionType = 'credit';
-            } else {
-                Wallet::query()->update([
-                    'balance' => DB::raw("balance - $amount"),
-                    'available_balance' => DB::raw("available_balance - $amount")
-                ]);
-                $transactionType = 'debit';
-            }
-
-            // Bulk insert transactions
-            // We need user IDs to insert transactions.
-            // If there are too many users, we should chunk this.
+            $transactionType = $type;
             
-            User::chunkById(1000, function ($users) use ($amount, $transactionType, $description, $adminId) {
+            User::with('wallet')->chunkById(1000, function ($users) use ($amount, $type, $description, $adminId, $transactionType) {
+                $userIdsToUpdate = [];
                 $transactions = [];
+
                 foreach ($users as $user) {
-                    $reference = 'AF1-' . str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
-                    $transactions[] = [
-                        'user_id' => $user->id,
-                        'amount' => $amount,
-                        'type' => $transactionType,
-                        'status' => 'completed',
-                        'transaction_ref' => $reference,
-                        'referenceId' => $reference,
-                        'payer_name' => 'Admin',
-                        'fee' => 0,
-                        'net_amount' => $amount,
-                        'performed_by' => $adminId,
-                        'approved_by' => $adminId,
-                        'description' => $description,
-                        'metadata' => json_encode([
-                            'admin_id' => $adminId,
-                            'is_bulk' => true
-                        ]),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                    $wallet = $user->wallet;
+                    
+                    // Credit all users, or debit users with sufficient balance
+                    if ($type === 'manual_credit' || ($type === 'manual_debit' && $wallet && $wallet->balance >= $amount)) {
+                        $userIdsToUpdate[] = $user->id;
+
+                        $reference = 'AF1-' . str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+                        $transactions[] = [
+                            'user_id' => $user->id,
+                            'amount' => $amount,
+                            'type' => $transactionType,
+                            'status' => 'completed',
+                            'transaction_ref' => $reference,
+                            'referenceId' => $reference,
+                            'payer_name' => 'Admin',
+                            'fee' => 0,
+                            'net_amount' => $amount,
+                            'performed_by' => $adminId,
+                            'approved_by' => $adminId,
+                            'description' => $description,
+                            'metadata' => json_encode([
+                                'admin_id' => $adminId,
+                                'is_bulk' => true
+                            ]),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
                 }
-                Transaction::insert($transactions);
+
+                if (!empty($userIdsToUpdate)) {
+                    if ($type === 'manual_credit') {
+                        Wallet::whereIn('user_id', $userIdsToUpdate)->update([
+                            'balance' => DB::raw("balance + $amount"),
+                            'available_balance' => DB::raw("available_balance + $amount")
+                        ]);
+                    } else {
+                        Wallet::whereIn('user_id', $userIdsToUpdate)->update([
+                            'balance' => DB::raw("balance - $amount"),
+                            'available_balance' => DB::raw("available_balance - $amount")
+                        ]);
+                    }
+                    Transaction::insert($transactions);
+                }
             });
         });
 
