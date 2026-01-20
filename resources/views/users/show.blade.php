@@ -409,4 +409,163 @@
         </div>
     </div>
 <div class="container-fluid px-4 mt-4">
+
+    <!-- SweetAlert CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update Status Form
+            const statusForm = document.querySelector('#updateStatusModal form');
+            if (statusForm) {
+                statusForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const selectedStatus = this.querySelector('select[name="status"]').value;
+                    
+                    Swal.fire({
+                        title: 'Update User Status?',
+                        text: `Change status to "${selectedStatus.toUpperCase()}"?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, update it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            }
+
+            // Update Role Form
+            const roleForm = document.querySelector('#updateRoleModal form');
+            if (roleForm) {
+                roleForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const selectedRole = this.querySelector('select[name="role"]').selectedOptions[0].text;
+                    
+                    Swal.fire({
+                        title: 'Update User Role?',
+                        text: `Change role to "${selectedRole}"?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, update it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            }
+
+            // Update Limit Form
+            const limitForm = document.querySelector('#updateLimitModal form');
+            if (limitForm) {
+                limitForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const limitValue = this.querySelector('input[name="limit"]').value;
+                    
+                    Swal.fire({
+                        title: 'Update Transaction Limit?',
+                        text: `Set limit to ₦${parseFloat(limitValue).toLocaleString()}?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, update it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            }
+
+            // Email Verification Form
+            const verifyEmailForm = document.querySelector('form[action*="verify-email"]');
+            if (verifyEmailForm) {
+                verifyEmailForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: 'Verify Email?',
+                        text: 'Mark this user\'s email as verified?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#198754',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, verify it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            }
+
+            // Delete User Form
+            const deleteForm = document.querySelector('form[action*="destroy"]');
+            if (deleteForm) {
+                const deleteButton = deleteForm.querySelector('button[type="submit"]');
+                if (deleteButton) {
+                    deleteButton.removeAttribute('onclick'); // Remove old confirm
+                    deleteForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        Swal.fire({
+                            title: 'Delete User?',
+                            text: 'This action cannot be undone! All user data will be permanently deleted.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'Cancel',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                this.submit();
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Success/Error Messages from Session
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '{{ session('error') }}',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            @if($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: '<ul class="text-start">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+        });
+    </script>
 </x-app-layout>
