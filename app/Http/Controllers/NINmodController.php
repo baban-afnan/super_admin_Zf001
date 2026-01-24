@@ -28,7 +28,9 @@ class NINmodController extends Controller
 
         // Base query filtering by service_type
         $query = AgentService::query()
-         ->whereIn('service_type', ['nin_modification', 'nin modification']);
+            ->select('agent_services.*', 'users.email as user_email')
+            ->join('users', 'agent_services.user_id', '=', 'users.id')
+            ->whereIn('agent_services.service_type', ['nin_modification', 'nin modification']);
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
@@ -51,7 +53,7 @@ class NINmodController extends Controller
 
         // Apply custom status order + submission_date
         $enrollments = $query
-            ->orderByRaw("CASE status
+            ->orderByRaw("CASE agent_services.status
                 WHEN 'pending' THEN 1
                 WHEN 'processing' THEN 2
                 WHEN 'in-progress' THEN 3
@@ -62,15 +64,15 @@ class NINmodController extends Controller
                 WHEN 'failed' THEN 8
                 WHEN 'remark' THEN 9
                 ELSE 999 END")
-            ->orderByDesc('submission_date')
+            ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
         // Status counts filtered by service_type
         $statusCounts = [
-            'pending'    => AgentService::where('service_type', 'nin_modification')->where('status', 'pending')->count(),
-            'processing' => AgentService::where('service_type', 'nin_modification')->where('status', 'processing')->count(),
-            'resolved'   => AgentService::where('service_type', 'nin_modification')->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => AgentService::where('service_type', 'nin_modification')->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->where('status', 'pending')->count(),
+            'processing' => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->where('status', 'processing')->count(),
+            'resolved'   => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         // Get distinct banks for filter

@@ -143,7 +143,7 @@
                             <div class="col-12">
                                 <label class="form-label text-muted small text-uppercase fw-bold">New Information</label>
                                 <div class="p-3 bg-light rounded border">
-                                    {{ $enrollmentInfo->modification_data }}
+                                    {{ $enrollmentInfo->description}}   {{ $enrollmentInfo->modification_data}}
                                 </div>
                             </div>
 

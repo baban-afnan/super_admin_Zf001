@@ -1,294 +1,366 @@
 <x-app-layout>
-  <title>Arewa Smart - NIN - Modification </title>
-      <div class="page-body">
-    <div class="container-fluid">
-      <div class="page-title">
-        <div class="row">
-          <div class="col-sm-6 col-12">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
-            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: white;">Pending</p>
-                        <h3 class="stats-value mb-0">{{ $statusCounts['pending'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">Work on this request its Urgent!</small>
+    <title>Arewa Smart - NIN - Modification</title>
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-title">
+                <div class="row">
+                    <div class="col-sm-6 col-12">
                     </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                        <i class="ti ti-hourglass-empty fs-24 text-white"></i>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
+                        <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                            <div>
+                                <p class="stats-label mb-1" style="color: white;">Pending</p>
+                                <h3 class="stats-value mb-0">{{ $statusCounts['pending'] ?? 0 }}</h3>
+                                <small class="text-white-50 fs-12 fw-medium">Work on this request, it's Urgent!</small>
+                            </div>
+                            <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                                <i class="ti ti-hourglass-empty fs-24 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="financial-card shadow-sm h-100 p-4" style="background: var(--info-gradient);">
+                        <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                            <div>
+                                <p class="stats-label mb-1" style="color: white;">Processing</p>
+                                <h3 class="stats-value mb-0">{{ $statusCounts['processing'] ?? 0 }}</h3>
+                                <small class="text-white-50 fs-12 fw-medium">Check and confirm the status</small>
+                            </div>
+                            <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                                <i class="ti ti-settings fs-24 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
+                        <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                            <div>
+                                <p class="stats-label mb-1" style="color: white;">Resolved</p>
+                                <h3 class="stats-value mb-0">{{ $statusCounts['resolved'] ?? 0 }}</h3>
+                                <small class="text-white-50 fs-12 fw-medium">You have done a great job</small>
+                            </div>
+                            <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                                <i class="ti ti-circle-check fs-24 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
+                        <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                            <div>
+                                <p class="stats-label mb-1" style="color: white;">Rejected/failed</p>
+                                <h3 class="stats-value mb-0">{{ $statusCounts['rejected'] ?? 0 }}</h3>
+                                <small class="text-white-50 fs-12 fw-medium">Don’t give up — Keep accepting requests</small>
+                            </div>
+                            <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
+                                <i class="ti ti-circle-x fs-24 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <style>
+            :root {
+                --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+                --info-gradient: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+                --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+            }
+
+            .financial-card {
+                position: relative;
+                overflow: hidden;
+                border: none;
+                border-radius: 1rem;
+                color: white;
+            }
+
+            .financial-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 150px;
+                height: 150px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(30%, -30%);
+            }
+
+            .financial-card::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100px;
+                height: 100px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                transform: translate(-30%, 30%);
+            }
+
+            .stats-label {
+                font-size: 0.875rem;
+                font-weight: 500;
+                opacity: 0.9;
+            }
+
+            .stats-value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                letter-spacing: -0.025em;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .fade-in-up {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+
+            .avatar-lg {
+                width: 3rem;
+                height: 3rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 1.25rem;">
+                    <div class="card-body p-4 bg-white">
+                        <form method="GET" action="{{ route('ninmod.index') }}">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-lg-5">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-muted px-3"><i class="ti ti-search fs-18"></i></span>
+                                        <input type="text" name="search" class="form-control border-start-0 bg-light py-2" placeholder="Search Name, NIN, Reference, Agent ID..." value="{{ request('search') }}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-muted px-3"><i class="ti ti-chart-dots fs-18"></i></span>
+                                        <select name="status" class="form-select border-start-0 bg-light py-2" onchange="this.form.submit()">
+                                            <option value="">All Statuses</option>
+                                            @foreach(['pending', 'processing', 'in-progress', 'resolved', 'successful', 'rejected', 'failed', 'query', 'remark'] as $s)
+                                                <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary px-4 py-2 d-flex align-items-center justify-content-center flex-grow-1">
+                                            <i class="ti ti-filter me-2 fs-18"></i> Filter Results
+                                        </button>
+                                        @if(request('status') || request('search'))
+                                            <a href="{{ route('ninmod.index') }}" class="btn btn-outline-danger px-4 py-2 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-refresh me-2 fs-18"></i> Clear
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
-            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--info-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: white;">Processing</p>
-                        <h3 class="stats-value mb-0">{{ $statusCounts['processing'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">Check and confirm The status</small>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                        <i class="ti ti-settings fs-24 text-white"></i>
-                    </div>
+        {{-- Data Card --}}
+        <div class="card border-0 shadow-sm" style="border-radius: 1.25rem;">
+            <div class="card-header bg-white py-4 border-bottom-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark d-flex align-items-center">
+                    <i class="ti ti-list-details me-2 text-primary fs-22"></i>
+                    NIN Modification Requests
+                </h5>
+                <div class="text-muted small">
+                    Showing {{ $enrollments->firstItem() }} to {{ $enrollments->lastItem() }} of {{ $enrollments->total() }} entries
                 </div>
             </div>
-        </div>
 
-        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
-            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: white;">Resolved</p>
-                        <h3 class="stats-value mb-0">{{ $statusCounts['resolved'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">You have did a great Job</small>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                        <i class="ti ti-circle-check fs-24 text-white"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="card-body p-0">
+                {{-- Errors & Success Messages --}}
+                <div class="px-4">
+                    @if (session('errorMessage'))
+                        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-alert-circle fs-20 me-2"></i>
+                                <div><strong>Error!</strong> {{ session('errorMessage') }}</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
 
-        <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
-            <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: white;">Rejected</p>
-                        <h3 class="stats-value mb-0">{{ $statusCounts['rejected'] ?? 0 }}</h3>
-                        <small class="text-white-50 fs-12 fw-medium">Don’t give up — Kept accepting Request</small>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                        <i class="ti ti-circle-x fs-24 text-white"></i>
-                    </div>
+                    @if (session('successMessage'))
+                        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="ti ti-circle-check fs-20 me-2"></i>
+                                <div><strong>Success!</strong> {{ session('successMessage') }}</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Table --}}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase fw-bold">
+                            <tr>
+                                <th class="ps-4 py-3">ID</th>
+                                <th class="py-3">NIN</th>
+                                <th class="py-3">Agent Details</th>
+                                <th class="py-3">Modification Field</th>
+                                <th class="py-3 text-center">Status</th>
+                                <th class="py-3">Date Created</th>
+                                <th class="pe-4 py-3 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($enrollments as $enrollment)
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="text-muted fw-medium">#{{ $loop->iteration + ($enrollments->currentPage() - 1) * $enrollments->perPage() }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle me-2">
+                                                <i class="ti ti-fingerprint fs-16"></i>
+                                            </div>
+                                            <span class="fw-bold text-dark">{{ $enrollment->nin }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-semibold text-dark">{{ $enrollment->performed_by }}</span>
+                                            <small class="text-muted">{{ $enrollment->user_email }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-medium px-2 py-1">
+                                            {{ $enrollment->service_field_name ?? $enrollment->field_name }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @php
+                                            $statusConfig = match($enrollment->status) {
+                                                'pending' => ['color' => 'warning', 'icon' => 'ti-hourglass-low'],
+                                                'processing' => ['color' => 'info', 'icon' => 'ti-loader-2'],
+                                                'in-progress' => ['color' => 'primary', 'icon' => 'ti-progress'],
+                                                'resolved', 'successful' => ['color' => 'success', 'icon' => 'ti-circle-check'],
+                                                'rejected', 'failed' => ['color' => 'danger', 'icon' => 'ti-circle-x'],
+                                                'query' => ['color' => 'warning', 'icon' => 'ti-help-circle'],
+                                                'remark' => ['color' => 'secondary', 'icon' => 'ti-message-dots'],
+                                                default => ['color' => 'secondary', 'icon' => 'ti-dots']
+                                            };
+                                        @endphp
+                                        <span class="badge bg-{{ $statusConfig['color'] }}-subtle text-{{ $statusConfig['color'] }} px-3 py-2 rounded-pill fw-bold">
+                                            <i class="ti {{ $statusConfig['icon'] }} me-1"></i>
+                                            {{ ucfirst($enrollment->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="text-dark fw-medium small">{{ \Carbon\Carbon::parse($enrollment->submission_date)->format('M j, Y') }}</span>
+                                            <small class="text-muted">{{ \Carbon\Carbon::parse($enrollment->submission_date)->format('g:i A') }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <a href="{{ route('ninmod.show', $enrollment->id) }}" class="btn btn-icon btn-light btn-sm rounded-circle shadow-sm" data-bs-toggle="tooltip" title="View Details">
+                                            <i class="ti ti-eye text-primary"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="py-4">
+                                            <i class="ti ti-database-off fs-40 text-muted mb-3 d-block"></i>
+                                            <h6 class="text-muted fw-normal">No enrollment records found.</h6>
+                                            @if(request('search') || request('status'))
+                                                <a href="{{ route('ninmod.index') }}" class="btn btn-link btn-sm mt-2">Clear all filters</a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            {{-- Pagination --}}
+            @if($enrollments->hasPages())
+                <div class="card-footer bg-white py-3 border-top-0">
+                    {{ $enrollments->links('vendor.pagination.custom') }}
+                </div>
+            @endif
+        </div>
         </div>
     </div>
 
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --success-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
-            --info-gradient: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
-            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .financial-card {
-            position: relative;
-            overflow: hidden;
-            border: none;
-            border-radius: 1rem;
-            color: white;
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .financial-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(30%, -30%);
-        }
-        .financial-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(-30%, 30%);
-        }
-        
-        .stats-label { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
-        .stats-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .table > :not(caption) > * > * {
+            padding: 1rem 0.75rem;
         }
-        .fade-in-up {
-            animation: fadeIn 0.5s ease-out forwards;
+
+        .badge {
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
-        
-        .avatar-lg { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; }
+
+        .form-select,
+        .form-control {
+            border-color: #f1f3f4;
+        }
+
+        .form-select:focus,
+        .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.1);
+        }
     </style>
-
-
-<div class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary">NIN Modification Request</h6>
-        <div class="dropdown no-arrow">
-            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-three-dots-vertical text-gray-400"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                <div class="dropdown-header">Export Options:</div>
-                <a class="dropdown-item" href="#"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Export as CSV</a>
-                <a class="dropdown-item" href="#"><i class="bi bi-file-excel me-2"></i>Export as Excel</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#"><i class="bi bi-printer me-2"></i>Print Records</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="card-body">
-        {{-- Search and Filters --}}
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <form method="GET" class="form-inline search-full col">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search by NIN, Transaction Ref, Agent Name..." value="{{ request('search') }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                    <input type="hidden" name="status" value="{{ request('status') }}">
-                    <input type="hidden" name="bank" value="{{ request('bank') }}">
-                </form>
-            </div>
-
-            <div class="col-md-6 text-md-end">
-                <div class="btn-group">
-                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
-                        <i class="bi bi-funnel"></i>
-                        @if(request('status') || request('bank'))
-                            Filters Active
-                        @else
-                            Filters
-                        @endif
-                    </button>
-
-                    @if(request('status') || request('search') || request('bank'))
-                        <a href="{{ route('ninmod.index') }}" class="btn btn-outline-danger">
-                            <i class="bi bi-x-circle"></i> Clear
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Errors --}}
-         {{-- Errors --}}
-         @if (session('errorMessage'))
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          <strong>Error!</strong> {{ session('errorMessage') }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      @endif
-
-      @if (session('successMessage'))
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-          <strong>Success!</strong> {{ session('successMessage') }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      @endif
-
-
-        {{-- Table --}}
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Agent Name</th>
-                        <th>NIN</th>
-                        <th>MODIFICATION FIELD</th>
-                        <th>Status</th>
-                        <th>Date Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                  
-                    @forelse ($enrollments as $enrollment)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $enrollment->performed_by }}</td>
-                            <td>{{ $enrollment->nin }}</td>
-                            <td>{{ $enrollment->service_field_name ?? $enrollment->field_name }}</td>
-                            <td>
-                               @php
-                                    $statusColor = match($enrollment->status) {
-                                        'pending' => 'warning',
-                                        'processing' => 'info',
-                                        'in-progress' => 'primary',
-                                        'resolved', 'successful' => 'success',
-                                        'rejected', 'failed' => 'danger',
-                                        'query' => 'warning',
-                                        'remark' => 'secondary',
-                                        default => 'secondary'
-                                    };
-                                @endphp
-                                <span class="badge bg-{{ $statusColor }}">
-                                    {{ ucfirst($enrollment->status) }}
-                                </span>
-                            </td>
-                            <td>{{ \Carbon\Carbon::parse($enrollment->submission_date)->format('M j, Y g:i A') }}</td>
-                            <td>
-                                <a href="{{ route('ninmod.show', $enrollment->id) }}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4">No enrollment records found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-
-            {{-- Pagination --}}
-            <div class="card-footer bg-white">
-                {{ $enrollments->links('vendor.pagination.custom') }}
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Filter Modal --}}
-<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="GET">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="filterModalLabel">Filter Enrollments</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="statusFilter" class="form-label">Status</label>
-                        <select class="form-select" id="statusFilter" name="status">
-                            <option value="">All Statuses</option>
-                            @foreach(['pending', 'processing', 'in-progress', 'resolved', 'successful', 'rejected', 'failed', 'query', 'remark'] as $status)
-                                <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
-                                    {{ ucfirst($status) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-funnel me-1"></i> Apply Filters
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 </x-app-layout>
