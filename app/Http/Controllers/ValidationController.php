@@ -27,26 +27,29 @@ class ValidationController extends Controller
 
         // Base query filtering by service_type
         $query = AgentService::query()
-            ->where('service_type', 'NIN_VALIDATION');
+            ->select('agent_services.*', 'users.email as user_email')
+            ->join('users', 'agent_services.user_id', '=', 'users.id')
+            ->where('agent_services.service_type', 'NIN_VALIDATION');
 
         // Enhanced search
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('bvn', 'like', "%$search%")
-                  ->orWhere('nin', 'like', "%$search%")
-                  ->orWhere('reference', 'like', "%$search%")
-                  ->orWhere('performed_by', 'like', "%$search%")
-                  ->orWhere('user_id', 'like', "%$search%");
+                $q->where('agent_services.bvn', 'like', "%$search%")
+                  ->orWhere('agent_services.nin', 'like', "%$search%")
+                  ->orWhere('agent_services.tracking_id', 'like', "%$search%")
+                  ->orWhere('agent_services.reference', 'like', "%$search%")
+                  ->orWhere('agent_services.performed_by', 'like', "%$search%")
+                  ->orWhere('agent_services.user_id', 'like', "%$search%");
             });
         }
 
         if ($statusFilter) {
-            $query->where('status', $statusFilter);
+            $query->where('agent_services.status', $statusFilter);
         }
 
         // Apply custom status order + submission_date
         $enrollments = $query
-            ->orderByRaw("CASE status
+            ->orderByRaw("CASE agent_services.status
                 WHEN 'pending' THEN 1
                 WHEN 'processing' THEN 2
                 WHEN 'in-progress' THEN 3
@@ -57,15 +60,15 @@ class ValidationController extends Controller
                 WHEN 'failed' THEN 8
                 WHEN 'remark' THEN 9
                 ELSE 999 END")
-            ->orderByDesc('submission_date')
+            ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type
+        // Status counts filtered by service_type (Fixed to match 'NIN_VALIDATION')
         $statusCounts = [
-            'pending'    => AgentService::where('service_type', 'validation')->where('status', 'pending')->count(),
-            'processing' => AgentService::where('service_type', 'validation')->where('status', 'processing')->count(),
-            'resolved'   => AgentService::where('service_type', 'validation')->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => AgentService::where('service_type', 'validation')->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => AgentService::where('service_type', 'NIN_VALIDATION')->where('status', 'pending')->count(),
+            'processing' => AgentService::where('service_type', 'NIN_VALIDATION')->where('status', 'processing')->count(),
+            'resolved'   => AgentService::where('service_type', 'NIN_VALIDATION')->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => AgentService::where('service_type', 'NIN_VALIDATION')->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         return view('validation.index', compact('enrollments', 'search', 'statusFilter', 'statusCounts'));

@@ -10,6 +10,7 @@ use App\Models\BonusHistory;
 use App\Models\VirtualAccount;
 use App\Models\AgentService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -48,38 +49,41 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
         
-        $ninModificationCount = AgentService::where('service_type', 'nin_modification')
+        $ninModificationCount = AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])
+            ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+            ->count();
+        
+        // Get total verification count from verifications table
+        $totalVerifications = DB::table('verifications')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        // Get total verification count (assuming verification is a service_type)
-        $totalVerifications = AgentService::where('service_type', 'verification')
+        $vninNibssCount = AgentService::where('service_type', 'vnin to nibss')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
         // Financial Metrics
-        // Total User Balance - Sum of all wallet balances
-        $totalUserBalance = Wallet::sum('balance') ?? 0;
+        // Total Volume - Sum of all transactions for current month
+        $totalVolume = \App\Models\Transaction::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+            ->sum('amount') ?? 0;
 
-        // Monthly Funding - Sum of credit transactions for current month
-        $monthlyFunding = \App\Models\Transaction::where('type', 'credit')
+        // Monthly Credit - Sum of credit transactions for current month
+        $monthlyCredit = \App\Models\Transaction::whereIn('type', ['credit', 'manual_funding'])
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->sum('amount') ?? 0;
 
         // Monthly Debit - Sum of debit transactions for current month
-        $monthlyDebit = \App\Models\Transaction::where('type', 'debit')
+        $monthlyDebit = \App\Models\Transaction::whereIn('type', ['debit', 'manual_debit'])
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->sum('amount') ?? 0;
 
-        // Monthly Refund - Sum of refund transactions for current month
-        $monthlyRefund = \App\Models\Transaction::where('type', 'refund')
-            ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
-            ->sum('amount') ?? 0;
+        // Monthly New Users
+        $monthlyNewUsers = User::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])->count();
 
-        // PalmPay Gateway Balance
-        // This will be stored in a settings table or retrieved from API
-        // For now, using a placeholder that can be updated via admin panel
-        $palmpayBalance = \Illuminate\Support\Facades\Cache::get('palmpay_gateway_balance', 0);
+        // Monthly Transacting Users (Unique users who made transactions this month)
+        $monthlyTransactingUsers = \App\Models\Transaction::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+            ->distinct('user_id')
+            ->count('user_id');
 
         // Get today's date range
         $todayStart = Carbon::today();
@@ -111,7 +115,7 @@ class DashboardController extends Controller
             ->count();
             
         $apiTransactions = \App\Models\Transaction::whereBetween('created_at', [$todayStart, $todayEnd])
-            ->where('type', 'api')
+            ->where('trans_source', 'api')
             ->count();
 
         // Calculate percentages
@@ -130,7 +134,7 @@ class DashboardController extends Controller
             'bvn_modification' => AgentService::where('service_type', 'bvn_modification')
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count(),
-            'nin_modification' => AgentService::where('service_type', 'nin_modification')
+            'nin_modification' => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count(),
             'crm' => AgentService::where('service_type', 'crm')
@@ -142,7 +146,10 @@ class DashboardController extends Controller
             'agency_services' => AgentService::whereIn('service_type', ['cac', 'tin individual', 'tin cooperate'])
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count(),
-            'verification' => AgentService::where('service_type', 'verification')
+            'verification' => DB::table('verifications')
+                ->whereBetween('created_at', [$todayStart, $todayEnd])
+                ->count(),
+            'vnin_nibss' => AgentService::where('service_type', 'vnin to nibss')
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count(),
         ];
@@ -165,12 +172,13 @@ class DashboardController extends Controller
             'bvnServiceCount',
             'ninModificationCount',
             'totalVerifications',
+            'vninNibssCount',
             'currentMonth',
-            'totalUserBalance',
-            'monthlyFunding',
+            'totalVolume',
+            'monthlyCredit',
             'monthlyDebit',
-            'monthlyRefund',
-            'palmpayBalance',
+            'monthlyNewUsers',
+            'monthlyTransactingUsers',
             'recentTransactions',
             'totalTransactions',
             'completedTransactions',

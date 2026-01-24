@@ -148,7 +148,22 @@
                             <div class="col-12">
                                 <label class="form-label text-muted small text-uppercase fw-bold">New Information</label>
                                 <div class="p-3 bg-light rounded border">
-                                    {{ $enrollmentInfo->description }}
+                                    @php
+                                        $newInfo = json_decode($enrollmentInfo->description, true);
+                                    @endphp
+
+                                    @if(is_array($newInfo))
+                                        <div class="row g-3">
+                                            @foreach($newInfo as $key => $value)
+                                                <div class="col-md-4">
+                                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">{{ str_replace('_', ' ', $key) }}</small>
+                                                    <span class="fw-medium text-dark">{{ $value }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        {{ $enrollmentInfo->description }}
+                                    @endif
                                 </div>
                             </div>
 

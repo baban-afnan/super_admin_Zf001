@@ -28,30 +28,33 @@ class NinIpeController extends Controller
 
         // Base query filtering by service_type (handling both 'ipe' and 'nin_ipe' for consistency)
         $query = AgentService::query()
+            ->select('agent_services.*', 'users.email as user_email')
+            ->join('users', 'agent_services.user_id', '=', 'users.id')
             ->whereIn('service_type', ['ipe', 'nin_ipe']);
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('bvn', 'like', "%$search%")
-                  ->orWhere('nin', 'like', "%$search%")
-                  ->orWhere('reference', 'like', "%$search%")
-                  ->orWhere('performed_by', 'like', "%$search%")
-                  ->orWhere('user_id', 'like', "%$search%");
+                $q->where('agent_services.bvn', 'like', "%$search%")
+                  ->orWhere('agent_services.nin', 'like', "%$search%")
+                  ->orWhere('agent_services.tracking_id', 'like', "%$search%")
+                  ->orWhere('agent_services.reference', 'like', "%$search%")
+                  ->orWhere('agent_services.performed_by', 'like', "%$search%")
+                  ->orWhere('agent_services.user_id', 'like', "%$search%");
             });
         }
 
         if ($statusFilter) {
-            $query->where('status', $statusFilter);
+            $query->where('agent_services.status', $statusFilter);
         }
 
         if ($bankFilter) {
-            $query->where('bank', $bankFilter);
+            $query->where('agent_services.bank', $bankFilter);
         }
 
         // Apply custom status order + submission_date
         $enrollments = $query
-            ->orderByRaw("CASE status
+            ->orderByRaw("CASE agent_services.status
                 WHEN 'pending' THEN 1
                 WHEN 'processing' THEN 2
                 WHEN 'in-progress' THEN 3
@@ -62,7 +65,7 @@ class NinIpeController extends Controller
                 WHEN 'failed' THEN 8
                 WHEN 'remark' THEN 9
                 ELSE 999 END")
-            ->orderByDesc('submission_date')
+            ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
         // Status counts filtered by service_type

@@ -1,28 +1,33 @@
 <x-app-layout>
     <title>Arewa Smart - Transaction History</title>
+    
     <div class="content">
+        {{-- Page Header --}}
         <div class="page-header d-print-none mb-4">
             <div class="row g-2 align-items-center">
                 <div class="col">
                     <h3 class="page-title text-primary mb-1 fw-bold">
                         @if(request('source') == 'api')
-                            API Transactions
+                            <i class="ti ti-api me-1"></i> API Transactions
                         @else
-                            Transaction History
+                            <i class="ti ti-receipt me-1"></i> Transaction History
                         @endif
                     </h3>
-                    <div class="text-muted mt-1">Manage and view all {{ request('source') == 'api' ? 'API' : 'system' }} transactions</div>
+                    <div class="text-muted mt-1">
+                        Manage and view all {{ request('source') == 'api' ? 'API-driven' : 'system-wide' }} transactions
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Stats Cards --}}
-         <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4">
+            {{-- Total Volume --}}
             <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1" style="color: white;">Total Volume</p>
+                            <p class="stats-label mb-1 text-light">Total Volume</p>
                             <h3 class="stats-value mb-0">₦{{ number_format($totalVolume, 2) }}</h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
@@ -32,12 +37,25 @@
                 </div>
             </div>
 
+            {{-- Total Credits / Total Bonus --}}
             <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1" style="color: white;">Total Credits</p>
-                            <h3 class="stats-value mb-0">₦{{ number_format($totalCredits, 2) }}</h3>
+                            <p class="stats-label mb-1 text-light">
+                                @if(request('source') == 'api')
+                                    Total Bonus
+                                @else
+                                    Total Credits
+                                @endif
+                            </p>
+                            <h3 class="stats-value mb-0">
+                                @if(request('source') == 'api')
+                                    ₦{{ number_format($totalBonus, 2) }}
+                                @else
+                                    ₦{{ number_format($totalCredits, 2) }}
+                                @endif
+                            </h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
                             <i class="ti ti-arrow-down-left fs-24 text-white"></i>
@@ -46,11 +64,12 @@
                 </div>
             </div>
 
+            {{-- Total Debits --}}
             <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1" style="color: white;">Total Debits</p>
+                            <p class="stats-label mb-1 text-light">Total Debits</p>
                             <h3 class="stats-value mb-0">₦{{ number_format($totalDebits, 2) }}</h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
@@ -60,11 +79,12 @@
                 </div>
             </div>
 
-             <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
+            {{-- Total Count --}}
+            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--warning-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1" style="color: white;">Total Count</p>
+                            <p class="stats-label mb-1 text-light">Total Count</p>
                             <h3 class="stats-value mb-0">{{ number_format($totalCount) }}</h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
@@ -129,64 +149,77 @@
         </style>
 
 
-        <div class="card flex-fill border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between border-bottom-0">
-                 <h5 class="mb-0 fw-bold text-dark">
-                    <i class="ti ti-receipt me-2"></i>All Transactions
-                </h5>
-                
-           
-            </div>
-
-            <div class="card-body p-0">
-            <div class="card-body p-0">
-                {{-- Slim Filter Toolbar --}}
-                <div class="px-3 py-3 border-bottom bg-light bg-opacity-50">
-                    <form action="{{ route('admin.transactions.index') }}" method="GET">
+    {{-- Transaction Search & Filters --}}
+    <div class="row mb-4 fade-in-up" style="animation-delay: 0.5s;">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 1.25rem;">
+                <div class="card-body p-4 bg-white">
+                    <form method="GET" action="{{ route('admin.transactions.index') }}">
                         <input type="hidden" name="source" value="{{ request('source') }}">
-                        <div class="row g-2 align-items-center justify-content-between">
-                            {{-- Search --}}
-                            <div class="col-md-3">
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text bg-white border-end-0 text-muted ps-3"><i class="ti ti-search"></i></span>
-                                    <input type="text" name="search" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search transactions..." value="{{ request('search') }}">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-lg-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted px-2"><i class="ti ti-search fs-15"></i></span>
+                                    <input type="text" name="search" class="form-control border-start-0 bg-light py-2 fs-13" 
+                                           placeholder="Search Reference, Name..." value="{{ request('search') }}">
                                 </div>
                             </div>
-
-                            {{-- Filters --}}
-                            <div class="col-md-9">
-                                <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
-                                    <div class="input-group input-group-sm" style="max-width: 130px;">
-                                        <input type="date" name="start_date" class="form-control form-control-sm text-muted" value="{{ request('start_date') }}" placeholder="From">
-                                    </div>
-                                    <span class="text-muted small">-</span>
-                                    <div class="input-group input-group-sm" style="max-width: 130px;">
-                                        <input type="date" name="end_date" class="form-control form-control-sm text-muted" value="{{ request('end_date') }}" placeholder="To">
-                                    </div>
-                                    
-                                    <select name="type" class="form-select form-select-sm" style="max-width: 140px;">
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted px-2"><i class="ti ti-adjustments fs-15"></i></span>
+                                    <select name="type" class="form-select border-start-0 bg-light py-2 fs-13" onchange="this.form.submit()">
                                         <option value="all">All Types</option>
-                                        <option value="credit" {{ request('type') == 'credit' ? 'selected' : '' }}>Credit</option>
-                                        <option value="debit" {{ request('type') == 'debit' ? 'selected' : '' }}>Debit</option>
-                                        <option value="manual_credit" {{ request('type') == 'manual_credit' ? 'selected' : '' }}>Manual Credit</option>
-                                        <option value="manual_debit" {{ request('type') == 'manual_debit' ? 'selected' : '' }}>Manual Debit</option>
-                                        <option value="bonus" {{ request('type') == 'bonus' ? 'selected' : '' }}>Bonus</option>
+                                        @foreach(['credit', 'debit', 'manual_credit', 'manual_debit', 'bonus', 'refund'] as $t)
+                                            <option value="{{ $t }}" {{ request('type') == $t ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $t)) }}</option>
+                                        @endforeach
                                     </select>
-
-                                    <div class="d-flex gap-1">
-                                        <button type="submit" class="btn btn-sm btn-primary px-3 shadow-sm">
-                                            Filter
-                                        </button>
-                                        <a href="{{ route('admin.transactions.index') }}" class="btn btn-sm btn-light border px-2" data-bs-toggle="tooltip" title="Reset">
-                                            <i class="ti ti-refresh"></i>
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted px-2"><i class="ti ti-chart-dots fs-15"></i></span>
+                                    <select name="status" class="form-select border-start-0 bg-light py-2 fs-13" onchange="this.form.submit()">
+                                        <option value="all">Statuses</option>
+                                        @foreach(['completed', 'pending', 'failed'] as $s)
+                                            <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="d-flex gap-1">
+                                    <input type="date" name="start_date" class="form-control bg-light py-2 fs-13 px-2" value="{{ request('start_date') }}" data-bs-toggle="tooltip" title="Start Date">
+                                    <input type="date" name="end_date" class="form-control bg-light py-2 fs-13 px-2" value="{{ request('end_date') }}" data-bs-toggle="tooltip" title="End Date">
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="submit" class="btn btn-primary px-2 py-2 d-flex align-items-center justify-content-center" data-bs-toggle="tooltip" title="Filter Results">
+                                        <i class="ti ti-filter fs-16"></i>
+                                    </button>
+                                    @if(request('status') || request('search') || request('type') || request('start_date') || request('end_date'))
+                                        <a href="{{ route('admin.transactions.index', ['source' => request('source')]) }}" class="btn btn-outline-danger px-2 py-2 d-flex align-items-center justify-content-center" data-bs-toggle="tooltip" title="Clear Filters">
+                                            <i class="ti ti-refresh fs-16"></i>
                                         </a>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
 
+        {{-- Data Table Container --}}
+        <div class="card flex-fill border-0 shadow-sm rounded-4 overflow-hidden fade-in-up" style="animation-delay: 0.6s;">
+            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between border-bottom-0">
+                 <h5 class="mb-0 fw-bold text-dark">
+                    <i class="ti ti-list-details me-2 text-primary"></i>All Transactions
+                </h5>
+            </div>
+
+            <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-nowrap mb-0 align-middle">
                         <thead class="bg-light">
@@ -205,13 +238,13 @@
                             @forelse($transactions as $transaction)
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="text-muted">{{ $transactions->firstItem() + $loop->index }}</span>
+                                        <span class="text-muted fw-medium">{{ $transactions->firstItem() + $loop->index }}</span>
                                     </td>
                                     <td>
                                          <div class="d-flex flex-column">
                                             <span class="fw-bold text-dark">{{ $transaction->transaction_ref }}</span>
                                             <span class="text-muted small" data-bs-toggle="tooltip" title="{{ $transaction->description }}">
-                                                {{ \Illuminate\Support\Str::limit($transaction->description ?? '', 10) }}
+                                                {{ \Illuminate\Support\Str::limit($transaction->description ?? 'No description', 15) }}
                                             </span>
                                         </div>
                                     </td>
@@ -221,25 +254,32 @@
                                                 {{ strtoupper(substr($transaction->user->first_name ?? 'U', 0, 1)) }}
                                             </span>
                                             <div class="d-flex flex-column">
-                                                <span class="fw-medium text-dark">{{ trim(($transaction->user->first_name ?? '') . ' ' . ($transaction->user->middle_name ?? '') . ' ' . ($transaction->user->last_name ?? '')) }}</span>
-                                                <span class="text-muted small">{{ $transaction->user->email ?? '' }}</span>
+                                                <span class="fw-medium text-dark">
+                                                    {{ trim(($transaction->user->first_name ?? '') . ' ' . ($transaction->user->last_name ?? '')) }}
+                                                </span>
+                                                <span class="text-muted small">{{ $transaction->user->email ?? 'N/A' }}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        @if(in_array($transaction->type, ['credit', 'manual_credit', 'bonus']))
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
-                                                <i class="ti ti-arrow-down-left me-1"></i>Credit
-                                            </span>
-                                        @elseif(in_array($transaction->type, ['debit', 'manual_debit']))
-                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1">
-                                                <i class="ti ti-arrow-up-right me-1"></i>Debit
-                                            </span>
-                                        @else
-                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2 py-1">
-                                                {{ ucfirst(str_replace('_', ' ', $transaction->type)) }}
-                                            </span>
-                                        @endif
+                                        @php
+                                            $typeClass = 'bg-secondary-subtle text-secondary';
+                                            $typeIcon = 'ti-dots';
+                                            $typeName = ucfirst(str_replace('_', ' ', $transaction->type));
+
+                                            if (in_array($transaction->type, ['credit', 'manual_credit', 'bonus', 'refund'])) {
+                                                $typeClass = 'bg-success-subtle text-success';
+                                                $typeIcon = 'ti-arrow-down-left';
+                                                $typeName = $transaction->type == 'bonus' ? 'Bonus' : 'Credit';
+                                            } elseif (in_array($transaction->type, ['debit', 'manual_debit'])) {
+                                                $typeClass = 'bg-danger-subtle text-danger';
+                                                $typeIcon = 'ti-arrow-up-right';
+                                                $typeName = 'Debit';
+                                            }
+                                        @endphp
+                                        <span class="badge {{ $typeClass }} border border-opacity-10 rounded-pill px-2 py-1">
+                                            <i class="ti {{ $typeIcon }} me-1"></i>{{ $typeName }}
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="fw-bold {{ in_array($transaction->type, ['credit', 'manual_credit', 'bonus', 'refund']) ? 'text-success' : 'text-danger' }}">
@@ -247,24 +287,23 @@
                                         </span>
                                     </td>
                                     <td>
-                                        @if($transaction->status == 'completed' || $transaction->status == 'success')
-                                            <span class="badge bg-success text-white rounded-pill px-3">Success</span>
-                                        @elseif($transaction->status == 'pending')
-                                            <span class="badge bg-warning text-white rounded-pill px-3">Pending</span>
-                                        @elseif($transaction->status == 'failed')
-                                            <span class="badge bg-danger text-white rounded-pill px-3">Failed</span>
-                                        @else
-                                            <span class="badge bg-secondary text-white rounded-pill px-3">{{ ucfirst($transaction->status) }}</span>
-                                        @endif
+                                        @php
+                                            $statusClass = 'bg-secondary';
+                                            $statusLabel = ucfirst($transaction->status);
+                                            if ($transaction->status == 'completed' || $transaction->status == 'success') $statusClass = 'bg-success';
+                                            elseif ($transaction->status == 'pending') $statusClass = 'bg-warning';
+                                            elseif ($transaction->status == 'failed') $statusClass = 'bg-danger';
+                                        @endphp
+                                        <span class="badge {{ $statusClass }} text-white rounded-pill px-3">{{ $statusLabel }}</span>
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column">
-                                            <span class="text-dark">{{ $transaction->created_at->format('d M, Y') }}</span>
+                                            <span class="text-dark fw-medium">{{ $transaction->created_at->format('d M, Y') }}</span>
                                             <span class="text-muted small">{{ $transaction->created_at->format('h:i A') }}</span>
                                         </div>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <button class="btn btn-sm btn-light border shadow-sm view-transaction-btn"
+                                        <button class="btn btn-sm btn-light border shadow-sm view-transaction-btn hover-lift"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#transactionDetailModal"
                                             data-ref="{{ $transaction->transaction_ref }}"
@@ -273,7 +312,7 @@
                                             data-status="{{ ucfirst($transaction->status) }}"
                                             data-date="{{ $transaction->created_at->format('d M Y, h:i A') }}"
                                             data-type="{{ ucfirst(str_replace('_', ' ', $transaction->type)) }}"
-                                            data-user="{{ $transaction->user->first_name ?? 'Unknown' }} {{ $transaction->user->last_name ?? '' }}"
+                                            data-user="{{ trim(($transaction->user->first_name ?? 'Unknown') . ' ' . ($transaction->user->last_name ?? '')) }}"
                                             data-email="{{ $transaction->user->email ?? '' }}"
                                             data-desc="{{ $transaction->description }}"
                                             data-meta='{{ json_encode($transaction->metadata) }}'>
@@ -304,56 +343,6 @@
         </div>
     </div>
 
-    {{-- Filter Modal --}}
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                 <form action="{{ route('admin.transactions.index') }}" method="GET">
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                    <input type="hidden" name="source" value="{{ request('source') }}">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold">Filter Transactions</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                         <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">Date Range</label>
-                                <div class="input-group">
-                                    <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
-                                    <span class="input-group-text">to</span>
-                                    <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Transaction Type</label>
-                                <select name="type" class="form-select">
-                                    <option value="all" {{ request('type') == 'all' ? 'selected' : '' }}>All Types</option>
-                                    <option value="credit" {{ request('type') == 'credit' ? 'selected' : '' }}>Credit</option>
-                                    <option value="debit" {{ request('type') == 'debit' ? 'selected' : '' }}>Debit</option>
-                                    <option value="manual_funding" {{ request('type') == 'manual_funding' ? 'selected' : '' }}>Manual Funding</option>
-                                    <option value="manual_debit" {{ request('type') == 'manual_debit' ? 'selected' : '' }}>Manual Debit</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                     <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
-                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Failed</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    </div>
-                 </form>
-            </div>
-        </div>
-    </div>
 
     {{-- Detail Modal --}}
     <div class="modal fade" id="transactionDetailModal" tabindex="-1" aria-hidden="true">
@@ -428,6 +417,7 @@
         </div>
     </div>
 
+    {{-- Transaction Detail Logic --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const detailModal = document.getElementById('transactionDetailModal');
@@ -440,7 +430,7 @@
                     const statusEl = document.getElementById('detail-status');
                     statusEl.textContent = status;
                     
-                    // Reset classes
+                    // Dynamic Status Styling
                     statusEl.className = 'badge rounded-pill px-3 py-2';
                     if(status === 'Success' || status === 'Completed') statusEl.classList.add('bg-success');
                     else if(status === 'Pending') statusEl.classList.add('bg-warning');

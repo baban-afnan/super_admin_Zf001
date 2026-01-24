@@ -193,9 +193,9 @@
                                     </a>
                                 </div>
                                 <div class="card-footer">
-                                    <form method="POST" action="{{ route('logout') }}">
+                                    <form method="POST" action="{{ route('logout') }}" id="logout-form-header">
                                         @csrf
-                                        <a class="dropdown-item d-inline-flex align-items-center p-0 py-2" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">
+                                        <a class="dropdown-item d-inline-flex align-items-center p-0 py-2" href="javascript:void(0);" onclick="confirmLogout('logout-form-header')">
                                             <i class="ti ti-login me-2"></i>Logout
                                         </a>
                                     </form>
@@ -215,9 +215,9 @@
             <div class="dropdown-menu dropdown-menu-end">
                 <a class="dropdown-item" href="{{ route('profile.edit') }}">My Profile</a>
                 <a class="dropdown-item" href="{{ route('profile.edit') }}">Settings</a>
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" id="logout-form-mobile">
                     @csrf
-                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">Logout</a>
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout('logout-form-mobile')">Logout</a>
                 </form>
             </div>
         </div>

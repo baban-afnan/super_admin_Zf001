@@ -62,8 +62,11 @@ class TransactionController extends Controller
         $debitQuery = clone $query;
         $totalDebits = $debitQuery->whereIn('type', ['debit', 'manual_debit'])->sum('amount');
 
+        $bonusQuery = clone $query;
+        $totalBonus = $bonusQuery->where('type', 'bonus')->sum('amount');
+
         $transactions = $query->paginate(10)->withQueryString();
 
-        return view('admin.transactions.index', compact('transactions', 'totalVolume', 'totalCount', 'totalCredits', 'totalDebits'));
+        return view('admin.transactions.index', compact('transactions', 'totalVolume', 'totalCount', 'totalCredits', 'totalDebits', 'totalBonus'));
     }
 }

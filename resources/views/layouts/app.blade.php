@@ -165,6 +165,25 @@
     <script src="{{ asset('assets/js/bvnservices.js') }}"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('assets/js/sweetalert.js') }}"></script>
+    <script>
+        function confirmLogout(formId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will be logged out of your session!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            })
+        }
+    </script>
     @stack('scripts')
 </body>
 </html>
