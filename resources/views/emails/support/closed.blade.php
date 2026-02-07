@@ -140,6 +140,32 @@
             color: #94a3b8;
             font-size: 13px;
         }
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                margin-top: 0 !important;
+                border-radius: 0 !important;
+            }
+            .content {
+                padding: 25px 20px !important;
+            }
+            .header {
+                padding: 25px 20px !important;
+            }
+            .info-row {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            .info-label {
+                margin-bottom: 4px;
+            }
+            .history-title {
+                font-size: 16px !important;
+            }
+            .message-bubble {
+                padding: 15px !important;
+            }
+        }
     </style>
 </head>
 <body>

@@ -42,12 +42,12 @@
                                     name="two_factor_code" 
                                     required 
                                     autofocus 
-                                    maxlength="10"
-                                    minlength="10"
+                                    maxlength="6"
+                                    minlength="6"
                                     autocomplete="one-time-code" 
                                     inputmode="numeric" 
                                     class="form-control border-start-0 py-2" 
-                                    placeholder="Enter 10-digit code">
+                                    placeholder="Enter 6-digit code">
                             </div>
                             <div class="form-text mt-2">
                                 <i class="ti ti-info-circle me-1"></i> A code has been sent to your email address.

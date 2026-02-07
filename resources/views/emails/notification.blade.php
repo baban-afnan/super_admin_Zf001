@@ -117,6 +117,29 @@
             color: #94a3b8;
             font-size: 13px;
         }
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                margin-top: 0 !important;
+                border-radius: 0 !important;
+            }
+            .content {
+                padding: 25px 20px !important;
+            }
+            .header {
+                padding: 25px 20px !important;
+            }
+            .detail-row {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            .detail-label {
+                margin-bottom: 4px;
+            }
+            .detail-value {
+                font-size: 13px !important;
+            }
+        }
     </style>
 </head>
 <body>

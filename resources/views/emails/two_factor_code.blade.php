@@ -97,6 +97,24 @@
             color: #94a3b8;
             font-size: 12px;
         }
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                margin-top: 0 !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+            }
+            .content {
+                padding: 30px 20px !important;
+            }
+            .otp-code {
+                font-size: 32px !important;
+                letter-spacing: 4px !important;
+            }
+            .header h1 {
+                font-size: 18px !important;
+            }
+        }
     </style>
 </head>
 <body>
