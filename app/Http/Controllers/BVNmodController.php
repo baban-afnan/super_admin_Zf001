@@ -30,7 +30,10 @@ class BVNmodController extends Controller
         $query = AgentService::query()
             ->select('agent_services.*', 'users.email as user_email')
             ->join('users', 'agent_services.user_id', '=', 'users.id')
-            ->where('agent_services.service_type', 'bvn_modification');
+            ->where(function($q) {
+                $q->where('agent_services.service_type', 'like', '%bvn_modification%')
+                  ->orWhere('agent_services.service_type', 'like', '%bvn modification%');
+            });
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
@@ -44,7 +47,13 @@ class BVNmodController extends Controller
         }
 
         if ($statusFilter) {
-            $query->where('agent_services.status', $statusFilter);
+            if ($statusFilter === 'resolved' || $statusFilter === 'successful') {
+                $query->whereIn('agent_services.status', ['resolved', 'successful']);
+            } elseif ($statusFilter === 'rejected' || $statusFilter === 'failed') {
+                $query->whereIn('agent_services.status', ['rejected', 'failed']);
+            } else {
+                $query->where('agent_services.status', $statusFilter);
+            }
         }
 
         if ($bankFilter) {
@@ -67,12 +76,17 @@ class BVNmodController extends Controller
             ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type
+        // Status counts filtered by service_type using same logic
+        $baseCountQuery = AgentService::where(function($q) {
+            $q->where('service_type', 'like', '%bvn_modification%')
+              ->orWhere('service_type', 'like', '%bvn modification%');
+        });
+
         $statusCounts = [
-            'pending'    => AgentService::where('service_type', 'bvn_modification')->where('status', 'pending')->count(),
-            'processing' => AgentService::where('service_type', 'bvn_modification')->where('status', 'processing')->count(),
-            'resolved'   => AgentService::where('service_type', 'bvn_modification')->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => AgentService::where('service_type', 'bvn_modification')->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => (clone $baseCountQuery)->where('status', 'pending')->count(),
+            'processing' => (clone $baseCountQuery)->where('status', 'processing')->count(),
+            'resolved'   => (clone $baseCountQuery)->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => (clone $baseCountQuery)->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         // Get distinct banks for filter

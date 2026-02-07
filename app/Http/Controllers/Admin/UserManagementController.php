@@ -128,8 +128,23 @@ class UserManagementController extends Controller
     public function show(User $user)
     {
         $user->load('wallet', 'virtualAccount');
-        $transactions = $user->transactions()->latest()->paginate(15);
-        return view('users.show', compact('user', 'transactions'));
+        
+        $query = $user->transactions()->latest();
+
+        if ($reference = request('reference')) {
+            $query->where('reference', 'like', "%{$reference}%");
+        }
+
+        if ($type = request('type')) {
+            $query->where('type', $type);
+        }
+
+        // Calculate total amount for filtered results
+        $totalAmount = (clone $query)->sum('amount');
+
+        $transactions = $query->paginate(10)->withQueryString();
+
+        return view('users.show', compact('user', 'transactions', 'totalAmount'));
     }
 
     public function updateStatus(Request $request, User $user)
@@ -297,9 +312,21 @@ class UserManagementController extends Controller
 
     public function destroy(User $user)
     {
-        // Delete related data if necessary, e.g., wallet, transactions (if cascading is not set)
-        // For now, we assume soft deletes or cascading, or just direct delete
-        $user->delete();
-        return back()->with('success', 'User deleted successfully.');
+        try {
+            // Attempt to delete the user
+            $user->delete();
+            return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check if it's a foreign key constraint violation
+            if ($e->getCode() == 23000 || strpos($e->getMessage(), 'Integrity constraint violation') !== false) {
+                return back()->with('error', 'This user cannot be deleted because they have related transactions or verifications in the system.');
+            }
+            
+            // For other database errors
+            return back()->with('error', 'An error occurred while deleting the user. Please try again.');
+        } catch (\Exception $e) {
+            // Catch any other exceptions
+            return back()->with('error', 'An unexpected error occurred. Please contact support.');
+        }
     }
 }

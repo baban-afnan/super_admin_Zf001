@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\AgentService;
 use Illuminate\Support\Facades\Auth;
 
 class AdminWalletController extends Controller
@@ -149,9 +150,6 @@ class AdminWalletController extends Controller
         $description = $request->description ?? ucfirst($type) . ' all users by Admin';
         $adminId = Auth::id();
 
-        // Dispatch job or handle directly if "fast" requirement allows direct SQL
-        // Direct SQL is fastest for "all users"
-        
         DB::transaction(function () use ($amount, $type, $description, $adminId) {
             $transactionType = $type;
             
@@ -162,7 +160,6 @@ class AdminWalletController extends Controller
                 foreach ($users as $user) {
                     $wallet = $user->wallet;
                     
-                    // Credit all users, or debit users with sufficient balance
                     if ($type === 'manual_credit' || ($type === 'manual_debit' && $wallet && $wallet->balance >= $amount)) {
                         $userIdsToUpdate[] = $user->id;
 
@@ -208,5 +205,72 @@ class AdminWalletController extends Controller
         });
 
         return redirect()->route('admin.wallet.index')->with('success', 'All users wallets updated successfully.');
+    }
+
+    public function summary()
+    {
+        // 1. Total Users Balance
+        $totalBalance = Wallet::sum('balance');
+
+        // 2. Top 10 Users by Balance
+        $topUsersByBalance = User::with('wallet')
+            ->join('wallets', 'users.id', '=', 'wallets.user_id')
+            ->orderBy('wallets.balance', 'desc')
+            ->limit(10)
+            ->select('users.*', 'wallets.balance as wallet_balance')
+            ->get();
+
+        // 3. Most Used Service
+        $mostUsedServiceData = AgentService::select('service_type', DB::raw('count(*) as total'))
+            ->groupBy('service_type')
+            ->orderBy('total', 'desc')
+            ->first();
+
+        $mostUsedService = $mostUsedServiceData ? $mostUsedServiceData->service_type : 'None';
+        $usageCount = $mostUsedServiceData ? $mostUsedServiceData->total : 0;
+
+        // 4. Top 10 Users by Service Usage
+        $topUsersByService = [];
+        if ($mostUsedService !== 'None') {
+            $topUserStats = AgentService::where('service_type', $mostUsedService)
+                ->select('user_id', DB::raw('count(*) as usage_count'))
+                ->groupBy('user_id')
+                ->orderBy('usage_count', 'desc')
+                ->limit(10)
+                ->get();
+
+            $topUserIds = $topUserStats->pluck('user_id');
+            
+            $topUsersByService = User::whereIn('id', $topUserIds)
+                ->get()
+                ->map(function ($user) use ($topUserStats) {
+                    $stats = $topUserStats->firstWhere('user_id', $user->id);
+                    $user->usage_count = $stats ? $stats->usage_count : 0;
+                    return $user;
+                })
+                ->sortByDesc('usage_count');
+        }
+
+        // 5. Monthly Stats
+        $startOfMonth = \Carbon\Carbon::now()->startOfMonth();
+        $endOfMonth = \Carbon\Carbon::now()->endOfMonth();
+
+        $monthlyManualCredit = Transaction::where('type', 'manual_funding')
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        $monthlyManualDebit = Transaction::where('type', 'manual_debit')
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        return view('wallet.summary', compact(
+            'totalBalance',
+            'topUsersByBalance',
+            'mostUsedService',
+            'usageCount',
+            'topUsersByService',
+            'monthlyManualCredit',
+            'monthlyManualDebit'
+        ));
     }
 }

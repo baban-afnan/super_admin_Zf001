@@ -126,6 +126,13 @@
         </div>
     </footer>
 
+     
+         <div class="row">
+        @if(!auth()->user()->two_factor_enabled && !session('two_factor_verified'))
+            @include('auth.two-factor')
+        @endif
+        </div>
+
     <script>
         // Auto year
         document.getElementById("currentYear").textContent = new Date().getFullYear();

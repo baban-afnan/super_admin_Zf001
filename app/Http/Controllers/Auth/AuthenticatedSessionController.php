@@ -32,6 +32,30 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
+        // Check if 2FA is enabled
+        if ($user->two_factor_enabled) {
+            // Generate 6-digit code
+            $code = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            
+            $user->update([
+                'two_factor_code' => $code,
+                'two_factor_expires_at' => now()->addMinutes(10),
+            ]);
+
+            // Clear verified status in session
+            $request->session()->forget('two_factor_verified');
+
+            // Send email
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\TwoFactorCode($code));
+            } catch (\Exception $e) {
+                // Log error but continue (middleware will handle redirection)
+                \Illuminate\Support\Facades\Log::error("Failed to send 2FA mail: " . $e->getMessage());
+            }
+
+            return redirect()->route('verify.index');
+        }
+
         // Allowed roles
         $allowedRoles = ['super_admin'];
 

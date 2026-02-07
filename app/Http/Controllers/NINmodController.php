@@ -26,29 +26,38 @@ class NINmodController extends Controller
         $statusFilter = $request->input('status');
         $bankFilter = $request->input('bank');
 
-        // Base query filtering by service_type
+        // Base query filtering by service_type (Case-Insensitive match for NIN MODIFICATION)
         $query = AgentService::query()
             ->select('agent_services.*', 'users.email as user_email')
             ->join('users', 'agent_services.user_id', '=', 'users.id')
-            ->whereIn('agent_services.service_type', ['nin_modification', 'nin modification']);
+            ->where(function($q) {
+                $q->where('agent_services.service_type', 'like', '%nin_modification%')
+                  ->orWhere('agent_services.service_type', 'like', '%nin modification%');
+            });
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('bvn', 'like', "%$search%")
-                  ->orWhere('nin', 'like', "%$search%")
-                  ->orWhere('reference', 'like', "%$search%")
-                  ->orWhere('performed_by', 'like', "%$search%")
-                  ->orWhere('user_id', 'like', "%$search%");
+                $q->where('agent_services.bvn', 'like', "%$search%")
+                  ->orWhere('agent_services.nin', 'like', "%$search%")
+                  ->orWhere('agent_services.reference', 'like', "%$search%")
+                  ->orWhere('agent_services.performed_by', 'like', "%$search%")
+                  ->orWhere('agent_services.user_id', 'like', "%$search%");
             });
         }
 
         if ($statusFilter) {
-            $query->where('status', $statusFilter);
+            if ($statusFilter === 'resolved' || $statusFilter === 'successful') {
+                $query->whereIn('agent_services.status', ['resolved', 'successful']);
+            } elseif ($statusFilter === 'rejected' || $statusFilter === 'failed') {
+                $query->whereIn('agent_services.status', ['rejected', 'failed']);
+            } else {
+                $query->where('agent_services.status', $statusFilter);
+            }
         }
 
         if ($bankFilter) {
-            $query->where('bank', $bankFilter);
+            $query->where('agent_services.bank', $bankFilter);
         }
 
         // Apply custom status order + submission_date
@@ -67,12 +76,17 @@ class NINmodController extends Controller
             ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type
+        // Status counts filtered by service_type using same logic
+        $baseCountQuery = AgentService::where(function($q) {
+            $q->where('service_type', 'like', '%nin_modification%')
+              ->orWhere('service_type', 'like', '%nin modification%');
+        });
+
         $statusCounts = [
-            'pending'    => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->where('status', 'pending')->count(),
-            'processing' => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->where('status', 'processing')->count(),
-            'resolved'   => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => AgentService::whereIn('service_type', ['nin_modification', 'nin modification'])->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => (clone $baseCountQuery)->where('status', 'pending')->count(),
+            'processing' => (clone $baseCountQuery)->where('status', 'processing')->count(),
+            'resolved'   => (clone $baseCountQuery)->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => (clone $baseCountQuery)->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         // Get distinct banks for filter

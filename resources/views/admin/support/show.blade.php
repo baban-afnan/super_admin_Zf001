@@ -23,14 +23,14 @@
                             'customer_reply' => 'warning',
                             'closed' => 'secondary',
                             default => 'info'
-                        } }} fs-6 me-2">
+                        } }} fs-12 me-2">
                             {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
                         </span>
 
                         @if($ticket->status !== 'closed')
-                            <form action="{{ route('admin.support.close', $ticket->ticket_reference) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to close this ticket? This will send an email notification to the user.');">
+                            <form id="closeTicketForm" action="{{ route('admin.support.close', $ticket->ticket_reference) }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn btn-danger">
+                                <button type="button" class="btn btn-danger" onclick="confirmCloseTicket()">
                                     <i class="ti ti-lock"></i> Close Ticket
                                 </button>
                             </form>
@@ -150,6 +150,51 @@
                 const fileName = e.target.files[0]?.name;
                 document.getElementById('fileNameDisplay').textContent = fileName ? 'Attached: ' + fileName : '';
             });
+
+            function confirmCloseTicket() {
+                Swal.fire({
+                    title: 'Close Ticket?',
+                    text: 'Are you sure you want to close this ticket? This will send an email notification to the user.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, close it!',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('closeTicketForm').submit();
+                    }
+                });
+            }
+
+            // Handle Session Messages with SweetAlert
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: "{{ session('success') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: "{{ session('error') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
         </script>
     </div>
 </x-app-layout>

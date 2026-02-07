@@ -1,136 +1,214 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $service_name }} Status Update</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8fafc;
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f8fafc;
+            padding-bottom: 40px;
         }
         .container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
             overflow: hidden;
         }
-       
+        .header {
+            background: linear-gradient(135deg, #FF6F28 0%, #FF5325 100%);
+            color: #ffffff;
+            padding: 35px 20px;
+            text-align: center;
+        }
         .header h1 {
-            background-color: #c2910aff;
             color: #ffffff;
             margin: 0;
-            font-size: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
         }
         .content {
-            padding: 20px;
+            padding: 40px 30px;
         }
         .content p {
-            color: #555555;
-            line-height: 1.6;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 20px;
         }
-        .details {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 10px;
+        .details-card {
+            background-color: #f1f5f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 4px solid #FF6F28;
         }
-        .details p {
-            margin: 5px 0;
-            font-weight: bold;
+        .detail-row {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
         }
-        .footer {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #eeeeee;
-            color: #999999;
-            font-size: 12px;
+        .detail-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: #1e293b;
+            font-weight: 600;
         }
         .status-badge {
             display: inline-block;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
         }
         .status-pending { background-color: #fef3c7; color: #92400e; }
         .status-processing { background-color: #dbeafe; color: #1e40af; }
         .status-resolved, .status-successful { background-color: #d1fae5; color: #065f46; }
         .status-rejected, .status-failed { background-color: #fee2e2; color: #991b1b; }
-        .status-query { background-color: #fef3c7; color: #92400e; }
-        .status-remark { background-color: #e0e7ff; color: #3730a3; }
+        
         .comment-box {
             background-color: #fffbeb;
-            border-left: 4px solid #fbbf24;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 15px;
+            border: 1px solid #fde68a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            word-break: break-word;
         }
-        .file-download {
+        .btn-action {
             display: inline-block;
-            background-color: #ec6c02ff;
-            color: #ffffff;
-            padding: 10px 20px;
+            background: #FF6F28;
+            color: #ffffff !important;
+            padding: 14px 28px;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .support-section {
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 30px;
+            text-align: center;
+        }
+        .support-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .social-link-item {
+            display: inline-block;
+            margin: 0 10px;
+            color: #FF6F28;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #94a3b8;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>{{ $service_name }} Status Update</h1>
-        </div>
-        <div class="content">
-            <p>Hello {{ $first_name . ' ' . $last_name }},</p>
-            <p>We have an update regarding your <strong>{{ $service_name }}</strong> request. Below are the details:</p>
-            
-            <div class="details">
-                <p>Service: {{ $service_name }}</p>
-                <p>Ticket ID: {{ $ticket_id }}</p>
-                @if($batch_id)
-                <p>Batch ID: #{{ $batch_id }}</p>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>{{ $service_name }} Update</h1>
+            </div>
+            <div class="content">
+                <p>Hello <strong>{{ $first_name }} {{ $last_name }}</strong>,</p>
+                <p>We're writing to update you on your <strong>{{ $service_name }}</strong> ticket. Please find the details below:</p>
+                
+                <div class="details-card">
+                    <div class="detail-row">
+                        <span class="detail-label">Service:</span>
+                        <span class="detail-value">{{ $service_name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Ticket ID:</span>
+                        <span class="detail-value">#{{ $ticket_id }}</span>
+                    </div>
+                    @if($batch_id)
+                    <div class="detail-row">
+                        <span class="detail-label">Batch ID:</span>
+                        <span class="detail-value">#{{ $batch_id }}</span>
+                    </div>
+                    @endif
+                    <div class="detail-row">
+                        <span class="detail-label">Reference:</span>
+                        <span class="detail-value">{{ $reference }}</span>
+                    </div>
+                    <div class="detail-row" style="margin-top: 15px;">
+                        <span class="detail-label">Ticket Status:</span>
+                        <span class="status-badge status-{{ strtolower($status) }}">{{ $status }}</span>
+                    </div>
+                </div>
+
+                @if($comment)
+                <div class="comment-box">
+                    <p style="margin: 0 0 10px 0; color: #92400e; font-weight: 700; font-size: 14px;">AGENT RESPONSE:</p>
+                    <div style="margin: 0; color: #78350f; line-height: 1.5; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; font-size: 14px;">{{ $comment }}</div>
+                </div>
                 @endif
-                <p>Reference: {{ $reference }}</p>
-                <p>Status: <span class="status-badge status-{{ strtolower($status) }}">{{ $status }}</span></p>
+
+                @if($file_url)
+                <div style="text-align: center;">
+                    <a href="{{ url($file_url) }}" class="btn-action" target="_blank">📥 Download Attached Document</a>
+                </div>
+                @endif
+
+                <div style="margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 8px; text-align: center;">
+                    @if(strtolower($status) === 'resolved' || strtolower($status) === 'successful')
+                        <span style="font-size: 24px;">🎯</span>
+                        <p style="margin: 10px 0 0 0; font-weight: 600; color: #065f46;">Your issue has been resolved successfully.</p>
+                    @elseif(strtolower($status) === 'rejected' || strtolower($status) === 'failed')
+                        <span style="font-size: 24px;">🚫</span>
+                        <p style="margin: 10px 0 0 0; font-weight: 600; color: #991b1b;">Your request was not successful. Review the remarks above.</p>
+                    @else
+                        <span style="font-size: 24px;">👨‍💻</span>
+                        <p style="margin: 10px 0 0 0; font-weight: 600; color: #1e40af;">Our team is currently investigating your request.</p>
+                    @endif
+                </div>
             </div>
 
-            @if($comment)
-            <div class="comment-box">
-                <p style="margin: 0; color: #78350f;"><strong>Staff Comment:</strong></p>
-                <div style="margin: 10px 0 0 0; color: #78350f; white-space: pre-wrap; font-family: monospace; font-size: 13px; line-height: 1.4;">{{ $comment }}</div>
+            <div class="support-section">
+                <span class="support-title">Need Real-time Support?</span>
+                
+                <div style="margin-bottom: 20px;">
+                    <a href="https://chat.whatsapp.com/DbXtTP0VPW90YDqKaKBsl3" class="social-link-item">💬 WhatsApp Community</a>
+                    <a href="https://www.facebook.com/share/184dBwK8HX/" class="social-link-item">🔵 Follow Our Page</a>
+                </div>
+                
+                <div style="padding: 10px; background-color: #eff6ff; border-radius: 6px; display: inline-block;">
+                    <span style="color: #1e40af; font-size: 13px; font-weight: 600;">Technical Support: 08064333983</span>
+                </div>
             </div>
-            @endif
 
-            @if($file_url)
-            <p style="margin-top: 20px;">A document has been attached to your request:</p>
-            <a href="{{ url($file_url) }}" class="file-download" target="_blank">📥 Download Document</a>
-            @endif
-
-            <p style="margin-top: 20px;">
-                @if(strtolower($status) === 'resolved' || strtolower($status) === 'successful')
-                    ✅ <strong>Congratulations!</strong> Your request has been successfully processed.
-                @elseif(strtolower($status) === 'rejected' || strtolower($status) === 'failed')
-                    ❌ Your request has been rejected. Please review the comment above. If applicable, a refund has been processed to your wallet.
-                @elseif(strtolower($status) === 'processing')
-                    ⏳ Your request is being processed. We'll notify you once completed.
-                @elseif(strtolower($status) === 'query')
-                    ❓ We need additional information. Please review the comment above.
-                @else
-                    📌 Your request status has been updated.
-                @endif
-            </p>
-
-            <p>Thank you for using our service.</p>
-            <p>For any further assistance, please contact our support team.</p>
-        </div>
-        <div class="footer">
-            <p>&copy; {{ date('Y') }} Arewa Smart. All rights reserved.</p>
+            <div class="footer">
+                <p>&copy; {{ date('Y') }} Arewa Smart. All rights reserved.</p>
+            </div>
         </div>
     </div>
 </body>

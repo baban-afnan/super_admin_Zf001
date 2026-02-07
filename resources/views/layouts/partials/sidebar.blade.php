@@ -29,17 +29,36 @@
                     </a>
                 </li>
 
-                <li>
-                    <a href="{{ route('services.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">
-                        <i class="ti ti-server"></i><span>Services</span>
+
+                 <!-- Services -->
+                <li class="submenu">
+                    <a href="javascript:void(0);" class="{{ request()->routeIs(['services.*', 'admin.wallet.summary', 'admin.data-variations.*']) ? 'active subdrop' : '' }}">
+                        <i class="ti ti-server"></i>
+                        <span>Services</span>
+                        <span class="menu-arrow"></span>
                     </a>
+                    <ul>
+                        <li><a href="{{ route('services.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">Services</a></li>
+                        <li><a href="{{ route('admin.data-variations.index') }}" class="{{ request()->routeIs('admin.data-variations.*') ? 'active' : '' }}">VTpass Data</a></li>
+                        <li><a href="#">SME Data</a></li>
+                    </ul>
                 </li>
+                <!-- /Services -->
+
+                <!-- Wallets Services -->
+                <li class="submenu">
+                    <a href="javascript:void(0);" class="{{ request()->routeIs('admin.wallet.*') ? 'active subdrop' : '' }}">
+                        <i class="ti ti-wallet"></i>
+                        <span>Wallets</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('admin.wallet.index') }}" class="{{ request()->routeIs('admin.wallet.index') ? 'active' : '' }}">Wallets</a></li>
+                        <li><a href="{{ route('admin.wallet.summary') }}" class="{{ request()->routeIs('admin.wallet.summary') ? 'active' : '' }}">Summary</a></li>
+                    </ul>
+                </li>
+                <!-- /Wallets Services -->
                 
-                <li class="{{ request()->routeIs('admin.wallet.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.wallet.index') }}">
-                        <i class="ti ti-wallet"></i><span>Wallet</span>
-                    </a>
-                </li>
 
                 <!-- BVN Request  -->
                 <li class="submenu">

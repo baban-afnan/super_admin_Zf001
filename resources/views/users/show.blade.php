@@ -53,9 +53,9 @@
                                 @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST">
+                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" id="delete-user-form">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure? This action cannot be undone.')">
+                                        <button type="submit" class="dropdown-item text-danger">
                                             <i class="ti ti-trash me-2"></i>Delete User
                                         </button>
                                     </form>
@@ -164,7 +164,37 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0 fw-bold">Transaction History</h5>
-                        <span class="badge bg-light text-dark border">Total: {{ $transactions->total() }}</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-soft-primary text-primary border">Filtered Total: ₦{{ number_format($totalAmount, 2) }}</span>
+                            <span class="badge bg-light text-dark border">Entries: {{ $transactions->total() }}</span>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom bg-light bg-opacity-25">
+                        <form action="{{ route('admin.users.show', $user) }}" method="GET" class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Search Reference</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0"><i class="ti ti-search text-muted"></i></span>
+                                    <input type="text" name="reference" class="form-control border-start-0" placeholder="Enter reference..." value="{{ request('reference') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Transaction Type</label>
+                                <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">All Types</option>
+                                    <option value="credit" {{ request('type') == 'credit' ? 'selected' : '' }}>Credit</option>
+                                    <option value="refund" {{ request('type') == 'refund' ? 'selected' : '' }}>Refund</option>
+                                    <option value="debit" {{ request('type') == 'debit' ? 'selected' : '' }}>Debit</option>
+                                    <option value="manual_credit" {{ request('type') == 'manual_credit' ? 'selected' : '' }}>Manual Credit</option>
+                                    <option value="manual_debit" {{ request('type') == 'manual_debit' ? 'selected' : '' }}>Manual Debit</option>
+                                    <option value="bonus" {{ request('type') == 'bonus' ? 'selected' : '' }}>Bonus</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-sm btn-primary flex-fill">Filter</button>
+                                <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-light border flex-fill">Reset</a>
+                            </div>
+                        </form>
                     </div>
                     <div class="card-body p-0">
                         @if($transactions->count() > 0)
@@ -409,10 +439,6 @@
         </div>
     </div>
 <div class="container-fluid px-4 mt-4">
-
-    <!-- SweetAlert CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Update Status Form
@@ -511,31 +537,27 @@
             }
 
             // Delete User Form
-            const deleteForm = document.querySelector('form[action*="destroy"]');
+            const deleteForm = document.getElementById('delete-user-form');
             if (deleteForm) {
-                const deleteButton = deleteForm.querySelector('button[type="submit"]');
-                if (deleteButton) {
-                    deleteButton.removeAttribute('onclick'); // Remove old confirm
-                    deleteForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        
-                        Swal.fire({
-                            title: 'Delete User?',
-                            text: 'This action cannot be undone! All user data will be permanently deleted.',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#dc3545',
-                            cancelButtonColor: '#6c757d',
-                            confirmButtonText: 'Yes, delete it!',
-                            cancelButtonText: 'Cancel',
-                            reverseButtons: true
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                this.submit();
-                            }
-                        });
+                deleteForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This action cannot be undone! All user data will be permanently deleted.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
                     });
-                }
+                });
             }
 
             // Success/Error Messages from Session

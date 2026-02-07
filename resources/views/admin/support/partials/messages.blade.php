@@ -1,15 +1,3 @@
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show mb-4">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
 
 @foreach($ticket->messages as $message)
 <div class="d-flex mb-4 {{ $message->is_admin_reply ? 'justify-content-end' : 'justify-content-start' }}">

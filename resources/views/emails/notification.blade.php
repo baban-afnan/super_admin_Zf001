@@ -6,129 +6,186 @@
     <title>{{ config('app.name') }} Notification</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8fafc;
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f8fafc;
+            padding-bottom: 40px;
         }
         .container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
             overflow: hidden;
         }
-        
+        .header {
+            background: linear-gradient(135deg, #FF6F28 0%, #FF5325 100%);
+            color: #ffffff;
+            padding: 35px 20px;
+            text-align: center;
+        }
         .header h1 {
-            background-color: #c2910aff;
             color: #ffffff;
             margin: 0;
-            font-size: 20px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
         }
         .content {
-            padding: 20px;
+            padding: 40px 30px;
         }
         .content p {
-            color: #555555;
-            line-height: 1.6;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 20px;
         }
-        .details {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 10px;
+        .notification-card {
+            background-color: #f1f5f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 4px solid #FF6F28;
         }
-        .details-item {
+        .detail-row {
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px solid #eeeeee;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
         }
-        .details-item:last-child {
+        .detail-row:last-child {
             border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
-        .details-label {
-            font-weight: bold;
+        .detail-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .detail-value {
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .embedded-img-container {
+            margin-top: 30px;
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .embedded-img-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .support-section {
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 30px;
+            text-align: center;
+        }
+        .support-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: #FF6F28;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
         }
         .footer {
             text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #eeeeee;
-            color: #999999;
-            font-size: 12px;
-        }
-        .btn {
-            display: inline-block;
-            background-color: #ec6c02ff;
-            color: #ffffff;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        img.embedded-image {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-            border-radius: 8px;
+            padding: 30px 20px;
+            color: #94a3b8;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            @if(is_array($mail_data) && isset($mail_data['amount']))
-                <h1>Payment Notification</h1>
-            @else
-                <h1>{{ config('app.name') }} Notification</h1>
-            @endif
-        </div>
-        
-        <div class="content">
-            <p>Hello,</p>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                @if(is_array($mail_data) && isset($mail_data['amount']))
+                    <h1>Payment Update</h1>
+                @else
+                    <h1>System Notification</h1>
+                @endif
+            </div>
             
-            @if(is_array($mail_data) && isset($mail_data['amount']))
-                <p>We have received a new transaction on your account. Below are the details:</p>
+            <div class="content">
+                <p>Hello,</p>
                 
-                <div class="details">
-                    <div class="details-item">
-                        <span class="details-label">Transaction Type</span>
-                        <span>{{ $mail_data['type'] ?? 'N/A' }}</span>
+                @if(is_array($mail_data) && isset($mail_data['amount']))
+                    <p>We've processed a new transaction on your account. Here are the latest details:</p>
+                    
+                    <div class="notification-card">
+                        <div class="detail-row">
+                            <span class="detail-label">Service Type</span>
+                            <span class="detail-value">{{ $mail_data['type'] ?? 'Transaction' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Amount Paid</span>
+                            <span class="detail-value" style="color: #059669;">₦{{ isset($mail_data['amount']) ? number_format((float)$mail_data['amount'], 2) : '0.00' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Reference ID</span>
+                            <span class="detail-value">{{ $mail_data['ref'] ?? 'N/A' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Channel/Bank</span>
+                            <span class="detail-value">{{ $mail_data['bankName'] ?? 'Internal' }}</span>
+                        </div>
                     </div>
-                    <div class="details-item">
-                        <span class="details-label">Amount</span>
-                        <span>₦{{ isset($mail_data['amount']) ? number_format((float)$mail_data['amount'], 2) : '0.00' }}</span>
+                @else
+                    <div class="notification-card" style="background-color: #fffbeb; border-color: #fbbf24;">
+                        <p style="margin: 0; color: #92400e; line-height: 1.6;">{!! nl2br(e($mail_data)) !!}</p>
                     </div>
-                    <div class="details-item">
-                        <span class="details-label">Reference No</span>
-                        <span>{{ $mail_data['ref'] ?? 'N/A' }}</span>
-                    </div>
-                    <div class="details-item">
-                        <span class="details-label">Bank/Gateway</span>
-                        <span>{{ $mail_data['bankName'] ?? 'N/A' }}</span>
-                    </div>
-                </div>
-            @else
-                {{-- Generic Content --}}
-                <p>{!! nl2br(e($mail_data)) !!}</p>
-            @endif
+                @endif
 
-            @if(isset($imagePath) && $imagePath)
-                <div style="text-align: center;">
-                    <img src="{{ $message->embed(storage_path('app/public/' . $imagePath)) }}" class="embedded-image" alt="Attached Image">
-                </div>
-            @endif
+                @if(isset($imagePath) && $imagePath)
+                    <div class="embedded-img-container">
+                        <img src="{{ $message->embed(storage_path('app/public/' . $imagePath)) }}" alt="Notification Details">
+                    </div>
+                @endif
 
-            <p style="margin-top: 20px;">Thank you for using our service.</p>
-        </div>
-        
-        <div class="footer">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
-            <p>This is an automated message, please do not reply directly to this email.</p>
+                <p style="margin-top: 30px;">Log in to your dashboard to view your full transaction history or update your settings.</p>
+            </div>
+
+            <div class="support-section">
+                <span class="support-title">Need Help? Contact Us</span>
+                
+                <div style="margin-bottom: 20px;">
+                    <a href="https://chat.whatsapp.com/DbXtTP0VPW90YDqKaKBsl3" class="social-link">💬 WhatsApp Group</a>
+                    <a href="https://www.facebook.com/share/184dBwK8HX/" class="social-link">🔵 Official Facebook</a>
+                </div>
+                
+                <div style="padding: 10px 20px; background-color: #eff6ff; border-radius: 50px; display: inline-block;">
+                    <span style="color: #1e40af; font-size: 13px; font-weight: 700;">Support Desk: 08064333983</span>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+                <p style="margin-top: 8px;">This is an automated system email. Please do not reply directly.</p>
+            </div>
         </div>
     </div>
 </body>

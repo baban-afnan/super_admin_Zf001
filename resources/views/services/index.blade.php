@@ -171,7 +171,7 @@
                                         </a>
                                     @else
                                         <a href="#" class="avatar avatar-md border rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center">
-                                            <span class="fs-5 fw-bold">{{ strtoupper(substr($service->name, 0, 1)) }}</span>
+                                            <span class="fs-10 fw-bold">{{ strtoupper(substr($service->name, 0, 1)) }}</span>
                                         </a>
                                     @endif
                                     <div class="ms-2">

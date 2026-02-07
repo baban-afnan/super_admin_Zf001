@@ -1,7 +1,7 @@
 <x-app-layout>
     <title>Arewa Smart - User Management</title>
 
-    <div class="content">
+     <div class="content">
 
         {{-- Alerts --}}
         {{-- Alerts --}}
@@ -39,7 +39,7 @@
 
         <!-- Stats Cards -->
         <div class="row g-3 mb-4">
-            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="col-xl-3 col-md-4 fade-in-up" style="animation-delay: 0.1s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="col-xl-3 col-md-4 fade-in-up" style="animation-delay: 0.2s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
@@ -69,7 +69,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="col-xl-3 col-md-4 fade-in-up" style="animation-delay: 0.3s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--danger-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
@@ -84,7 +84,7 @@
                 </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
+            <div class="col-xl-3 col-md-4 fade-in-up" style="animation-delay: 0.4s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--info-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
@@ -152,6 +152,8 @@
             
             .avatar-lg { width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; }
         </style>
+
+
 
         <!-- Filter Section -->
         <div class="row mb-4">
@@ -295,6 +297,7 @@
                                                             <option value="{{ $s }}" @selected($user->status == $s)>{{ ucfirst($s) }}</option>
                                                         @endforeach
                                                     </select>
+                                                </form>
                                             </td>
 
                                             <td>
@@ -314,7 +317,7 @@
                                                     <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-xs btn-outline-secondary border-0 rounded-circle me-1" title="Edit">
                                                         <i class="ti ti-edit fs-12"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-xs btn-outline-danger border-0 rounded-circle" onclick="confirmDelete('{{ $user->id }}')" title="Delete">
+                                                    <button type="button" class="btn btn-xs btn-outline-danger border-0 rounded-circle delete-user-btn" data-id="{{ $user->id }}" title="Delete">
                                                         <i class="ti ti-trash fs-12"></i>
                                                     </button>
                                                     <form id="delete-form-{{ $user->id }}" action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-none">
@@ -538,24 +541,33 @@
     <!-- Bootstrap JS (if not already loaded) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-    {{-- SweetAlert CDN --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- Scripts --}}
 
     <script>
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this! User data will be permanently deleted.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete user!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delete confirmation
+            const deleteButtons = document.querySelectorAll('.delete-user-btn');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This action cannot be undone! All user data will be permanently deleted.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('delete-form-' + userId).submit();
+                        }
+                    });
+                });
             });
-        }
+        });
     </script>
 </x-app-layout>
