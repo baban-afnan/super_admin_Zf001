@@ -32,7 +32,7 @@
 
                  <!-- Services -->
                 <li class="submenu">
-                    <a href="javascript:void(0);" class="{{ request()->routeIs(['services.*', 'admin.wallet.summary', 'admin.data-variations.*']) ? 'active subdrop' : '' }}">
+                    <a href="javascript:void(0);" class="{{ request()->routeIs(['services.*', 'admin.data-variations.*']) ? 'active subdrop' : '' }}">
                         <i class="ti ti-server"></i>
                         <span>Services</span>
                         <span class="menu-arrow"></span>
