@@ -53,6 +53,17 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
         Route::put('/{dataVariation}', [\App\Http\Controllers\Admin\DataVariationController::class, 'update'])->name('update');
         Route::delete('/{dataVariation}', [\App\Http\Controllers\Admin\DataVariationController::class, 'destroy'])->name('destroy');
     });
+
+    Route::prefix('admin/sme-data')->name('admin.sme-data.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SmeDataController::class, 'index'])->name('index');
+        Route::get('/download-sample', [\App\Http\Controllers\Admin\SmeDataController::class, 'downloadSample'])->name('download-sample');
+        Route::post('/import', [\App\Http\Controllers\Admin\SmeDataController::class, 'import'])->name('import');
+        Route::delete('/delete-all', [\App\Http\Controllers\Admin\SmeDataController::class, 'deleteAll'])->name('delete-all');
+        Route::get('/{network}', [\App\Http\Controllers\Admin\SmeDataController::class, 'show'])->name('show');
+        Route::post('/', [\App\Http\Controllers\Admin\SmeDataController::class, 'store'])->name('store');
+        Route::put('/{smeData}', [\App\Http\Controllers\Admin\SmeDataController::class, 'update'])->name('update');
+        Route::delete('/{smeData}', [\App\Http\Controllers\Admin\SmeDataController::class, 'destroy'])->name('destroy');
+    });
     
     Route::get('/refresh-variations', [VariationController::class, 'refresh'])->name('variations.refresh');
 

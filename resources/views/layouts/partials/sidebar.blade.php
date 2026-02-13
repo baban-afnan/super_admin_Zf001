@@ -32,7 +32,7 @@
 
                  <!-- Services -->
                 <li class="submenu">
-                    <a href="javascript:void(0);" class="{{ request()->routeIs(['services.*', 'admin.data-variations.*']) ? 'active subdrop' : '' }}">
+                    <a href="javascript:void(0);" class="{{ request()->routeIs(['services.*', 'admin.data-variations.*', 'admin.sme-data.*']) ? 'active subdrop' : '' }}">
                         <i class="ti ti-server"></i>
                         <span>Services</span>
                         <span class="menu-arrow"></span>
@@ -40,7 +40,7 @@
                     <ul>
                         <li><a href="{{ route('services.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">Services</a></li>
                         <li><a href="{{ route('admin.data-variations.index') }}" class="{{ request()->routeIs('admin.data-variations.*') ? 'active' : '' }}">VTpass Data</a></li>
-                        <li><a href="#">SME Data</a></li>
+                        <li><a href="{{ route('admin.sme-data.index') }}" class="{{ request()->routeIs('admin.sme-data.*') ? 'active' : '' }}">SME Data</a></li>
                     </ul>
                 </li>
                 <!-- /Services -->
