@@ -1,7 +1,14 @@
-<x-app-layout>
     <title>Arewa Smart - Wallet Management</title>
+    <div class="page-body">
+        {{-- Header Section --}}
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <h4 class="mb-0 fw-bold text-dark">Wallet Management Dashboard</h4>
+                <p class="text-muted small">Monitor manual credits, debits, and funding operations.</p>
+            </div>
+        </div>
 
-    <div class="content">
+        <div class="content">
         {{-- Alerts --}}
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4">

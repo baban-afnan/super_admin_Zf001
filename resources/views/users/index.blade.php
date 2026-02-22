@@ -164,7 +164,7 @@
                             <div class="row g-3 align-items-center">
                                 <div class="col-lg-3">
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="ti ti-search"></i></span>
+                                        <span class="input-group-text bg-light border-end-0"><i class="ti ti-search fs-18"></i></span>
                                         <input type="text" name="search" class="form-control border-start-0 bg-light" 
                                                placeholder="Search Name, Email, Phone..." value="{{ request('search') }}">
                                     </div>
@@ -180,7 +180,7 @@
                                 <div class="col-lg-2">
                                     <select name="status" class="form-select bg-light" onchange="this.form.submit()">
                                         <option value="">All Statuses</option>
-                                        @foreach(['active','inactive','suspended','pending'] as $s)
+                                        @foreach(['active','inactive','suspended','pending','query'] as $s)
                                             <option value="{{ $s }}" {{ request('status') == $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
                                         @endforeach
                                     </select>

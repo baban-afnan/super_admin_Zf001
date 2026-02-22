@@ -115,11 +115,24 @@
                         <div class="bg-light rounded-3 p-3 mb-4 text-start border">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="text-muted small fw-bold text-uppercase">Wallet Balance</span>
-                                <i class="ti ti-wallet text-primary fs-4"></i>
+                                <div class="form-check form-switch ps-0">
+                                    <form id="wallet-status-form" action="{{ route('admin.users.update-wallet-status', $user) }}" method="POST">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="status" id="wallet-status-input" value="{{ $user->wallet && $user->wallet->status === 'active' ? 'inactive' : 'active' }}">
+                                        <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="walletStatusSwitch" 
+                                               {{ $user->wallet && $user->wallet->status === 'active' ? 'checked' : '' }}
+                                               style="cursor: pointer; width: 2.5em; height: 1.25em;">
+                                    </form>
+                                </div>
                             </div>
                             <h3 class="fw-bold text-dark mb-0">₦{{ number_format($user->wallet->balance ?? 0, 2) }}</h3>
-                            <div class="small text-muted mt-1">
-                                Available: <span class="fw-medium text-dark">₦{{ number_format($user->wallet->available_balance ?? 0, 2) }}</span>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <div class="small text-muted">
+                                    Available: <span class="fw-medium text-dark">₦{{ number_format($user->wallet->available_balance ?? 0, 2) }}</span>
+                                </div>
+                                <span class="badge {{ $user->wallet && $user->wallet->status === 'active' ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger' }} fs-10 py-1">
+                                    {{ ucfirst($user->wallet->status ?? 'N/A') }}
+                                </span>
                             </div>
                         </div>
 
@@ -588,6 +601,37 @@
                     confirmButtonText: 'OK'
                 });
             @endif
+
+            // Wallet Status Switch Handler
+            const walletSwitch = document.getElementById('walletStatusSwitch');
+            const walletForm = document.getElementById('wallet-status-form');
+            const walletInput = document.getElementById('wallet-status-input');
+
+            if (walletSwitch) {
+                walletSwitch.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    const status = isChecked ? 'active' : 'inactive';
+                    walletInput.value = status;
+
+                    Swal.fire({
+                        title: isChecked ? 'Activate Wallet?' : 'Deactivate Wallet?',
+                        text: `Are you sure you want to ${isChecked ? 'activate' : 'deactive'} this user's wallet?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: isChecked ? '#198754' : '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, change it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            walletForm.submit();
+                        } else {
+                            // Revert switch if cancelled
+                            this.checked = !isChecked;
+                        }
+                    });
+                });
+            }
         });
     </script>
 </x-app-layout>

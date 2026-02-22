@@ -2,10 +2,11 @@
     <title>Arewa Smart - NIN - Modification</title>
     <div class="page-body">
         <div class="container-fluid">
-            <div class="page-title">
-                <div class="row">
-                    <div class="col-sm-6 col-12">
-                    </div>
+            {{-- Header Section --}}
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <h4 class="mb-0 fw-bold text-dark">NIN Modification Dashboard</h4>
+                    <p class="text-muted small">Submit and track NIN modification requests.</p>
                 </div>
             </div>
 

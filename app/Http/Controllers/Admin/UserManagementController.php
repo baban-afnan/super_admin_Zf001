@@ -154,6 +154,19 @@ class UserManagementController extends Controller
         return back()->with('success', 'User status updated successfully.');
     }
 
+    public function updateWalletStatus(Request $request, User $user)
+    {
+        $request->validate(['status' => 'required|in:active,inactive,suspended,closed']);
+        
+        if (!$user->wallet) {
+            return back()->with('error', 'User does not have a wallet.');
+        }
+
+        $user->wallet->update(['status' => $request->status]);
+        
+        return back()->with('success', 'Wallet status updated successfully.');
+    }
+
     public function updateRole(Request $request, User $user)
     {
         $request->validate(['role' => 'required|in:personal,agent,partner,business,staff,checker,super_admin,api']);

@@ -1,14 +1,13 @@
 <x-app-layout>
  <title>Arewa Smart - NIN - Validation</title>
-      <div class="page-body">
-    <div class="container-fluid">
-      <div class="page-title">
-        <div class="row">
-          <div class="col-sm-6 col-12">
-          </div>
+    <div class="page-body">
+        {{-- Header Section --}}
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <h4 class="mb-0 fw-bold text-dark">NIN Validation Dashboard</h4>
+                <p class="text-muted small">Manage and track NIN validation requests.</p>
+            </div>
         </div>
-      </div>
-    </div>
 
     <div class="row g-3 mb-4">
         <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">

@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
         Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
         Route::patch('/{user}/status', [UserManagementController::class, 'updateStatus'])->name('update-status');
         Route::patch('/{user}/role', [UserManagementController::class, 'updateRole'])->name('update-role');
+        Route::patch('/{user}/wallet-status', [UserManagementController::class, 'updateWalletStatus'])->name('update-wallet-status');
         Route::patch('/{user}/limit', [UserManagementController::class, 'updateLimit'])->name('update-limit');
         Route::patch('/{user}/verify-email', [UserManagementController::class, 'verifyEmail'])->name('verify-email');
     });
@@ -162,6 +163,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('index');
         Route::post('/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('send');
         Route::post('/announcement', [\App\Http\Controllers\Admin\NotificationController::class, 'storeAnnouncement'])->name('store-announcement');
+        Route::post('/advert', [\App\Http\Controllers\Admin\NotificationController::class, 'storeAdvert'])->name('store-advert');
         Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\NotificationController::class, 'toggleStatus'])->name('toggle-status');
         Route::get('/search-users', [\App\Http\Controllers\Admin\NotificationController::class, 'searchUsers'])->name('search-users');
         Route::delete('/{id}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('destroy');
