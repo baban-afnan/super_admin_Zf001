@@ -31,7 +31,7 @@ class CRMController extends Controller
 
         // Base query filtering by service_type
         $query = AgentService::query()
-            ->where('service_type', 'CRM, bvn_crm');
+            ->whereIn('service_type', ['CRM', 'bvn_crm']);
 
         // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
