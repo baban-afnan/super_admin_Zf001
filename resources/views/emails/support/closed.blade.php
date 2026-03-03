@@ -192,21 +192,10 @@
 
                 <p>We hope we've met your expectations. If you need any further help, feel free to open a new ticket or join our community group.</p>
 
-                <div class="history-section">
-                    <span class="history-title">Conversation Highlights</span>
-                    
-                    @foreach($ticket->messages->take(3) as $message)
-                        <div class="message-bubble {{ $message->is_admin_reply ? 'admin-msg' : 'user-msg' }}">
-                            <div class="msg-meta">
-                                {{ $message->is_admin_reply ? 'Arewa Support' : 'You' }} 
-                                • {{ $message->created_at->format('M d, Y') }}
-                            </div>
-                            <div class="msg-text">
-                                {{ $message->message }}
-                            </div>
-                        </div>
                     @endforeach
                 </div>
+
+                @include('emails.partials.referral_advert')
             </div>
 
             <div class="support-footer">

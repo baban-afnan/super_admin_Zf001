@@ -4,6 +4,8 @@
      <div class="content">
 
         {{-- Alerts --}}
+        @include('users.partials.import_report')
+        
         {{-- Alerts --}}
         @if(session('success'))
             <script>

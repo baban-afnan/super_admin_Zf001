@@ -101,10 +101,8 @@
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="{{ route('tin.index', ['type' => 'individual']) }}" class="{{ request('type') == 'individual' ? 'active' : '' }}">TIN Individual</a></li>
-                        <li><a href="{{ route('tin.index', ['type' => 'corporate']) }}" class="{{ request('type') == 'corporate' ? 'active' : '' }}">TIN Corporate</a></li>
-                        <li><a href="#">CAC Registration</a></li>
-                        <li><a href="#">Affidavit</a></li>
+                        <li><a href="{{ route('cac-registration.index') }}" class="{{ request()->routeIs('cac-registration.*') ? 'active' : '' }}">CAC Registration</a></li>
+                        <li><a href="{{ route('affidavit.index') }}" class="{{ request()->routeIs('affidavit.*') ? 'active' : '' }}">Affidavit</a></li>
                         <li><a href="#">VAS</a></li>
                     </ul>
                 </li>

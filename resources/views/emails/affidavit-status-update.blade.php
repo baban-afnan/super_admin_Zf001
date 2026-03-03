@@ -57,59 +57,83 @@
         border-radius: 8px;
         margin-top: 25px;
     }
+    .status-message {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f8fafc;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .status-icon {
+        font-size: 24px;
+        display: block;
+        margin-bottom: 10px;
+    }
+    .status-text {
+        margin: 0;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    .support-section {
+        background-color: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 25px;
+        text-align: center;
+    }
+    .social-link-item {
+        color: #FF6F28;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        margin: 0 10px;
+    }
 </style>
 @endsection
 
 @section('content')
     <p>Hello <strong>{{ $first_name }} {{ $last_name }}</strong>,</p>
-    <p>We have an update regarding your request for <strong>{{ $service_name }}</strong>. Details are provided below:</p>
+    <p>There has been a status update regarding your <strong>{{ $service_name }}</strong> request. Please find the details below:</p>
     
     <div class="details-card">
         <div class="detail-row">
-            <span class="detail-label">Service</span>
+            <span class="detail-label">Service Type</span>
             <span class="detail-value">{{ $service_name }}</span>
         </div>
+        
         <div class="detail-row">
-            <span class="detail-label">Field</span>
-            <span class="detail-value">{{ $field_name }}</span>
+            <span class="detail-label">Reference ID</span>
+            <span class="detail-value">#{{ $reference }}</span>
         </div>
+        
         <div class="detail-row">
-            <span class="detail-label">Request ID</span>
-            <span class="detail-value">#{{ $request_id }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Reference</span>
-            <span class="detail-value">{{ $reference }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Status</span>
+            <span class="detail-label">Current Status</span>
             <span class="status-badge status-{{ strtolower($status) }}">{{ $status }}</span>
         </div>
     </div>
 
     @if($comment)
     <div class="comment-box">
-        <p style="margin: 0 0 10px 0; color: #92400e; font-weight: 700; font-size: 14px;">AGENT REMARKS:</p>
+        <p style="margin: 0 0 10px 0; color: #92400e; font-weight: 700; font-size: 14px;">STAFF REMARKS:</p>
         <p style="margin: 0; color: #783500; line-height: 1.5;">{{ $comment }}</p>
     </div>
     @endif
 
     @if($file_url)
     <div style="text-align: center; margin-top: 30px;">
-        <a href="{{ url($file_url) }}" class="btn">📥 View Document</a>
+        <a href="{{ url($file_url) }}" class="btn">📥 Download Your Document</a>
     </div>
     @endif
 
-    <div style="margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 8px; text-align: center;">
+    <div class="status-message">
         @if(strtolower($status) === 'resolved' || strtolower($status) === 'successful')
-            <span style="font-size: 24px;">✅</span>
-            <p style="margin: 10px 0 0 0; font-weight: 600; color: #065f46;">Great news! Your request has been fulfilled.</p>
+            <span class="status-icon">✅</span>
+            <p class="status-text" style="color: #065f46;">Your request has been successfully completed!</p>
         @elseif(strtolower($status) === 'rejected' || strtolower($status) === 'failed')
-            <span style="font-size: 24px;">❌</span>
-            <p style="margin: 10px 0 0 0; font-weight: 600; color: #991b1b;">Unfortunately, the request was unsuccessful.</p>
+            <span class="status-icon">❌</span>
+            <p class="status-text" style="color: #991b1b;">Your request could not be processed at this time.</p>
         @else
-            <span style="font-size: 24px;">⏳</span>
-            <p style="margin: 10px 0 0 0; font-weight: 600; color: #1e40af;">We are processing your update.</p>
+            <span class="status-icon">🔔</span>
+            <p class="status-text" style="color: #1e40af;">We are actively working on your request.</p>
         @endif
     </div>
 
@@ -117,16 +141,17 @@
 @endsection
 
 @section('footer_section')
-    <div class="support-section" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 30px; text-align: center;">
-        <span class="support-title" style="font-weight: 700; color: #1e293b; margin-bottom: 15px; display: block;">Need Help? Join Our Community</span>
+    <div class="support-section">
+        <span class="support-title" style="font-weight: 700; color: #1e293b; margin-bottom: 15px; display: block;">Need Assistance?</span>
+        <p style="font-size: 14px; margin-bottom: 20px;">Join our community or follow us for updates.</p>
         
-        <div style="margin-bottom: 20px;">
-            <a href="https://chat.whatsapp.com/DbXtTP0VPW90YDqKaKBsl3" style="color: #FF6F28; text-decoration: none; font-weight: 600; font-size: 14px; margin: 0 10px;">💬 WhatsApp Community</a>
-            <a href="https://www.facebook.com/share/184dBwK8HX/" style="color: #FF6F28; text-decoration: none; font-weight: 600; font-size: 14px; margin: 0 10px;">🔵 Official Facebook</a>
+        <div class="social-links">
+            <a href="https://chat.whatsapp.com/DbXtTP0VPW90YDqKaKBsl3" class="social-link-item">💬 WhatsApp Group</a>
+            <a href="https://www.facebook.com/share/184dBwK8HX/" class="social-link-item">🔵 Official Facebook</a>
         </div>
         
-        <div style="padding: 12px 20px; background-color: #eff6ff; border-radius: 50px; display: inline-block;">
-            <span style="color: #1e40af; font-size: 13px; font-weight: 700;">Support Line: 08064333983</span>
+        <div style="padding: 12px 20px; background-color: #eff6ff; border-radius: 50px; display: inline-block; margin-top: 15px;">
+            <span style="color: #1e40af; font-size: 13px; font-weight: 700;">Support Desk: 08064333983</span>
         </div>
     </div>
 @endsection

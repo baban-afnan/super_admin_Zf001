@@ -157,11 +157,28 @@ class DashboardController extends Controller
         // Support Tickets Count (Open or Customer Reply)
         $supportCount = \App\Models\SupportTicket::whereIn('status', ['open', 'customer_reply'])->count();
 
+        // Name and Photo Resolution (via Model Accessors)
+        $firstName = $user->display_first_name;
+        $lastName = $user->display_last_name;
+        $photo = $user->profile_photo_url;
+        // Time-based Greeting
+        $hour = date('H');
+        $greeting = 'Good Morning';
+        if ($hour >= 12 && $hour < 17) {
+            $greeting = 'Good Afternoon';
+        } elseif ($hour >= 17) {
+            $greeting = 'Good Evening';
+        }
+
         // Current month name for display
         $currentMonth = Carbon::now()->format('F Y');
 
         return view('dashboard', compact(
             'user', 
+            'firstName',
+            'lastName',
+            'photo',
+            'greeting',
             'wallet', 
             'virtualAccount', 
             'bonusHistory',

@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'webhook/s8v-validation',
+        ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             '2fa' => \App\Http\Middleware\TwoFactorVerified::class,

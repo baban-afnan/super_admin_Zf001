@@ -68,10 +68,10 @@ class NinIpeController extends Controller
             ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type
+        // Status counts filtered by service_type (comprehensive grouping)
         $statusCounts = [
             'pending'    => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->where('status', 'pending')->count(),
-            'processing' => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->where('status', 'processing')->count(),
+            'processing' => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->whereIn('status', ['processing', 'in-progress', 'query', 'remark'])->count(),
             'resolved'   => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->whereIn('status', ['resolved', 'successful'])->count(),
             'rejected'   => AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])->whereIn('status', ['rejected', 'failed'])->count(),
         ];
@@ -290,5 +290,147 @@ class NinIpeController extends Controller
             ->pluck('bank')
             ->sort()
             ->values();
+    }
+    /**
+     * Bulk check and sync status for pending/processing NIN IPE requests
+     */
+    public function checkBulkStatus(Request $request)
+    {
+        $user = Auth::user();
+        if (($user->status ?? 'inactive') !== 'active') {
+            return redirect()->back()->with('errorMessage', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+        }
+
+        $apiKey = env('NIN_API_KEY');
+
+        if (!$apiKey) {
+            return redirect()->back()->with('errorMessage', 'API Key is missing in .env');
+        }
+
+        // Increase execution time limit to 5 minutes to prevent timeouts during bulk processing
+        set_time_limit(300);
+
+        // Fetch requests that are not in a final state, limited to 50 per run
+        $enrollments = AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])
+            ->whereIn('status', ['pending', 'processing', 'in-progress'])
+            ->limit(50)
+            ->get();
+
+        $remainingCount = AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])
+            ->whereIn('status', ['pending', 'processing', 'in-progress'])
+            ->count() - $enrollments->count();
+
+        if ($enrollments->isEmpty()) {
+            return redirect()->back()->with('infoMessage', 'No pending or processing requests to sync.');
+        }
+
+        $checkedCount = 0;
+        $updatedCount = 0;
+        $failedCount = 0;
+        $noRecordCount = 0;
+
+        foreach ($enrollments as $enrollment) {
+            try {
+                $tracking_id = $enrollment->tracking_id;
+                
+                if (!$tracking_id) {
+                    $fieldData = json_decode($enrollment->field, true);
+                    $tracking_id = $fieldData['tracking_id'] ?? null;
+                }
+
+                if (!$tracking_id) continue;
+
+                $url = 'https://www.s8v.ng/api/clearance/status';
+                $payload = [
+                    'tracking_id' => $tracking_id,
+                    'token' => $apiKey
+                ];
+
+                $response = \Illuminate\Support\Facades\Http::post($url, $payload);
+                
+                if ($response->successful()) {
+                    $checkedCount++;
+                    $apiResponse = $response->json();
+
+                    // Clean the API response for better readability
+                    $cleanResponse = $this->cleanApiResponse($apiResponse);
+
+                    // Preparing the message for the comment
+                    $statusMessage = $apiResponse['message'] ?? $apiResponse['response'] ?? $cleanResponse;
+                    
+                    // Check for "No Record" in response
+                    $responseStr = json_encode($apiResponse);
+                    if (stripos($responseStr, 'no record') !== false) {
+                        $noRecordCount++;
+                    }
+
+                    // Prepare update data
+                    $updateData = [
+                        'comment' => $statusMessage,
+                    ];
+
+                    // Determine status from API response
+                    if (isset($apiResponse['status'])) {
+                        $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
+                    } elseif (isset($apiResponse['response'])) {
+                        $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
+                    }
+
+                    if (isset($updateData['status']) && $updateData['status'] !== $enrollment->status) {
+                        $enrollment->update($updateData);
+                        $updatedCount++;
+                    } else {
+                        $enrollment->update(['comment' => $statusMessage]);
+                    }
+                } else {
+                    \Log::warning('NIN IPE API failed for tracking ID: ' . $tracking_id, ['response' => $response->body()]);
+                    $failedCount++;
+                }
+            } catch (\Exception $e) {
+                \Log::error('NIN IPE Bulk Status Check Error: ' . $e->getMessage(), ['id' => $enrollment->id]);
+                $failedCount++;
+            }
+        }
+
+        return redirect()->back()->with('statusSyncResult', [
+            'provider' => 'S8V IPE',
+            'updated' => $updatedCount,
+            'failed' => $failedCount,
+            'no_record' => $noRecordCount,
+            'checked' => $checkedCount,
+            'remaining' => max(0, $remainingCount)
+        ]);
+    }
+
+    /**
+     * Clean API response by removing unwanted characters
+     */
+    private function cleanApiResponse($response): string
+    {
+        if (is_array($response)) {
+            // If it's an array, try to extract specific info or make it a neat string
+            if (isset($response['message'])) return (string) $response['message'];
+            if (isset($response['response'])) return (string) $response['response'];
+            
+            return collect($response)
+                ->map(fn($v, $k) => is_array($v) ? "$k: " . json_encode($v) : "$k: $v")
+                ->implode(' | ');
+        }
+
+        return trim((string) $response);
+    }
+
+    private function normalizeStatus($status): string
+    {
+        $s = strtolower(trim((string) $status));
+        
+        return match ($s) {
+            'successful', 'success', 'resolved', 'in-progress', 'approved', 'completed' => 'successful',
+            'processing', 'pending', 'submitted', 'new' => 'processing',
+            'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
+            'query' => 'query',
+            'remark' => 'remark',
+            default => 'pending',
+        };
     }
 }

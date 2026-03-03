@@ -83,6 +83,52 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     /**
+     * Get the user's profile photo URL.
+     */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        if (empty($this->photo)) {
+            return asset('assets/img/profiles/avatar-31.jpg');
+        }
+
+        if (strpos($this->photo, 'http') === 0) {
+            return $this->photo;
+        }
+
+        if (strpos($this->photo, 'storage/') === 0) {
+            return asset($this->photo);
+        }
+
+        // Check if file exists in public/ directly (legacy)
+        try {
+            if (file_exists(public_path($this->photo))) {
+                return asset($this->photo);
+            }
+        } catch (\Exception $e) {
+            // Fallback for environments where public_path might fail or be restricted
+        }
+
+        // Default to storage path
+        return asset('storage/' . ltrim($this->photo, '/'));
+    }
+
+    /**
+     * Get the user's display first name.
+     */
+    public function getDisplayFirstNameAttribute(): string
+    {
+        return $this->first_name ?? ($this->name ? explode(' ', $this->name)[0] : 'User');
+    }
+
+    /**
+     * Get the user's display last name.
+     */
+    public function getDisplayLastNameAttribute(): string
+    {
+        return $this->last_name ?? ($this->name ? implode(' ', array_slice(explode(' ', $this->name), 1)) : '');
+    }
+
+    /**
      * Relationship: A user has many transactions
      */
     public function transactions()

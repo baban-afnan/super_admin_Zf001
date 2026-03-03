@@ -12,6 +12,8 @@ use App\Models\AgentService;
 use App\Models\User;
 use App\Models\Service;
 use App\Models\ServiceField;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +31,7 @@ class ValidationController extends Controller
         $query = AgentService::query()
             ->select('agent_services.*', 'users.email as user_email')
             ->join('users', 'agent_services.user_id', '=', 'users.id')
-            ->where('agent_services.service_type', 'NIN_VALIDATION');
+            ->whereIn('agent_services.service_type', ['NIN_VALIDATION', 'validation', 'nin_validation']);
 
         // Enhanced search
         if ($search) {
@@ -63,12 +65,12 @@ class ValidationController extends Controller
             ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type (Fixed to match 'NIN_VALIDATION')
+        // Status counts filtered by service_type (Fixed to match all variants)
         $statusCounts = [
-            'pending'    => AgentService::where('service_type', 'NIN_VALIDATION')->where('status', 'pending')->count(),
-            'processing' => AgentService::where('service_type', 'NIN_VALIDATION')->where('status', 'processing')->count(),
-            'resolved'   => AgentService::where('service_type', 'NIN_VALIDATION')->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => AgentService::where('service_type', 'NIN_VALIDATION')->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])->where('status', 'pending')->count(),
+            'processing' => AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])->where('status', 'processing')->count(),
+            'resolved'   => AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
         return view('validation.index', compact('enrollments', 'search', 'statusFilter', 'statusCounts'));
@@ -251,5 +253,281 @@ class ValidationController extends Controller
             $message->to($user->email)
                     ->subject("Status Update: {$serviceName} Request");
         });
+    }
+
+    /**
+     * Check status for a specific NIN or ID
+     */
+    public function checkStatus(Request $request, $id = null)
+    {
+        $user = Auth::user();
+        // Permission check: All authenticated users can check. 
+        // We've removed the 'active' check to allow inactive or regular users to sync/check.
+
+        try {
+            if ($id) {
+                $agentService = AgentService::findOrFail($id);
+            } else {
+                $request->validate([
+                    'nin' => 'required|string',
+                ]);
+                $agentService = AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])
+                    ->where(function($q) use ($request) {
+                        $q->where('nin', $request->nin)->orWhere('tracking_id', $request->nin);
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->firstOrFail();
+            }
+
+            $apiKey = env('NIN_API_KEY');
+            
+            // Always use NIN validation endpoint for this controller
+            $url = 'https://s8v.ng/api/validation/status';
+            $payload = [
+                'nin' => $agentService->nin,
+                'token' => $apiKey
+            ];
+
+            $response = Http::post($url, $payload);
+            $apiResponse = $response->json();
+
+            // Check if response failed but contains record not found error
+            if (!$response->successful()) {
+                $errorMsg = $apiResponse['error'] ?? $apiResponse['message'] ?? 'API Error';
+                if (stripos($errorMsg, 'record not found') !== false) {
+                    $agentService->update(['comment' => 'Record not found on S8V API']);
+                    return back()->with('infoMessage', 'Record not found on S8V API.');
+                }
+                throw new \Exception($errorMsg);
+            }
+
+            // Clean the API response
+            $cleanResponse = $this->cleanApiResponse($apiResponse);
+
+            // Prepare update data
+            $updateData = [
+                'comment' => $cleanResponse,
+            ];
+
+            // Determine status from API response
+            if (isset($apiResponse['status'])) {
+                $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
+            } elseif (isset($apiResponse['response'])) {
+                $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
+            }
+
+            // Update the agent service record
+            $agentService->update($updateData);
+
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => true,
+                    'nin' => $agentService->nin,
+                    'tracking_id' => $agentService->tracking_id,
+                    'status' => $agentService->status,
+                    'response' => $apiResponse,
+                    'clean_comment' => $cleanResponse
+                ]);
+            }
+
+            return back()->with('successMessage', 'Status checked successfully. Current status: ' . $agentService->status);
+
+        } catch (\Exception $e) {
+            Log::error('Status Check Error: ' . $e->getMessage());
+
+            if ($request->wantsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to check status: ' . $e->getMessage(),
+                    'status' => 'error'
+                ], 500);
+            }
+            return back()->with('errorMessage', 'Unable to complete the request. Please try again.');
+        }
+    }
+
+    /**
+     * Bulk check and sync status for pending/processing NIN Validation requests
+     */
+    public function checkS8vBulkStatus(Request $request)
+    {
+        $user = Auth::user();
+        // Permission check relaxed - even inactive users can sync pending/processing records.
+
+        $apiKey = env('NIN_API_KEY');
+
+        if (!$apiKey) {
+            return redirect()->back()->with('errorMessage', 'API Key is missing in .env');
+        }
+
+        set_time_limit(300);
+
+        $enrollments = AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])
+            ->whereIn('status', ['pending', 'processing', 'in-progress'])
+            ->limit(50)
+            ->get();
+
+        $remainingCount = AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])
+            ->whereIn('status', ['pending', 'processing', 'in-progress'])
+            ->count() - $enrollments->count();
+
+        if ($enrollments->isEmpty()) {
+            return redirect()->back()->with('infoMessage', 'No pending or processing NIN Validation requests to sync.');
+        }
+
+        $checkedCount = 0;
+        $updatedCount = 0;
+        $failedCount = 0;
+        $noRecordCount = 0;
+
+        foreach ($enrollments as $enrollment) {
+            try {
+                $nin = $enrollment->nin;
+                
+                if (!$nin) {
+                    $fieldData = json_decode($enrollment->field, true);
+                    $nin = $fieldData['nin'] ?? null;
+                }
+
+                if (!$nin) continue;
+
+                $url = 'https://s8v.ng/api/validation/status';
+                $payload = [
+                    'nin' => $nin,
+                    'token' => $apiKey
+                ];
+
+                $response = Http::post($url, $payload);
+                $apiResponse = $response->json();
+                
+                if ($response->successful()) {
+                    $checkedCount++;
+                    $cleanResponse = $this->cleanApiResponse($apiResponse);
+                    
+                    $statusMessage = $apiResponse['message'] ?? $apiResponse['response'] ?? $cleanResponse;
+                    
+                    $responseStr = json_encode($apiResponse);
+                    if (stripos($responseStr, 'no record') !== false) {
+                        $noRecordCount++;
+                    }
+
+                    $updateData = ['comment' => $statusMessage];
+
+                    if (isset($apiResponse['status'])) {
+                        $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
+                    } elseif (isset($apiResponse['response'])) {
+                        $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
+                    }
+
+                    if (isset($updateData['status']) && $updateData['status'] !== $enrollment->status) {
+                        $enrollment->update($updateData);
+                        $updatedCount++;
+                    } else {
+                        $enrollment->update(['comment' => $statusMessage]);
+                    }
+                } else {
+                    $errorMsg = $apiResponse['error'] ?? $apiResponse['message'] ?? 'API Error';
+                    if (stripos($errorMsg, 'record not found') !== false) {
+                        $enrollment->update(['comment' => 'Record not found on S8V API']);
+                        $noRecordCount++;
+                        $checkedCount++;
+                    } else {
+                        Log::warning('S8V NIN Validation API failed for NIN: ' . $nin, ['response' => $response->body()]);
+                        $failedCount++;
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('S8V NIN Bulk Status Check Error: ' . $e->getMessage(), ['id' => $enrollment->id]);
+                $failedCount++;
+            }
+        }
+
+        return redirect()->back()->with('statusSyncResult', [
+            'provider' => 'S8V NIN',
+            'updated' => $updatedCount,
+            'failed' => $failedCount,
+            'no_record' => $noRecordCount,
+            'checked' => $checkedCount,
+            'remaining' => max(0, $remainingCount)
+        ]);
+    }
+
+    /**
+     * Webhook receiver for S8v notifications
+     */
+    public function webhook(Request $request)
+    {
+        $data = $request->all();
+
+        Log::info('NIN Validation Webhook Received', $data);
+
+        $identifier = $data['nin'] ?? null;
+
+        if ($identifier) {
+            $submission = AgentService::where('nin', $identifier)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($submission) {
+                // Clean the webhook response
+                $cleanResponse = $this->cleanApiResponse($data);
+                
+                $updateData = [
+                    'comment' => $cleanResponse,
+                ];
+
+                if (isset($data['status'])) {
+                    $updateData['status'] = $this->normalizeStatus($data['status']);
+                }
+
+                $submission->update($updateData);
+
+                Log::info('NIN Validation Updated via Webhook', [
+                    'submission_id' => $submission->id,
+                    'identifier' => $identifier,
+                    'new_status' => $updateData['status'] ?? 'unknown'
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Webhook received successfully'
+        ]);
+    }
+
+    /**
+     * Clean API response by removing unwanted characters
+     */
+    private function cleanApiResponse($response): string
+    {
+        if (is_array($response)) {
+            // If it's an array, try to extract specific info or make it a neat string
+            if (isset($response['message'])) return (string) $response['message'];
+            if (isset($response['response'])) return (string) $response['response'];
+            
+            return collect($response)
+                ->map(fn($v, $k) => is_array($v) ? "$k: " . json_encode($v) : "$k: $v")
+                ->implode(' | ');
+        }
+
+        return trim((string) $response);
+    }
+
+    /**
+     * Normalize status from various API response formats
+     */
+    private function normalizeStatus($status): string
+    {
+        $s = strtolower(trim((string) $status));
+        
+        return match ($s) {
+            'successful', 'success', 'resolved', 'approved', 'in-progress', 'completed' => 'successful',
+            'processing', 'pending', 'submitted', 'new' => 'processing',
+            'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
+            'query' => 'query',
+            'remark' => 'remark',
+            default => 'pending',
+        };
     }
 }

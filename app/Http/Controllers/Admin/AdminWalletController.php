@@ -32,17 +32,17 @@ class AdminWalletController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        // Get totals with same filters
-        $total_manual_credit = (clone $query)->where('type', 'manual_credit')->sum('amount');
-        $total_manual_debit = (clone $query)->where('type', 'manual_debit')->sum('amount');
+        // Filtered totals based on date range/type filters
+        $filtered_manual_credit = (clone $query)->where('type', 'manual_credit')->sum('amount');
+        $filtered_manual_debit = (clone $query)->where('type', 'manual_debit')->sum('amount');
 
-        // Monthly Stats (Current Month)
-        $monthly_manual_credit = Transaction::where('type', 'manual_credit')
+        // Snapshot Stats (Strictly Current Month)
+        $monthlyFunding = Transaction::where('type', 'manual_credit')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('amount');
         
-        $monthly_manual_debit = Transaction::where('type', 'manual_debit')
+        $monthlyDebit = Transaction::where('type', 'manual_debit')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('amount');
@@ -58,10 +58,10 @@ class AdminWalletController extends Controller
 
         return view('wallet.index', [
             'transactions' => $transactions,
-            'monthly_manual_credit' => $total_manual_credit,
-            'monthly_manual_debit' => $total_manual_debit,
-            'monthlyFunding' => $monthly_manual_credit,
-            'monthlyDebit' => $monthly_manual_debit,
+            'filtered_manual_credit' => $filtered_manual_credit,
+            'filtered_manual_debit' => $filtered_manual_debit,
+            'monthlyFunding' => $monthlyFunding,
+            'monthlyDebit' => $monthlyDebit,
             'palmpayBalance' => $palmpayBalance,
         ]);
     }
@@ -207,12 +207,15 @@ class AdminWalletController extends Controller
         return redirect()->route('admin.wallet.index')->with('success', 'All users wallets updated successfully.');
     }
 
-    public function summary()
+    public function summary(Request $request)
     {
-        // 1. Total Users Balance
+        $month = $request->get('month', date('m'));
+        $year = $request->get('year', date('Y'));
+
+        // 1. Total Users Balance (Snapshot)
         $totalBalance = Wallet::sum('balance');
 
-        // 2. Top 10 Users by Balance
+        // 2. Top 10 Users by Balance (Snapshot)
         $topUsersByBalance = User::with('wallet')
             ->join('wallets', 'users.id', '=', 'wallets.user_id')
             ->orderBy('wallets.balance', 'desc')
@@ -220,8 +223,10 @@ class AdminWalletController extends Controller
             ->select('users.*', 'wallets.balance as wallet_balance')
             ->get();
 
-        // 3. Most Used Service
-        $mostUsedServiceData = AgentService::select('service_type', DB::raw('count(*) as total'))
+        // 3. Most Used Service (Filtered by Month/Year)
+        $mostUsedServiceData = AgentService::whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->select('service_type', DB::raw('count(*) as total'))
             ->groupBy('service_type')
             ->orderBy('total', 'desc')
             ->first();
@@ -229,10 +234,37 @@ class AdminWalletController extends Controller
         $mostUsedService = $mostUsedServiceData ? $mostUsedServiceData->service_type : 'None';
         $usageCount = $mostUsedServiceData ? $mostUsedServiceData->total : 0;
 
-        // 4. Top 10 Users by Service Usage
+        // 4. Monthly Financial Aggregates (Filtered by Month/Year)
+        $monthlyStats = Transaction::whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->select('type', DB::raw('SUM(amount) as total'))
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        $monthlyManualCredit = $monthlyStats->get('manual_credit', 0);
+        $monthlyManualDebit = $monthlyStats->get('manual_debit', 0);
+        $monthlyServiceSpend = $monthlyStats->get('debit', 0);
+        $monthlyRefunds = $monthlyStats->get('refund', 0);
+        $monthlyAutomatedFunding = $monthlyStats->get('credit', 0);
+        
+        // Monthly Revenue from Agent Services (Actual order value)
+        $monthlyRevenue = AgentService::whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->sum('amount');
+
+        // Net Yield (Total Incomes - Total Expenses/Outflows)
+        // Income = Manual Credit + Automated Credit + Refunds
+        // Outgo = Manual Debit + Service Spend
+        $totalIn = $monthlyManualCredit + $monthlyAutomatedFunding + $monthlyRefunds;
+        $totalOut = $monthlyManualDebit + $monthlyServiceSpend;
+        $monthlyNetYield = $totalIn - $totalOut;
+
+        // 5. Top 10 Users by Service Usage (Filtered by Month/Year)
         $topUsersByService = [];
         if ($mostUsedService !== 'None') {
             $topUserStats = AgentService::where('service_type', $mostUsedService)
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year)
                 ->select('user_id', DB::raw('count(*) as usage_count'))
                 ->groupBy('user_id')
                 ->orderBy('usage_count', 'desc')
@@ -251,18 +283,6 @@ class AdminWalletController extends Controller
                 ->sortByDesc('usage_count');
         }
 
-        // 5. Monthly Stats
-        $startOfMonth = \Carbon\Carbon::now()->startOfMonth();
-        $endOfMonth = \Carbon\Carbon::now()->endOfMonth();
-
-        $monthlyManualCredit = Transaction::where('type', 'manual_funding')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
-        $monthlyManualDebit = Transaction::where('type', 'manual_debit')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
         return view('wallet.summary', compact(
             'totalBalance',
             'topUsersByBalance',
@@ -270,7 +290,14 @@ class AdminWalletController extends Controller
             'usageCount',
             'topUsersByService',
             'monthlyManualCredit',
-            'monthlyManualDebit'
+            'monthlyManualDebit',
+            'monthlyServiceSpend',
+            'monthlyRefunds',
+            'monthlyAutomatedFunding',
+            'monthlyRevenue',
+            'monthlyNetYield',
+            'month',
+            'year'
         ));
     }
 }

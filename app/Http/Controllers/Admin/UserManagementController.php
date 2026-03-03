@@ -9,9 +9,11 @@ use App\Models\User;
 use App\Models\Transaction;
 use App\Models\BlockedIp;
 use App\Models\Wallet;
+use App\Notifications\NewUserCreated;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Notifications\NewUserCreated;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UserManagementController extends Controller
 {
@@ -102,6 +104,7 @@ class UserManagementController extends Controller
             'password' => Hash::make($password),
             'role' => 'personal', // Default role
             'status' => 'active',
+            'referral_code' => Str::random(6),
         ]);
 
         // Create Wallet
@@ -211,7 +214,7 @@ class UserManagementController extends Controller
 
     public function downloadSample()
     {
-        $csvHeader = ['First Name', 'Surname', 'Email', 'Phone Number', 'BVN'];
+        $csvHeader = ['First Name', 'Last Name', 'Middle Name', 'Email', 'Phone Number', 'BVN'];
         $callback = function() use ($csvHeader) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $csvHeader);
@@ -232,66 +235,130 @@ class UserManagementController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt,xlsx',
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls',
         ]);
 
-        $file = $request->file('file');
-        
-        // Simple CSV parsing for now to avoid dependency issues if Maatwebsite is not fully configured
-        // If it's an actual Excel file, we might need PhpSpreadsheet, but let's assume CSV for simplicity or try to parse
-        
-        $path = $file->getRealPath();
-        $data = array_map('str_getcsv', file($path));
-        $header = array_shift($data); // Remove header
-
-        $count = 0;
-        foreach ($data as $row) {
-            if (count($row) < 5) continue;
-
-            // Basic mapping assuming order: First Name, Surname, Email, Phone, BVN
-            $firstName = $row[0];
-            $surname = $row[1];
-            $email = $row[2];
-            $phone = $row[3];
-            $bvn = $row[4];
-
-            if (User::where('email', $email)->exists()) continue;
-
-            $password = Str::random(10);
+        try {
+            $file = $request->file('file');
+            $extension = $file->getClientOriginalExtension();
             
-            $user = User::create([
-                'first_name' => $firstName,
-                'last_name' => $surname,
-                'email' => $email,
-                'phone_no' => $phone,
-                'bvn' => $bvn,
-                'password' => Hash::make($password),
-                'role' => 'personal',
-                'status' => 'active',
-            ]);
-
-            // Create Wallet
-            Wallet::create([
-                'user_id' => $user->id,
-                'balance' => 0,
-                'hold_amount' => 0,
-                'available_balance' => 0,
-                'wallet_number' => mt_rand(1000000000, 9999999999),
-                'currency' => 'NGN',
-                'status' => 'active',
-                'last_activity' => now(),
-            ]);
-
-            try {
-                $user->notify(new NewUserCreated($password));
-            } catch (\Exception $e) {
-                // Log error or continue
+            if (in_array($extension, ['xlsx', 'xls'])) {
+                $spreadsheet = IOFactory::load($file->getRealPath());
+                $sheet = $spreadsheet->getActiveSheet();
+                $data = $sheet->toArray();
+            } else {
+                // Handle CSV/TXT
+                $data = [];
+                if (($handle = fopen($file->getRealPath(), "r")) !== FALSE) {
+                    while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        $data[] = $row;
+                    }
+                    fclose($handle);
+                }
+            }
+            
+            if (count($data) <= 1) {
+                return back()->with('error', 'The uploaded file is empty or missing data rows.');
             }
 
-            $count++;
-        }
+            $header = array_shift($data); // Remove header
 
-        return back()->with('success', "$count users imported successfully.");
+            $created = 0;
+            $skipped = 0;
+            $errors = 0;
+
+            foreach ($data as $row) {
+                // Skip empty rows
+                if (empty(array_filter($row))) continue;
+                
+                // Expected: First Name, Last Name, Middle Name, Email, Phone Number, BVN
+                $firstName = isset($row[0]) ? trim($row[0]) : null;
+                $lastName = isset($row[1]) ? trim($row[1]) : null;
+                $middleName = isset($row[2]) ? trim($row[2]) : null;
+                $email = isset($row[3]) ? trim($row[3]) : null;
+                $phone = isset($row[4]) ? trim($row[4]) : null;
+
+                // Add leading zero if missing (common in Excel formatting for numbers)
+                if ($phone && is_numeric($phone) && strlen($phone) === 10 && !str_starts_with($phone, '0')) {
+                    $phone = '0' . $phone;
+                }
+                $bvn = isset($row[5]) ? trim($row[5]) : null;
+
+                if (empty($email) || empty($phone)) {
+                    $errors++;
+                    continue;
+                }
+
+                // Check for duplicate email or phone
+                $exists = User::where('email', $email)
+                    ->orWhere('phone_no', $phone)
+                    ->exists();
+
+                if ($exists) {
+                    $skipped++;
+                    continue;
+                }
+
+                DB::beginTransaction();
+                try {
+                    $password = Str::random(10);
+                    
+                    $user = User::create([
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
+                        'middle_name' => $middleName,
+                        'email' => $email,
+                        'phone_no' => $phone,
+                        'bvn' => $bvn,
+                        'password' => Hash::make($password),
+                        'role' => 'personal',
+                        'status' => 'active',
+                        'referrel_code' => Str::random(6),
+                    ]);
+
+                    // Create Wallet
+                    Wallet::create([
+                        'user_id' => $user->id,
+                        'balance' => 0,
+                        'hold_amount' => 0,
+                        'available_balance' => 0,
+                        'wallet_number' => mt_rand(1000000000, 9999999999),
+                        'currency' => 'NGN',
+                        'status' => 'active',
+                        'last_activity' => now(),
+                    ]);
+
+                    DB::commit();
+
+                    // Send notification
+                    try {
+                        $user->notify(new NewUserCreated($password));
+                    } catch (\Exception $e) {
+                        // Email failed but user is created, log it
+                        \Log::error("Failed to send welcome email to {$email}: " . $e->getMessage());
+                    }
+
+                    $created++;
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error("Failed to import user {$email}: " . $e->getMessage());
+                    $errors++;
+                }
+            }
+
+            $total = count($data);
+            $report = [
+                'created' => $created,
+                'skipped' => $skipped,
+                'errors' => $errors,
+                'total' => $total
+            ];
+            
+            return back()->with('success', 'Import processing completed.')->with('import_report', $report);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred during import: ' . $e->getMessage());
+        }
     }
     public function edit(User $user)
     {

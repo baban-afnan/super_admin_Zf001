@@ -23,31 +23,31 @@
 
         {{-- Stats Cards --}}
         <div class="row g-3 mb-4">
-            <!-- Total Manual Credit -->
+            <!-- Total Manual Credit (Filtered) -->
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.1s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--primary-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1" style="color: white;">Total Manual Credit</p>
-                            <h3 class="stats-value mb-0">₦{{ number_format($monthly_manual_credit, 2) }}</h3>
+                            <p class="stats-label mb-1" style="color: white;">Filtered Credit Total</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($filtered_manual_credit, 2) }}</h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                            <i class="ti ti-arrow-up-right fs-24 text-white"></i>
+                            <i class="ti ti-filter fs-24 text-white"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Manual Debit -->
+            <!-- Total Manual Debit (Filtered) -->
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.2s;">
                 <div class="financial-card shadow-sm h-100 p-4" style="background: var(--warning-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1" style="color: white;">Total Manual Debit</p>
-                            <h3 class="stats-value mb-0">₦{{ number_format($monthly_manual_debit, 2) }}</h3>
+                            <p class="stats-label mb-1" style="color: white;">Filtered Debit Total</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($filtered_manual_debit, 2) }}</h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                            <i class="ti ti-arrow-down-left fs-24 text-white"></i>
+                            <i class="ti ti-filter fs-24 text-white"></i>
                         </div>
                     </div>
                 </div>

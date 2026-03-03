@@ -14,57 +14,50 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Barryvdh\DomPDF\Facade\Pdf;
-use SimpleSoftwareIO\QrCode\Generator;
 
-class TinController extends Controller
+class CACRegistrationController extends Controller
 {
     /**
-     * List TIN requests with filters and pagination
+     * List cac_registrations with filters and pagination
      */
     public function index(Request $request)
     {
         $search = $request->input('search');
         $statusFilter = $request->input('status');
-        $bankFilter = $request->input('bank');
-        $typeFilter = $request->input('type'); // 'individual' or 'corporate'
 
-        // Determine service types to query
-        $serviceTypes = [];
-        if ($typeFilter === 'individual') {
-            $serviceTypes = ['TIN INDIVIDUAL'];
-        } elseif ($typeFilter === 'corporate') {
-            $serviceTypes = ['TIN CORPORATE'];
-        } else {
-            $serviceTypes = ['TIN INDIVIDUAL', 'TIN CORPORATE'];
-        }
-
-        // Base query filtering by service_type
+        // Base query filtering by service_type with user email join
         $query = AgentService::query()
-            ->whereIn('service_type', $serviceTypes);
+            ->select('agent_services.*', 'users.email as user_email')
+            ->join('users', 'agent_services.user_id', '=', 'users.id')
+            ->where(function($q) {
+                $q->where('agent_services.service_type', 'like', '%CAC%')
+                  ->orWhere('agent_services.service_type', 'like', '%cac%');
+            });
 
-        // Enhanced search
+        // Enhanced search: BVN, NIN, transaction_ref, agent name
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('bvn', 'like', "%$search%")
-                  ->orWhere('nin', 'like', "%$search%")
-                  ->orWhere('reference', 'like', "%$search%")
-                  ->orWhere('performed_by', 'like', "%$search%")
-                  ->orWhere('user_id', 'like', "%$search%");
+                $q->where('agent_services.bvn', 'like', "%$search%")
+                  ->orWhere('agent_services.nin', 'like', "%$search%")
+                  ->orWhere('agent_services.reference', 'like', "%$search%")
+                  ->orWhere('agent_services.performed_by', 'like', "%$search%")
+                  ->orWhere('agent_services.user_id', 'like', "%$search%");
             });
         }
 
         if ($statusFilter) {
-            $query->where('status', $statusFilter);
-        }
-
-        if ($bankFilter) {
-            $query->where('bank', $bankFilter);
+            if ($statusFilter === 'resolved' || $statusFilter === 'successful') {
+                $query->whereIn('agent_services.status', ['resolved', 'successful']);
+            } elseif ($statusFilter === 'rejected' || $statusFilter === 'failed') {
+                $query->whereIn('agent_services.status', ['rejected', 'failed']);
+            } else {
+                $query->where('agent_services.status', $statusFilter);
+            }
         }
 
         // Apply custom status order + submission_date
         $enrollments = $query
-            ->orderByRaw("CASE status
+            ->orderByRaw("CASE agent_services.status
                 WHEN 'pending' THEN 1
                 WHEN 'processing' THEN 2
                 WHEN 'in-progress' THEN 3
@@ -75,27 +68,27 @@ class TinController extends Controller
                 WHEN 'failed' THEN 8
                 WHEN 'remark' THEN 9
                 ELSE 999 END")
-            ->orderByDesc('submission_date')
+            ->orderByDesc('agent_services.submission_date')
             ->paginate(10);
 
-        // Status counts filtered by service_type(s)
-        $countQuery = AgentService::whereIn('service_type', $serviceTypes);
-        
+        // Status counts filtered by service_type using same logic
+        $baseCountQuery = AgentService::where(function($q) {
+            $q->where('service_type', 'like', '%cac_registration%')
+              ->orWhere('service_type', 'like', '%cac registration%');
+        });
+
         $statusCounts = [
-            'pending'    => (clone $countQuery)->where('status', 'pending')->count(),
-            'processing' => (clone $countQuery)->where('status', 'processing')->count(),
-            'resolved'   => (clone $countQuery)->whereIn('status', ['resolved', 'successful'])->count(),
-            'rejected'   => (clone $countQuery)->whereIn('status', ['rejected', 'failed'])->count(),
+            'pending'    => (clone $baseCountQuery)->where('status', 'pending')->count(),
+            'processing' => (clone $baseCountQuery)->where('status', 'processing')->count(),
+            'resolved'   => (clone $baseCountQuery)->whereIn('status', ['resolved', 'successful'])->count(),
+            'rejected'   => (clone $baseCountQuery)->whereIn('status', ['rejected', 'failed'])->count(),
         ];
 
-        // Get distinct banks for filter
-        $banks = $this->getDistinctBanks();
-
-        return view('tin.index', compact('enrollments', 'search', 'statusFilter', 'bankFilter', 'statusCounts', 'banks', 'typeFilter'));
+        return view('cac.index', compact('enrollments', 'search', 'statusFilter', 'statusCounts'));
     }
 
     /**
-     * Show details of a single request
+     * Show details of a single cac_registration
      */
     public function show($id)
     {
@@ -108,16 +101,15 @@ class TinController extends Controller
                 'comment' => $enrollmentInfo->comment,
                 'submission_date' => $enrollmentInfo->created_at,
                 'updated_at' => $enrollmentInfo->updated_at,
-                'file_url' => $this->fileUrlForPublic($enrollmentInfo->file_url),
+                'file_url' => $enrollmentInfo->file_url,
             ]
         ]);
 
-        return view('tin.view', compact('enrollmentInfo', 'statusHistory', 'user'));
+        return view('cac.view', compact('enrollmentInfo', 'statusHistory', 'user'));
     }
 
-
     /**
-     * Update the status of a request
+     * Update the status of a cac_registration
      */
     public function update(Request $request, $id)
     {
@@ -138,21 +130,17 @@ class TinController extends Controller
             // Handle file upload
             $fileUrl = $enrollment->file_url;
             if ($request->hasFile('file')) {
-                // Delete old file if exists. Support stored values being either stored path or public URL.
-                if ($fileUrl) {
-                    $storedPath = $this->storagePathFromUrl($fileUrl);
-                    if ($storedPath && Storage::disk('public')->exists($storedPath)) {
-                        Storage::disk('public')->delete($storedPath);
-                    }
+                // Delete old file if exists
+                if ($fileUrl && Storage::disk('public')->exists($fileUrl)) {
+                    Storage::disk('public')->delete($fileUrl);
                 }
 
-                // Store new file on the 'public' disk and save its public URL in the DB column
+                // Store new file
                 $file = $request->file('file');
                 $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('tin-files', $fileName, 'public');
-                // Store complete URL using APP_URL from config
+                $filePath = $file->storeAs('cac-files', $fileName, 'public');
                 $baseUrl = rtrim(config('app.url'), '/');
-                $fileUrl = $baseUrl . '/storage/tin-files/' . $fileName;
+                $fileUrl = $baseUrl . '/storage/cac-files/' . $fileName;
             }
 
             // Update enrollment
@@ -174,11 +162,11 @@ class TinController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('tin.index', ['type' => Str::contains($enrollment->service_type, 'individual') ? 'individual' : 'corporate'])
+            return redirect()->route('cac-registration.index')
                 ->with('successMessage', 'Status updated successfully and notification sent to user.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            return redirect()->route('cac-registration.index')
                 ->with('errorMessage', 'Failed to update status: ' . $e->getMessage());
         }
     }
@@ -228,8 +216,7 @@ class TinController extends Controller
             throw new \Exception('No valid price found for refund.');
         }
 
-        $refundAmount = round($basePrice * 0.8, 2);
-        $debitAmount = round($basePrice * 0.2, 2);
+        $refundAmount = $basePrice;
 
         $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
 
@@ -249,7 +236,7 @@ class TinController extends Controller
             'amount' => $refundAmount,
             'fee' => 0.00,
             'net_amount' => $refundAmount,
-            'description' => "Refund 80% for rejected service [{$serviceField->field_name}], Request ID #{$enrollment->id}",
+            'description' => "Full Refund (100%) for rejected service [{$serviceField->field_name}], Request ID #{$enrollment->id}",
             'type' => 'refund',
             'status' => 'completed',
             'metadata' => json_encode([
@@ -259,8 +246,7 @@ class TinController extends Controller
                 'field_name' => $serviceField->field_name ?? null,
                 'user_role' => $role,
                 'base_price' => $basePrice,
-                'percentage_refunded' => 80,
-                'amount_debited_by_system' => $debitAmount,
+                'percentage_refunded' => 100,
                 'forced_refund' => $forceRefund,
             ]),
         ]);
@@ -272,7 +258,7 @@ class TinController extends Controller
     private function sendStatusUpdateEmail($user, $enrollment, $fileUrl = null)
     {
         $service = Service::find($enrollment->service_id);
-        $serviceName = $service ? $service->name : 'TIN Service';
+        $serviceName = $service ? $service->name : 'CAC Registration Service';
         
         $serviceField = ServiceField::find($enrollment->service_field_id);
         $fieldName = $serviceField ? $serviceField->field_name : 'Service';
@@ -284,98 +270,14 @@ class TinController extends Controller
             'field_name' => $fieldName,
             'status' => ucfirst($enrollment->status),
             'comment' => $enrollment->comment,
-            'file_url' => $this->fileUrlForPublic($fileUrl),
+            'file_url' => $fileUrl ? (filter_var($fileUrl, FILTER_VALIDATE_URL) ? $fileUrl : Storage::url($fileUrl)) : null,
             'request_id' => $enrollment->id,
             'reference' => $enrollment->reference,
-            'bvn' => $enrollment->bvn,
-            'nin' => $enrollment->nin,
         ];
 
-        Mail::send('emails.bvn-status-update', $data, function($message) use ($user, $serviceName) {
+        Mail::send('emails.cac-status-update', $data, function($message) use ($user, $serviceName) {
             $message->to($user->email)
                     ->subject("Status Update: {$serviceName} Request");
         });
-    }
-
-    /**
-     * Convert a stored DB value (either a public URL or a relative storage path)
-     * to the relative path used by the 'public' disk. Returns null if input empty.
-     */
-    private function storagePathFromUrl($value)
-    {
-        if (!$value) {
-            return null;
-        }
-
-        $path = $value;
-
-        // If it's a full URL, extract path component
-        if (preg_match('#^https?://#', $path)) {
-            $parsed = parse_url($path, PHP_URL_PATH);
-            if ($parsed !== null) {
-                $path = $parsed;
-            }
-        }
-
-        // Remove leading '/storage/' or 'storage/' so it matches disk paths
-        $path = preg_replace('#^/storage/#', '', $path);
-        $path = preg_replace('#^storage/#', '', $path);
-
-        return $path;
-    }
-
-    /**
-     * Return a publicly accessible URL for a stored value. Accepts either a
-     * stored relative path or an already public URL and returns a public URL.
-     */
-    private function fileUrlForPublic($value)
-    {
-        if (!$value) {
-            return null;
-        }
-
-        // If already a full URL or already a '/storage/...' path, return as-is
-        if (preg_match('#^https?://#', $value) || strpos($value, '/storage/') === 0) {
-            return $value;
-        }
-
-        return Storage::url($value);
-    }
-
-    /**
-     * Get distinct banks from agent_services table
-     */
-    private function getDistinctBanks()
-    {
-        return AgentService::whereNotNull('bank')
-            ->where('bank', '!=', '')
-            ->distinct()
-            ->pluck('bank')
-            ->sort()
-            ->values();
-    }
-
-    /**
-     * Generate and download TIN certificate
-     */
-    public function downloadCertificate($id)
-    {
-        $enrollmentInfo = AgentService::findOrFail($id);
-        
-        // Generate QR Code
-        // Format: Name, TIN, Date Issued
-        $qrData = sprintf(
-            "Name: %s\nTIN: %s\nDate: %s",
-            $enrollmentInfo->first_name . ' ' . $enrollmentInfo->middle_name . ' ' . $enrollmentInfo->last_name,
-            $enrollmentInfo->nin ?? $enrollmentInfo->number ?? 'N/A', 
-            now()->format('Y-m-d')
-        );
-
-        $qrcode = (new Generator)->format('svg')->size(200)->generate($qrData);
-
-        $pdf = Pdf::loadView('tin.certificate', compact('enrollmentInfo', 'qrcode'))
-            ->setPaper('a4', 'landscape');
-
-        return $pdf->download('TIN_Certificate_' . ($enrollmentInfo->reference ?? 'doc') . '.pdf');
     }
 }

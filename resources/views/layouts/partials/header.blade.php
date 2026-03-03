@@ -163,7 +163,7 @@
                     <div class="dropdown profile-dropdown">
                         <a href="javascript:void(0);" class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
                             <span class="avatar avatar-sm online">
-                                <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : asset('assets/img/profiles/avatar-01.jpg') }}" alt="Img" class="img-fluid rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                <img src="{{ Auth::user()->profile_photo_url }}" alt="Img" class="img-fluid rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                             </span>
                         </a>
                         <div class="dropdown-menu shadow-none">
@@ -171,10 +171,10 @@
                                 <div class="card-header">
                                     <div class="d-flex align-items-center">
                                         <span class="avatar avatar-lg me-2 avatar-rounded">
-                                            <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : asset('assets/img/profiles/avatar-01.jpg') }}" alt="img" style="width: 48px; height: 48px; object-fit: cover;">
+                                            <img src="{{ Auth::user()->profile_photo_url }}" alt="img" style="width: 48px; height: 48px; object-fit: cover;">
                                         </span>
                                         <div>
-                                            <h5 class="mb-0">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</h5>
+                                            <h5 class="mb-0">{{ Auth::user()->display_first_name }} {{ Auth::user()->display_last_name }}</h5>
                                             <p class="fs-12 fw-medium mb-0">
                                                 {{ Auth::user()->email }}
                                             </p>

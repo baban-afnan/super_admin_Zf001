@@ -1,24 +1,6 @@
 <x-app-layout>
     <title>Arewa Smart - Dashboard</title>
     <div class="mt-4"> 
-
-        @php
-            $firstName = $user->first_name ?? ($user->name ? explode(' ', $user->name)[0] : 'User');
-            $lastName = $user->last_name ?? (isset($user->name) ? implode(' ', array_slice(explode(' ', $user->name), 1)) : '');
-            
-            if (!empty($user->photo)) {
-                if (strpos($user->photo, 'http') === 0) {
-                    $photo = $user->photo;
-                } elseif (strpos($user->photo, 'storage/') === 0) {
-                    $photo = asset($user->photo);
-                } else {
-                    $photo = asset('storage/' . ltrim($user->photo, '/'));
-                }
-            } else {
-                $photo = asset('assets/img/profiles/avatar-31.jpg');
-            }
-        @endphp
-
         
         <!-- Welcome Card -->
         <div class="card border-0 shadow-sm overflow-hidden mb-4" style="background: linear-gradient(to right, #ffffff, #f8f9fa);">
@@ -36,15 +18,6 @@
                             </span>
                         </div>
                         <div class="ms-3">
-                            @php
-                                $hour = date('H');
-                                $greeting = 'Good Morning';
-                                if ($hour >= 12 && $hour < 17) {
-                                    $greeting = 'Good Afternoon';
-                                } elseif ($hour >= 17) {
-                                    $greeting = 'Good Evening';
-                                }
-                            @endphp
                             <h3 class="mb-1 fw-bold text-dark">
                                 {{ $greeting }}, {{ $firstName }}{{ $lastName ? ' ' . $lastName : '' }}
                                 <a href="{{ route('profile.edit') }}" class="btn btn-icon btn-sm btn-ghost-secondary rounded-circle ms-1" data-bs-toggle="tooltip" title="Edit Profile">

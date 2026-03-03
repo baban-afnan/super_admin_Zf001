@@ -9,6 +9,8 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\BVNmodController;
 use App\Http\Controllers\BvnUserController;
+use App\Http\Controllers\CACRegistrationController;
+use App\Http\Controllers\AffidavitController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -116,14 +118,29 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
         Route::put('/{id}', [\App\Http\Controllers\NINmodController::class, 'update'])->name('update');
     });
 
+    Route::prefix('cac-registration')->name('cac-registration.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\CACRegistrationController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\CACRegistrationController::class, 'show'])->name('show');
+        Route::put('/{id}', [\App\Http\Controllers\CACRegistrationController::class, 'update'])->name('update');
+    });
+
+    Route::prefix('affidavit')->name('affidavit.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AffidavitController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\AffidavitController::class, 'show'])->name('show');
+        Route::put('/{id}', [\App\Http\Controllers\AffidavitController::class, 'update'])->name('update');
+    });
+
     Route::prefix('nin-ipe')->name('ninipe.')->group(function () {
         Route::get('/', [\App\Http\Controllers\NinIpeController::class, 'index'])->name('index');
+        Route::post('/check-status', [\App\Http\Controllers\NinIpeController::class, 'checkBulkStatus'])->name('checkBulkStatus');
         Route::get('/{id}', [\App\Http\Controllers\NinIpeController::class, 'show'])->name('show');
         Route::put('/{id}', [\App\Http\Controllers\NinIpeController::class, 'update'])->name('update');
     });
 
     Route::prefix('validation')->name('validation.')->group(function () {
         Route::get('/', [\App\Http\Controllers\ValidationController::class, 'index'])->name('index');
+        Route::post('/check-status', [\App\Http\Controllers\ValidationController::class, 'checkBulkStatus'])->name('checkBulkStatus');
+        Route::post('/check-s8v-status', [\App\Http\Controllers\ValidationController::class, 'checkS8vBulkStatus'])->name('checkS8vStatus');
         Route::get('/{id}', [\App\Http\Controllers\ValidationController::class, 'show'])->name('show');
         Route::put('/{id}', [\App\Http\Controllers\ValidationController::class, 'update'])->name('update');
     });
@@ -147,12 +164,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
         Route::post('/', [\App\Http\Controllers\VninToNibssController::class, 'store'])->name('store');
     });
 
-    Route::prefix('tin')->name('tin.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\TinController::class, 'index'])->name('index');
-        Route::get('/{id}', [\App\Http\Controllers\TinController::class, 'show'])->name('show');
-        Route::put('/{id}', [\App\Http\Controllers\TinController::class, 'update'])->name('update');
-        Route::get('/{id}/certificate', [\App\Http\Controllers\TinController::class, 'downloadCertificate'])->name('certificate');
-    });
+   
 
     Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
     Route::post('/enrollments/upload', [EnrollmentController::class, 'upload'])->name('enrollments.upload');
@@ -201,6 +213,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
     Route::post('/profile/pin', [ProfileController::class, 'updatePin'])->name('profile.pin');
+    
+    // Validation Status Check for Regular Users
+    Route::match(['get', 'post'], '/validation/check-single-status', [\App\Http\Controllers\ValidationController::class, 'checkStatus'])->name('validation.checkSingleStatus');
 });
 
 // Test Routes for Notification (Temporary)
@@ -217,5 +232,7 @@ Route::get('/test-notification-payment', function () {
 Route::get('/test-notification-generic', function () {
     return new App\Mail\SendNotification('Welcome', 'Welcome to our platform!');
 });
+
+Route::post('/webhook/s8v-validation', [\App\Http\Controllers\ValidationController::class, 'webhook'])->name('validation.webhook');
 
 require __DIR__.'/auth.php';

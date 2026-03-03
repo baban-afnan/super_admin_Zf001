@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -17,8 +18,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'firstName' => $user->display_first_name,
+            'lastName' => $user->display_last_name,
+            'photo' => $user->profile_photo_url,
         ]);
     }
 
@@ -59,9 +64,6 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    /**
-     * Update the user's profile photo.
-     */
     public function updatePhoto(Request $request): RedirectResponse
     {
         $request->validate([
@@ -72,19 +74,31 @@ class ProfileController extends Controller
 
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
-            if ($user->photo && file_exists(public_path($user->photo))) {
-                @unlink(public_path($user->photo));
+            if (!empty($user->photo)) {
+                $oldPath = $user->photo;
+                
+                // If the stored path is a full URL, attempt to extract the relative storage path
+                $storageUrl = asset('storage/');
+                if (strpos($oldPath, $storageUrl) === 0) {
+                    $oldPath = str_replace($storageUrl, '', $oldPath);
+                }
+                
+                $oldPath = ltrim($oldPath, '/');
+
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
             }
 
-            $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $path = 'public/profile-photos'; 
+            // Define folder and unique filename as requested
+            $folder = 'uploads/profile_photos';
+            $filename = 'profile_' . $user->id . '_' . time() . '.' . $request->file('photo')->getClientOriginalExtension();
             
-            // Move file to public/profile-photos
-            $file->move(public_path('profile-photos'), $filename);
+            // Store the file using 'public' disk
+            $path = $request->file('photo')->storeAs($folder, $filename, 'public');
             
-            // Save relative path to DB
-            $user->photo = 'profile-photos/' . $filename;
+            // Save FULL URL to DB for "easy tracking"
+            $user->photo = asset('storage/' . $path);
             $user->save();
         }
 

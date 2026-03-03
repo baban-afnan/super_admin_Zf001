@@ -1,5 +1,5 @@
 <x-app-layout>
-   <title>Arewa Smart - TIN Service Details</title>
+      <title>Arewa Smart - CAC Registration</title>
 
     <div class="content">
         <div class="row mb-4">
@@ -7,14 +7,11 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 class="mb-0 fw-bold text-primary">TIN Request Details</h4>
-                            <p class="text-muted mb-0">View and manage TIN {{ Str::contains($enrollmentInfo->service_type, 'individual') ? 'Individual' : 'Corporate' }} request</p>
+                            <h4 class="mb-0 fw-bold text-primary">CAC Registration Details</h4>
+                            <p class="text-muted mb-0">View and manage CAC registration request</p>
                         </div>
                         <div class="d-flex gap-2">
-                             <a href="{{ route('tin.certificate', $enrollmentInfo->id) }}" class="btn btn-success">
-                                <i class="ti ti-download me-1"></i> Download Certificate
-                            </a>
-                            <a href="{{ route('tin.index', ['type' => Str::contains($enrollmentInfo->service_type, 'individual') ? 'individual' : 'corporate']) }}" class="btn btn-light">
+                            <a href="{{ route('cac-registration.index') }}" class="btn btn-light">
                                 <i class="ti ti-arrow-left me-1"></i> Back to List
                             </a>
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
@@ -57,7 +54,7 @@
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-white py-3 border-bottom">
                         <h5 class="card-title mb-0 fw-bold">
-                            <i class="ti ti-info-circle me-2 text-primary"></i>Request Information
+                            <i class="ti ti-info-circle me-2 text-primary"></i>Registration Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -91,99 +88,21 @@
                                 </div>
                             </div>
 
-                            {{-- Type Specific Logic --}}
-                            @php
-                                $isIndividual = Str::contains($enrollmentInfo->service_type, 'individual');
-                            @endphp
-
-                            {{-- Common Fields --}}
-                             <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Number</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->number ?? 'N/A' }}</p>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Email</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->email ?? 'N/A' }}</p>
-                            </div>
-
-                             <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">BVN</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->bvn ?? 'N/A' }}</p>
-                            </div>
-
+                            {{-- NIN --}}
                             <div class="col-md-6">
                                 <label class="form-label text-muted small text-uppercase fw-bold">NIN</label>
                                 <p class="fw-medium mb-0">{{ $enrollmentInfo->nin ?? 'N/A' }}</p>
                             </div>
-                            
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">State</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->state ?? 'N/A' }}</p>
-                            </div>
 
-                             <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">LGA</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->lga ?? 'N/A' }}</p>
-                            </div>
-
-                            {{-- Personal / Representative Information (Shown for both) --}}
+                            {{-- company type --}}
                             <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">First Name</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->first_name ?? 'N/A' }}</p>
+                                <label class="form-label text-muted small text-uppercase fw-bold">Company Type</label>
+                                <p class="fw-medium mb-0">{{ $enrollmentInfo->company_type ?? 'N/A' }}</p>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Middle Name</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->middle_name ?? 'N/A' }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Last Name</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->last_name ?? 'N/A' }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Gender</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->gender ?? 'N/A' }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Date of Birth</label>
-                                <p class="fw-medium mb-0">{{ $enrollmentInfo->dob ?? 'N/A' }}</p>
-                            </div>
-                             <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Passport</label>
-                                @if($enrollmentInfo->passport_url)
-                                     <div class="mt-2">
-                                        <a href="{{ $enrollmentInfo->passport_url }}" target="_blank">
-                                            <img src="{{ $enrollmentInfo->passport_url }}" alt="Passport" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
-                                        </a>
-                                    </div>
-                                @else
-                                    <p class="fw-medium mb-0">N/A</p>
-                                @endif
-                            </div>
-
-                            @if(!$isIndividual)
-                            {{-- Corporate Specific Fields --}}
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small text-uppercase fw-bold">Company Name</label>
-                                    <p class="fw-medium mb-0">{{ $enrollmentInfo->company_name ?? 'N/A' }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label text-muted small text-uppercase fw-bold">CAC Certificate</label>
-                                     @if($enrollmentInfo->cac_file)
-                                        <div class="mt-2">
-                                            <a href="{{ $enrollmentInfo->cac_file }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                <i class="ti ti-file-text me-1"></i> View CAC Certificate
-                                            </a>
-                                        </div>
-                                    @else
-                                        <p class="fw-medium mb-0">N/A</p>
-                                    @endif
-                                </div>
-                            @endif
 
                             {{-- Service Field --}}
                             <div class="col-md-6">
-                                <label class="form-label text-muted small text-uppercase fw-bold">Service Field (Type)</label>
+                                <label class="form-label text-muted small text-uppercase fw-bold">Service Type</label>
                                 <p class="fw-medium mb-0">{{ $enrollmentInfo->service_field_name ?? $enrollmentInfo->field_name }}</p>
                             </div>
 
@@ -217,11 +136,174 @@
                                 </p>
                             </div>
 
+                            {{-- Structured CAC Information --}}
+                            @php
+                                $d = json_decode($enrollmentInfo->field, true) ?? [];
+                                
+                                $renderField = function($label, $key, $data) {
+                                    $value = $data[$key] ?? 'N/A';
+                                    echo '<div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">' . $label . '</small>
+                                            <span class="fw-medium text-dark">' . htmlspecialchars($value) . '</span>
+                                          </div>';
+                                };
+
+                                $renderFile = function($label, $key, $data) {
+                                    $path = $data[$key] ?? null;
+                                    if (!$path || !is_string($path)) return;
+                                    
+                                    $url = Storage::url($path);
+                                    $ext = pathinfo($path, PATHINFO_EXTENSION);
+                                    $isImage = in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif']);
+                                    
+                                    echo '<div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.7rem;">' . $label . '</small>';
+                                    if ($isImage) {
+                                        echo '<a href="' . $url . '" target="_blank">
+                                                <img src="' . $url . '" class="img-thumbnail" style="max-height: 100px; cursor: pointer;">
+                                              </a>';
+                                    } else {
+                                        echo '<a href="' . $url . '" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="ti ti-download me-1"></i> Download
+                                              </a>';
+                                    }
+                                    echo '</div>';
+                                };
+                            @endphp
+
+                            {{-- Section: Business Information --}}
+                            <div class="col-12 mt-4">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                    <i class="ti ti-building me-2"></i>Business Information
+                                </h6>
+                                <div class="row">
+                                    @php
+                                        $renderField('Proposed Business Name', 'business_name_1', $d);
+                                        $renderField('Business Type', 'business_type', $d);
+                                        $renderField('Nature of Business', 'nature_of_business', $d);
+                                    @endphp
+                                </div>
+                            </div>
+
+                            {{-- Section: Director 1 (Applicant) --}}
+                            <div class="col-12 mt-4">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                    <i class="ti ti-user me-2"></i>Director 1 (Applicant) Details
+                                </h6>
+                                <div class="row">
+                                    @php
+                                        $renderField('First Name', 'first_name', $d);
+                                        $renderField('Surname', 'surname', $d);
+                                        $renderField('Email', 'email', $d);
+                                        $renderField('Phone Number', 'phone_number', $d);
+                                        $renderField('Gender', 'gender', $d);
+                                        $renderField('Date of Birth', 'date_of_birth', $d);
+                                    @endphp
+                                </div>
+                            </div>
+
+                            {{-- Section: Director 1 Residential Address --}}
+                            <div class="col-12 mt-3">
+                                <h6 class="fw-bold text-muted small text-uppercase mb-3">Residential Address</h6>
+                                <div class="row px-3 py-2 bg-light rounded-3">
+                                    @php
+                                        $renderField('House No', 'res_house_no', $d);
+                                        $renderField('Street', 'res_street', $d);
+                                        $renderField('City', 'res_city', $d);
+                                        $renderField('LGA', 'res_lga', $d);
+                                        $renderField('State', 'res_state', $d);
+                                    @endphp
+                                </div>
+                            </div>
+
+                            {{-- Section: Business Address --}}
+                            <div class="col-12 mt-4">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                    <i class="ti ti-map-pin me-2"></i>Registered Business Address
+                                </h6>
+                                <div class="row">
+                                    @php
+                                        $renderField('House No', 'bus_house_no', $d);
+                                        $renderField('Street', 'bus_street', $d);
+                                        $renderField('City', 'bus_city', $d);
+                                        $renderField('LGA', 'bus_lga', $d);
+                                        $renderField('State', 'bus_state', $d);
+                                    @endphp
+                                </div>
+                            </div>
+
+                            {{-- Section: Director 2 (Optional) --}}
+                            @if(!empty($d['director2_first_name']) || !empty($d['director2_surname']))
+                            <div class="col-12 mt-4">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                    <i class="ti ti-users me-2"></i>Director 2 Details
+                                </h6>
+                                <div class="row">
+                                    @php
+                                        $renderField('First Name', 'director2_first_name', $d);
+                                        $renderField('Surname', 'director2_surname', $d);
+                                        $renderField('Phone Number', 'director2_phone_number', $d);
+                                        $renderField('Gender', 'director2_gender', $d);
+                                        $renderField('Date of Birth', 'director2_date_of_birth', $d);
+                                    @endphp
+                                </div>
+                                <h6 class="fw-bold text-muted small text-uppercase mb-3 mt-3">Residential Address (Director 2)</h6>
+                                <div class="row px-3 py-2 bg-light rounded-3">
+                                    @php
+                                        $renderField('House No', 'director2_res_house_no', $d);
+                                        $renderField('Street', 'director2_res_street', $d);
+                                        $renderField('City', 'director2_res_city', $d);
+                                        $renderField('LGA', 'director2_res_lga', $d);
+                                        $renderField('State', 'director2_res_state', $d);
+                                    @endphp
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Section: Uploads --}}
+                            <div class="col-12 mt-4">
+                                <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                    <i class="ti ti-files me-2"></i>Uploaded Documents
+                                </h6>
+                                <div class="row">
+                                    @php
+                                        $renderFile('NIN Slip', 'nin_upload', $d);
+                                        $renderFile('Signature', 'signature_upload', $d);
+                                        $renderFile('Passport Photo', 'passport_upload', $d);
+                                        
+                                        if(!empty($d['director2_nin_upload'])) $renderFile('NIN Slip (Dir 2)', 'director2_nin_upload', $d);
+                                        if(!empty($d['director2_signature_upload'])) $renderFile('Signature (Dir 2)', 'director2_signature_upload', $d);
+                                        if(!empty($d['director2_passport_upload'])) $renderFile('Passport Photo (Dir 2)', 'director2_passport_upload', $d);
+                                    @endphp
+                                </div>
+                            </div>
+
                             {{-- Comment --}}
                             <div class="col-12">
                                 <label class="form-label text-muted small text-uppercase fw-bold">Latest Comment</label>
                                 <div class="p-3 bg-light rounded border">
                                     {{ $enrollmentInfo->comment ?? 'N/A' }}
+                                </div>
+                            </div>
+
+                            {{-- Documents --}}
+                            <div class="col-12">
+                                <label class="form-label text-muted small text-uppercase fw-bold mb-3">Documents</label>
+                                <div class="d-flex gap-3 flex-wrap">
+                                    @if($enrollmentInfo->file_url)
+                                    <div class="card border p-3" style="min-width: 200px;">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="ti ti-file-check fs-3 text-success me-2"></i>
+                                            <span class="fw-bold">Supporting Document</span>
+                                        </div>
+                                        <div class="text-muted small mb-2">Registration File</div>
+                                        <a href="{{ Storage::url($enrollmentInfo->file_url) }}" target="_blank" class="btn btn-sm btn-outline-success w-100">
+                                            <i class="ti ti-download me-1"></i> Download
+                                        </a>
+                                    </div>
+                                    @else
+                                    <div class="text-muted small">No documents uploaded.</div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -283,6 +365,7 @@
                 </div>
             </div>
         </div>
+    </div>
             
     {{-- Update Status Modal --}}
     <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
@@ -294,7 +377,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('tin.update', $enrollmentInfo->id) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('cac-registration.update', $enrollmentInfo->id) }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-body p-4">
@@ -320,9 +403,6 @@
                             <textarea class="form-control" id="comment" name="comment" rows="4" 
                                 placeholder="Enter your comment here..." 
                                 >{{ old('comment', $enrollmentInfo->comment) }}</textarea>
-                            <small class="text-muted">
-                                <i class="ti ti-info-circle me-1"></i>Comment will auto-fill based on selected status
-                            </small>
                         </div>
 
                         {{-- File Upload --}}
@@ -341,9 +421,6 @@
                             <label class="form-check-label text-danger fw-bold" for="force_refund">
                                 Force Refund (Process again even if already refunded)
                             </label>
-                            <small class="form-text text-muted d-block">
-                                Check this ONLY if you need to credit the user again manually.
-                            </small>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
@@ -403,10 +480,6 @@
                                     <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Phone Number</small>
                                     <span class="fw-medium">{{ $user->phone_no ?? 'N/A' }}</span>
                                 </div>
-                                <div>
-                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Address</small>
-                                    <span class="fw-medium">{{ $user->address ?? 'N/A' }}</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -414,34 +487,4 @@
             </div>
         </div>
     @endif
-
-    {{-- JavaScript for Auto Messages --}}
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const statusField = document.getElementById("status");
-            const commentField = document.getElementById("comment");
-
-            const messages = {
-                pending: "Your request is pending. Our team will review it shortly.",
-                processing: "Your request is currently being processed. Please hold on.",
-                "in-progress": "Your request is in progress. We are working on it and will update you soon.",
-                resolved: "✅ Your Request Has Been Successfully Treated!\n\nHello 👋,\n\nWe're glad to inform you that your recent request has been successfully processed. Thank you for trusting us!\n🎯 Don't stop here — we're always ready to serve you better. Feel free to send in more requests anytime.\n\nYour satisfaction is our priority!",
-                successful: "✅ Success! Your request has been completed successfully. Thank you for using our service!",
-                query: "We require additional information regarding your request. Kindly respond promptly.",
-                rejected: "Unfortunately, your request has been rejected. Please review and try again.",
-                failed: "Your request could not be completed due to an error. Please contact support for assistance.",
-                remark: "A remark has been added to your request. Kindly review the details provided."
-            };
-
-            // Auto update comment when status changes
-            statusField.addEventListener("change", function () {
-                const selectedStatus = statusField.value;
-                if (messages[selectedStatus]) {
-                    commentField.value = messages[selectedStatus];
-                } else {
-                    commentField.value = "";
-                }
-            });
-        });
-    </script>
 </x-app-layout>
