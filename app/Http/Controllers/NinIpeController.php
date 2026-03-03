@@ -307,99 +307,28 @@ class NinIpeController extends Controller
             return redirect()->back()->with('errorMessage', 'API Key is missing in .env');
         }
 
-        // Increase execution time limit to 5 minutes to prevent timeouts during bulk processing
-        set_time_limit(300);
-
-        // Fetch requests that are not in a final state, limited to 50 per run
+        // Fetch requests that are not in a final state, limited to 100 per run
         $enrollments = AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])
             ->whereIn('status', ['pending', 'processing', 'in-progress'])
-            ->limit(50)
+            ->limit(100)
             ->get();
-
-        $remainingCount = AgentService::whereIn('service_type', ['ipe', 'nin_ipe'])
-            ->whereIn('status', ['pending', 'processing', 'in-progress'])
-            ->count() - $enrollments->count();
 
         if ($enrollments->isEmpty()) {
             return redirect()->back()->with('infoMessage', 'No pending or processing requests to sync.');
         }
 
-        $checkedCount = 0;
-        $updatedCount = 0;
-        $failedCount = 0;
-        $noRecordCount = 0;
-
         foreach ($enrollments as $enrollment) {
-            try {
-                $tracking_id = $enrollment->tracking_id;
-                
-                if (!$tracking_id) {
-                    $fieldData = json_decode($enrollment->field, true);
-                    $tracking_id = $fieldData['tracking_id'] ?? null;
-                }
+            // Update status to processing to indicate it's in queue
+            $enrollment->update([
+                'status' => 'processing',
+                'comment' => 'Request is in queue for bulk status check.'
+            ]);
 
-                if (!$tracking_id) continue;
-
-                $url = 'https://www.s8v.ng/api/clearance/status';
-                $payload = [
-                    'tracking_id' => $tracking_id,
-                    'token' => $apiKey
-                ];
-
-                $response = \Illuminate\Support\Facades\Http::post($url, $payload);
-                
-                if ($response->successful()) {
-                    $checkedCount++;
-                    $apiResponse = $response->json();
-
-                    // Clean the API response for better readability
-                    $cleanResponse = $this->cleanApiResponse($apiResponse);
-
-                    // Preparing the message for the comment
-                    $statusMessage = $apiResponse['message'] ?? $apiResponse['response'] ?? $cleanResponse;
-                    
-                    // Check for "No Record" in response
-                    $responseStr = json_encode($apiResponse);
-                    if (stripos($responseStr, 'no record') !== false) {
-                        $noRecordCount++;
-                    }
-
-                    // Prepare update data
-                    $updateData = [
-                        'comment' => $statusMessage,
-                    ];
-
-                    // Determine status from API response
-                    if (isset($apiResponse['status'])) {
-                        $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
-                    } elseif (isset($apiResponse['response'])) {
-                        $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
-                    }
-
-                    if (isset($updateData['status']) && $updateData['status'] !== $enrollment->status) {
-                        $enrollment->update($updateData);
-                        $updatedCount++;
-                    } else {
-                        $enrollment->update(['comment' => $statusMessage]);
-                    }
-                } else {
-                    \Log::warning('NIN IPE API failed for tracking ID: ' . $tracking_id, ['response' => $response->body()]);
-                    $failedCount++;
-                }
-            } catch (\Exception $e) {
-                \Log::error('NIN IPE Bulk Status Check Error: ' . $e->getMessage(), ['id' => $enrollment->id]);
-                $failedCount++;
-            }
+            // Dispatch background job
+            \App\Jobs\CheckIPEStatusJob::dispatch($enrollment);
         }
 
-        return redirect()->back()->with('statusSyncResult', [
-            'provider' => 'S8V IPE',
-            'updated' => $updatedCount,
-            'failed' => $failedCount,
-            'no_record' => $noRecordCount,
-            'checked' => $checkedCount,
-            'remaining' => max(0, $remainingCount)
-        ]);
+        return redirect()->back()->with('successMessage', 'Bulk sync started. ' . $enrollments->count() . ' requests have been queued for processing.');
     }
 
     /**
@@ -427,7 +356,7 @@ class NinIpeController extends Controller
         return match ($s) {
             'successful', 'success', 'resolved', 'in-progress', 'approved', 'completed' => 'successful',
             'processing', 'pending', 'submitted', 'new' => 'processing',
-            'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
+            'failed', 'rejected', 'error', 'cancelled', 'declined', 'invalid', 'no record' => 'failed',
             'query' => 'query',
             'remark' => 'remark',
             default => 'pending',

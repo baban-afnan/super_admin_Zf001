@@ -261,8 +261,6 @@ class ValidationController extends Controller
     public function checkStatus(Request $request, $id = null)
     {
         $user = Auth::user();
-        // Permission check: All authenticated users can check. 
-        // We've removed the 'active' check to allow inactive or regular users to sync/check.
 
         try {
             if ($id) {
@@ -279,66 +277,35 @@ class ValidationController extends Controller
                     ->firstOrFail();
             }
 
-            $apiKey = env('NIN_API_KEY');
-            
-            // Always use NIN validation endpoint for this controller
-            $url = 'https://s8v.ng/api/validation/status';
-            $payload = [
-                'nin' => $agentService->nin,
-                'token' => $apiKey
-            ];
-
-            $response = Http::post($url, $payload);
-            $apiResponse = $response->json();
-
-            // Check if response failed but contains record not found error
-            if (!$response->successful()) {
-                $errorMsg = $apiResponse['error'] ?? $apiResponse['message'] ?? 'API Error';
-                if (stripos($errorMsg, 'record not found') !== false) {
-                    $agentService->update(['comment' => 'Record not found on S8V API']);
-                    return back()->with('infoMessage', 'Record not found on S8V API.');
-                }
-                throw new \Exception($errorMsg);
+            // Update status to processing to indicate it's in queue
+            if (!in_array($agentService->status, ['successful', 'failed', 'rejected'])) {
+                $agentService->update([
+                    'status' => 'processing',
+                    'comment' => 'Request is in queue for status check.'
+                ]);
             }
 
-            // Clean the API response
-            $cleanResponse = $this->cleanApiResponse($apiResponse);
-
-            // Prepare update data
-            $updateData = [
-                'comment' => $cleanResponse,
-            ];
-
-            // Determine status from API response
-            if (isset($apiResponse['status'])) {
-                $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
-            } elseif (isset($apiResponse['response'])) {
-                $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
-            }
-
-            // Update the agent service record
-            $agentService->update($updateData);
+            // Dispatch the background job
+            \App\Jobs\CheckNINStatusJob::dispatch($agentService);
 
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => true,
+                    'message' => 'Your request is in queue. We will notify you once completed.',
                     'nin' => $agentService->nin,
-                    'tracking_id' => $agentService->tracking_id,
                     'status' => $agentService->status,
-                    'response' => $apiResponse,
-                    'clean_comment' => $cleanResponse
                 ]);
             }
 
-            return back()->with('successMessage', 'Status checked successfully. Current status: ' . $agentService->status);
+            return back()->with('successMessage', 'Your request is in queue. We will notify you once completed.');
 
         } catch (\Exception $e) {
-            Log::error('Status Check Error: ' . $e->getMessage());
+            Log::error('Status Check Dispatch Error: ' . $e->getMessage());
 
             if ($request->wantsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to check status: ' . $e->getMessage(),
+                    'message' => 'Failed to queue status check: ' . $e->getMessage(),
                     'status' => 'error'
                 ], 500);
             }
@@ -352,104 +319,33 @@ class ValidationController extends Controller
     public function checkS8vBulkStatus(Request $request)
     {
         $user = Auth::user();
-        // Permission check relaxed - even inactive users can sync pending/processing records.
 
         $apiKey = env('NIN_API_KEY');
-
         if (!$apiKey) {
             return redirect()->back()->with('errorMessage', 'API Key is missing in .env');
         }
 
-        set_time_limit(300);
-
         $enrollments = AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])
             ->whereIn('status', ['pending', 'processing', 'in-progress'])
-            ->limit(50)
+            ->limit(100)
             ->get();
-
-        $remainingCount = AgentService::whereIn('service_type', ['NIN_VALIDATION', 'validation', 'nin_validation'])
-            ->whereIn('status', ['pending', 'processing', 'in-progress'])
-            ->count() - $enrollments->count();
 
         if ($enrollments->isEmpty()) {
             return redirect()->back()->with('infoMessage', 'No pending or processing NIN Validation requests to sync.');
         }
 
-        $checkedCount = 0;
-        $updatedCount = 0;
-        $failedCount = 0;
-        $noRecordCount = 0;
-
         foreach ($enrollments as $enrollment) {
-            try {
-                $nin = $enrollment->nin;
-                
-                if (!$nin) {
-                    $fieldData = json_decode($enrollment->field, true);
-                    $nin = $fieldData['nin'] ?? null;
-                }
+            // Update status to processing to indicate it's in queue
+            $enrollment->update([
+                'status' => 'processing',
+                'comment' => 'Request is in queue for bulk status check.'
+            ]);
 
-                if (!$nin) continue;
-
-                $url = 'https://s8v.ng/api/validation/status';
-                $payload = [
-                    'nin' => $nin,
-                    'token' => $apiKey
-                ];
-
-                $response = Http::post($url, $payload);
-                $apiResponse = $response->json();
-                
-                if ($response->successful()) {
-                    $checkedCount++;
-                    $cleanResponse = $this->cleanApiResponse($apiResponse);
-                    
-                    $statusMessage = $apiResponse['message'] ?? $apiResponse['response'] ?? $cleanResponse;
-                    
-                    $responseStr = json_encode($apiResponse);
-                    if (stripos($responseStr, 'no record') !== false) {
-                        $noRecordCount++;
-                    }
-
-                    $updateData = ['comment' => $statusMessage];
-
-                    if (isset($apiResponse['status'])) {
-                        $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
-                    } elseif (isset($apiResponse['response'])) {
-                        $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
-                    }
-
-                    if (isset($updateData['status']) && $updateData['status'] !== $enrollment->status) {
-                        $enrollment->update($updateData);
-                        $updatedCount++;
-                    } else {
-                        $enrollment->update(['comment' => $statusMessage]);
-                    }
-                } else {
-                    $errorMsg = $apiResponse['error'] ?? $apiResponse['message'] ?? 'API Error';
-                    if (stripos($errorMsg, 'record not found') !== false) {
-                        $enrollment->update(['comment' => 'Record not found on S8V API']);
-                        $noRecordCount++;
-                        $checkedCount++;
-                    } else {
-                        Log::warning('S8V NIN Validation API failed for NIN: ' . $nin, ['response' => $response->body()]);
-                        $failedCount++;
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error('S8V NIN Bulk Status Check Error: ' . $e->getMessage(), ['id' => $enrollment->id]);
-                $failedCount++;
-            }
+            // Dispatch background job
+            \App\Jobs\CheckNINStatusJob::dispatch($enrollment);
         }
 
-        return redirect()->back()->with('statusSyncResult', [
-            'provider' => 'S8V NIN',
-            'updated' => $updatedCount,
-            'failed' => $failedCount,
-            'no_record' => $noRecordCount,
-            'checked' => $checkedCount,
-            'remaining' => max(0, $remainingCount)
-        ]);
+        return redirect()->back()->with('successMessage', 'Bulk sync started. ' . $enrollments->count() . ' requests have been queued for processing.');
     }
 
     /**
