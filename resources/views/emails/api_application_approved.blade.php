@@ -38,7 +38,7 @@
 @endsection
 
 @section('content')
-    <p>Hello <strong>{{ $user->first_name ?? 'User' }}</strong>,</p>
+   <p>Hello <strong>{{ $first_name }} {{ $last_name }}</strong>,</p>
     
     <div class="success-banner">
         <span style="font-size: 40px;">🎉</span>

@@ -77,7 +77,7 @@
 @endsection
 
 @section('content')
-    <p>Hello,</p>
+    <p>Hello <strong>{{ $first_name }} {{ $last_name }}</strong>,</p>
     
     @if(is_array($mail_data) && isset($mail_data['amount']))
         <p>We've processed a new transaction on your account. Here are the latest details:</p>
@@ -129,8 +129,6 @@
             <img src="{{ $src }}" alt="Notification Details">
         </div>
     @endif
-
-    <p style="margin-top: 30px;">Log in to your dashboard to view your full transaction history or update your settings.</p>
 
     @include('emails.partials.referral_advert')
 @endsection

@@ -129,6 +129,7 @@ class NotificationController extends Controller
             'message'      => 'required|string',
             'service_name' => 'nullable|string|max:255',
             'discount'     => 'nullable|string|max:255',
+            'link'         => 'nullable|url|max:255',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
 
@@ -149,6 +150,7 @@ class NotificationController extends Controller
             'message'       => $request->message,
             'service_name'  => $request->service_name,
             'discount'      => $request->discount,
+            'link'          => $request->link,
             'image'         => $imageUrl, // Store as URL instead of path
             'is_active'     => true,
             'status'        => 'active',

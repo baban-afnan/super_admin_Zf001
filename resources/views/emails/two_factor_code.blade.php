@@ -36,7 +36,7 @@
 @endsection
 
 @section('content')
-    <p>Hello,</p>
+   <p>Hello <strong>{{ $first_name }} {{ $last_name }}</strong>,</p>
     <p>You are receiving this code because a login or sensitive action was initiated on your <strong>Arewa Smart</strong> account.</p>
     
     <div class="otp-container">

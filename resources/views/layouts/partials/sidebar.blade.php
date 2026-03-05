@@ -6,13 +6,13 @@
     <!-- Logo -->
     <div class="sidebar-logo">
         <a href="{{ route('dashboard') }}" class="logo logo-normal">
-            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" width="150" height="150">
+            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" class="img-fluid sidebar-logo-img">
         </a>
         <a href="{{ route('dashboard') }}" class="logo-small">
-            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo">
+            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" class="img-fluid sidebar-logo-img-small">
         </a>
         <a href="{{ route('dashboard') }}" class="dark-logo">
-            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo">
+            <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" class="img-fluid sidebar-logo-img">
         </a>
     </div>
     <!-- /Logo -->
@@ -128,7 +128,7 @@
                     <ul>
                         <li><a href="{{ route('admin.api-applications.index') }}">API request</a></li>
                         <li><a href="{{ route('admin.transactions.index', ['source' => 'api']) }}" class="{{ request('source') == 'api' ? 'active' : '' }}">Transactions</a></li>
-                        <li><a href="#">Website</a></li>
+                        <li><a href="{{ route('admin.website-clients.index') }}" class="{{ request()->routeIs('admin.website-clients.*') ? 'active' : '' }}">Website Service</a></li>
                     </ul>
                 </li>
                 <!-- /Api Services -->
@@ -177,49 +177,31 @@
 <!-- /Sidebar -->
 
 
- <style>
-/* Sidebar Scrolling Fix */
+<style>
+
+/* Make the sidebar scrollable while keeping logo fixed on top */
 .sidebar {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    position: fixed !important;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1001; /* Ensure it stays on top */
-    padding-bottom: 0 !important; /* Remove bottom padding if likely to cause issues */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
-/* Prevent static sections from shrinking */
-.sidebar-logo, 
-.modern-profile, 
-.sidebar-header {
-    flex-shrink: 0 !important;
-}
-
-/* Make the inner menu scrollable */
 .sidebar-inner {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    height: auto !important; /* Override any potential JS fixed height */
-    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
+/* Customize the scrollbar for webkit browsers */
 .sidebar-inner::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
 }
 .sidebar-inner::-webkit-scrollbar-track {
     background: transparent;
 }
 .sidebar-inner::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 5px;
-}
-.sidebar-inner::-webkit-scrollbar-thumb:hover {
-    background: #bbb;
+    background: #d1d1d1;
+    border-radius: 4px;
 }
 
   /* Better icon and text spacing */
@@ -235,6 +217,40 @@
     text-align: center;
 }
 
+.sidebar-logo {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background-color: #fff; /* or your preferred background color */
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    min-height: 70px;
+}
+
+.sidebar-logo-img {
+    max-height: 50px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+.sidebar-logo-img-small {
+    max-height: 35px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Ensure logo resizes gracefully on smaller screens */
+@media (max-width: 768.98px) {
+    .sidebar-logo-img {
+        max-height: 40px;
+    }
+}
+
 /* Submenu styling */
 .sidebar-menu .submenu ul {
     background: rgba(0, 0, 0, 0.02);
@@ -247,7 +263,7 @@
 
 /* Active state */
 .sidebar-menu li a.active {
-    background: #e4d48eff;
+    background: #f1cfbfff;
     color: white;
 }
 
@@ -258,5 +274,10 @@
     text-transform: uppercase;
     color: #6c757d;
     font-weight: 600;
+}
+@keyframes pulse-red-sidebar {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
 }
  </style>

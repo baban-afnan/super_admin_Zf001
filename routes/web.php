@@ -200,6 +200,16 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
 
     Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('admin.transactions.index');
 
+    // Website Maintenance Service
+    Route::prefix('website-clients')->name('admin.website-clients.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\WebsiteClientController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\Admin\WebsiteClientController::class, 'store'])->name('store');
+        Route::put('/{id}', [\App\Http\Controllers\Admin\WebsiteClientController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\WebsiteClientController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/notify', [\App\Http\Controllers\Admin\WebsiteClientController::class, 'notify'])->name('notify');
+        Route::post('/notify-all', [\App\Http\Controllers\Admin\WebsiteClientController::class, 'notifyAll'])->name('notify-all');
+    });
+
     // 2FA Admin Actions
     Route::get('verify/resend', [App\Http\Controllers\Auth\TwoFactorController::class, 'resend'])->name('verify.resend');
     Route::resource('verify', App\Http\Controllers\Auth\TwoFactorController::class)->only(['index', 'store']);

@@ -17,6 +17,7 @@ class Announcement extends Model
         'message',
         'image',
         'discount',
+        'link',
         'service_name',
         'attachment',
         'is_active',

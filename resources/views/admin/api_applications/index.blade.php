@@ -3,7 +3,7 @@
     <div class="container-fluid px-4 py-4">
         <div class="row align-items-center justify-content-between mb-4">
             <div class="col-auto">
-                <h3 class="fw-bold mb-0 text-dark">
+                <h3 class="fw-bold mb-0 text-primary">
                     <i class="ti ti-api me-2 text-primary"></i>API Applications
                 </h3>
                 <p class="text-muted mb-0">Manage and review API access requests.</p>

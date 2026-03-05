@@ -4,10 +4,10 @@
         <!-- Header Left - Logo -->
         <div class="header-left">
             <a href="{{ route('dashboard') }}" class="logo">
-                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo">
+                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" class="img-fluid header-logo-img">
             </a>
             <a href="{{ route('dashboard') }}" class="dark-logo">
-                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo">
+                <img src="{{ asset('assets/img/logo/logo-small.png') }}" alt="Logo" class="img-fluid header-logo-img">
             </a>
         </div>
 
@@ -225,3 +225,31 @@
     </div>
 </div>
 <!-- /Header -->
+
+<style>
+.header-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 60px;
+}
+.header-logo-img {
+    max-height: 40px;
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+}
+@media (max-width: 991.98px) {
+    .header-logo-img {
+        max-height: 30px;
+    }
+    .header-left {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto !important;
+        background: transparent;
+    }
+}
+</style>

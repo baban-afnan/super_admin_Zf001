@@ -169,7 +169,7 @@
                 <div class="card border-0 shadow-sm h-100" style="border-radius:1rem; background:linear-gradient(135deg,#f59e0b,#d97706); overflow:hidden;">
                     <div class="card-body p-4 d-flex align-items-center gap-3">
                         <div class="stat-card-icon">
-                            <i class="ti ti-rectangle-rounded-filled fs-22 text-white"></i>
+                            <i class="ti ti-speakerphone text-white fs-20 text-white"></i>
                         </div>
                         <div>
                             <p class="mb-0 text-white opacity-75 small fw-medium">App Adverts</p>
@@ -178,7 +178,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         {{-- ===================== FILTERS ===================== --}}
@@ -486,7 +485,7 @@
                         </div>
 
                         <div class="row g-3 mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="advert_discount" class="form-label fw-semibold">Discount / Offer Tag</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light"><i class="ti ti-tag text-muted"></i></span>
@@ -495,7 +494,16 @@
                                 </div>
                                 <div class="form-text">Shown as a label badge in the activity list.</div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label for="advert_link" class="form-label fw-semibold">Advert Link</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="ti ti-link text-muted"></i></span>
+                                    <input type="url" class="form-control bg-light" id="advert_link" name="link"
+                                           placeholder="https://example.com">
+                                </div>
+                                <div class="form-text">Optional external link.</div>
+                            </div>
+                            <div class="col-md-4">
                                 <label for="advert_image" class="form-label fw-semibold">Advert Image</label>
                                 <input type="file" class="form-control bg-light" id="advert_image" name="image"
                                        accept="image/png,image/jpeg,image/jpg,image/gif">
@@ -522,12 +530,12 @@
                     </form>
                 </div>
 
-                <div class="modal-footer bg-light border-top px-4">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer bg-light border-top px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
                         <i class="ti ti-x me-1"></i>Cancel
                     </button>
                     <button type="submit" form="advertForm"
-                            class="btn btn-warning fw-semibold d-flex align-items-center gap-2">
+                            class="btn btn-warning fw-semibold d-flex align-items-center gap-2 px-4">
                         <i class="ti ti-rocket fs-16"></i> Publish Advert
                     </button>
                 </div>
@@ -759,9 +767,14 @@
                             <span class="text-muted small fw-medium">Service</span>
                             <span class="fw-semibold text-dark" id="view_service_name">—</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="text-muted small fw-medium">Discount / Offer</span>
                             <span class="fw-semibold text-success" id="view_discount">—</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small fw-medium">Advert Link</span>
+                            <a href="#" target="_blank" class="fw-semibold text-primary d-none" id="view_link" style="word-break: break-all; max-width: 60%; text-align: right;"></a>
+                            <span class="fw-semibold text-muted" id="view_link_empty">—</span>
                         </div>
                     </div>
 
@@ -869,6 +882,18 @@
             if (isAdvert) {
                 document.getElementById('view_service_name').textContent = d.service_name || '—';
                 document.getElementById('view_discount').textContent     = d.discount     || '—';
+                
+                const linkEl = document.getElementById('view_link');
+                const linkEmpty = document.getElementById('view_link_empty');
+                if (d.link) {
+                    linkEl.href = d.link;
+                    linkEl.textContent = d.link;
+                    linkEl.classList.remove('d-none');
+                    linkEmpty.classList.add('d-none');
+                } else {
+                    linkEl.classList.add('d-none');
+                    linkEmpty.classList.remove('d-none');
+                }
 
                 const imgWrap = document.getElementById('view_image_wrap');
                 if (d.image) {
