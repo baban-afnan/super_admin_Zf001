@@ -33,6 +33,10 @@ class ApiApplicationApproved extends Mailable
     public function build()
     {
         return $this->subject('API Application Approved')
-                    ->view('emails.api_application_approved');
+                    ->view('emails.api_application_approved')
+                    ->with([
+                        'first_name' => $this->user->first_name,
+                        'last_name' => $this->user->last_name,
+                    ]);
     }
 }

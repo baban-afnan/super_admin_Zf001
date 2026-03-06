@@ -14,13 +14,15 @@ class TwoFactorCode extends Mailable
     use Queueable, SerializesModels;
 
     public $code;
+    public $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($code)
+    public function __construct($code, $user = null)
     {
         $this->code = $code;
+        $this->user = $user;
     }
 
     /**
@@ -39,9 +41,11 @@ class TwoFactorCode extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.two_factor_code',
+            view: 'emails.two_factor_code',
             with: [
                 'code' => $this->code,
+                'first_name' => $this->user ? $this->user->first_name : '',
+                'last_name' => $this->user ? $this->user->last_name : '',
             ],
         );
     }

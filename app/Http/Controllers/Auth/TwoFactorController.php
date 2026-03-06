@@ -59,9 +59,10 @@ class TwoFactorController extends Controller
         ]);
 
         try {
-            Mail::to($user->email)->send(new TwoFactorCode($user->two_factor_code));
+            Mail::to($user->email)->send(new TwoFactorCode($user->two_factor_code, $user));
             return redirect()->back()->with('status', 'The two factor code has been resent.');
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to resend 2FA mail: " . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Unable to send email. Please try again later.']);
         }
     }

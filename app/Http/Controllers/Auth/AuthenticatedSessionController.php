@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
 
             // Send email
             try {
-                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\TwoFactorCode($code));
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\TwoFactorCode($code, $user));
             } catch (\Exception $e) {
                 // Log error but continue (middleware will handle redirection)
                 \Illuminate\Support\Facades\Log::error("Failed to send 2FA mail: " . $e->getMessage());

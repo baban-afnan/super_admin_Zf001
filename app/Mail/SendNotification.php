@@ -15,16 +15,19 @@ class SendNotification extends Mailable
     public $content;
     public $imagePath;
 
+    public $user;
+
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($subject, $content, $imagePath = null)
+    public function __construct($subject, $content, $imagePath = null, $user = null)
     {
         $this->subjectLine = $subject;
         $this->content = $content;
         $this->imagePath = $imagePath;
+        $this->user = $user;
     }
 
     /**
@@ -36,6 +39,10 @@ class SendNotification extends Mailable
     {
         return $this->subject($this->subjectLine)
                     ->view('emails.notification')
-                    ->with(['mail_data' => $this->content]);
+                    ->with([
+                        'mail_data' => $this->content,
+                        'first_name' => $this->user ? $this->user->first_name : 'Valued',
+                        'last_name' => $this->user ? $this->user->last_name : 'Customer',
+                    ]);
     }
 }
