@@ -165,8 +165,8 @@
                 <li>
                     <form method="POST" action="{{ route('logout') }}" id="logout-form-sidebar">
                         @csrf
-                        <a href="javascript:void(0);" onclick="confirmLogout('logout-form-sidebar')">
-                            <i class="ti ti-logout"></i><span>Logout</span>
+                        <a href="javascript:void(0);" onclick="confirmLogout('logout-form-sidebar')" class="btn btn-outline-danger w-100 text-start border-0 fw-semibold">
+                            <i class="ti ti-logout me-2"></i><span>Logout</span>
                         </a>
                     </form>
                 </li>
@@ -221,7 +221,7 @@
     position: sticky;
     top: 0;
     z-index: 9999;
-    background-color: #fff; /* or your preferred background color */
+    background-color: #fff; 
     flex-shrink: 0;
     display: flex;
     align-items: center;
