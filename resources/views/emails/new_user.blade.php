@@ -80,7 +80,7 @@
         <span class="credential-label">Temporary Password</span>
         <span class="credential-value">{{ $password }}</span>
         
-        <a href="{{ route('login') }}" class="btn">Access My Dashboard</a>
+        <a href="https://arewasmart.com.ng/login" class="btn">Access My Dashboard</a>
     </div>
 
     <div class="warning-banner">
