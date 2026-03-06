@@ -143,7 +143,28 @@
                             <div class="col-12">
                                 <label class="form-label text-muted small text-uppercase fw-bold">New Information</label>
                                 <div class="p-3 bg-light rounded border">
-                                    {{ $enrollmentInfo->description}}   {{ $enrollmentInfo->modification_data}}
+                                    @if(!empty($enrollmentInfo->description))
+                                        <div class="mb-3 fw-bold text-dark border-bottom pb-2">{{ $enrollmentInfo->description }}</div>
+                                    @endif
+
+                                    @php
+                                        $modData = is_string($enrollmentInfo->modification_data) 
+                                            ? json_decode($enrollmentInfo->modification_data, true) 
+                                            : $enrollmentInfo->modification_data;
+                                    @endphp
+
+                                    @if(is_array($modData))
+                                        <div class="row g-3">
+                                            @foreach($modData as $key => $value)
+                                                <div class="col-md-6 col-lg-4">
+                                                    <span class="text-muted text-capitalize">{{ str_replace('_', ' ', $key) }}:</span>
+                                                    <span class="fw-bold text-dark ms-1">{{ is_array($value) ? json_encode($value) : $value }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <p class="mb-0">{{ $enrollmentInfo->modification_data }}</p>
+                                    @endif
                                 </div>
                             </div>
 
