@@ -333,9 +333,9 @@
                                 <span class="fw-medium text-dark">#{{ substr($transaction->transaction_ref, 0, 8) }}...</span>
                             </td>
                             <td>
-                                @if($transaction->type == 'credit')
+                                @if($transaction->type == 'credit' || $transaction->type == 'bonus')
                                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
-                                        <i class="ti ti-arrow-down-left me-1"></i>Credit
+                                        <i class="ti ti-arrow-down-left me-1"></i>{{ ucfirst($transaction->type) }}
                                     </span>
                                 @elseif($transaction->type == 'refund')
                                     <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-1">
@@ -349,8 +349,8 @@
                             </td>
                            
                             <td>
-                                <span class="fw-bold {{ $transaction->type == 'credit' ? 'text-success' : ($transaction->type == 'refund' ? 'text-info' : 'text-danger') }}">
-                                    {{ $transaction->type == 'credit' ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                <span class="fw-bold {{ in_array($transaction->type, ['credit', 'bonus']) ? 'text-success' : ($transaction->type == 'refund' ? 'text-info' : 'text-danger') }}">
+                                    {{ in_array($transaction->type, ['credit', 'bonus']) ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
                                 </span>
                             </td>
                             <td>
