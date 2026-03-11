@@ -320,7 +320,7 @@ class ValidationController extends Controller
     {
         $user = Auth::user();
 
-        $apiKey = env('NIN_API_KEY');
+        $apiKey = env('IDENFY_API_KEY');
         if (!$apiKey) {
             return redirect()->back()->with('errorMessage', 'API Key is missing in .env');
         }
@@ -357,7 +357,7 @@ class ValidationController extends Controller
 
         Log::info('NIN Validation Webhook Received', $data);
 
-        $identifier = $data['nin'] ?? null;
+        $identifier = $data['nin'] ?? ($data['data']['nin'] ?? null);
 
         if ($identifier) {
             $submission = AgentService::where('nin', $identifier)
@@ -373,7 +373,19 @@ class ValidationController extends Controller
                 ];
 
                 if (isset($data['status'])) {
-                    $updateData['status'] = $this->normalizeStatus($data['status']);
+                    if (is_bool($data['status'])) {
+                        if ($data['status'] === true) {
+                            if (isset($data['code']) && strtoupper($data['code']) === 'PENDING') {
+                                $updateData['status'] = 'processing';
+                            } else {
+                                $updateData['status'] = 'successful';
+                            }
+                        } else {
+                            $updateData['status'] = 'failed';
+                        }
+                    } else {
+                        $updateData['status'] = $this->normalizeStatus($data['status']);
+                    }
                 }
 
                 $submission->update($updateData);

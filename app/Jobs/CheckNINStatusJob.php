@@ -35,28 +35,25 @@ class CheckNINStatusJob implements ShouldQueue
     public function handle()
     {
         try {
-            $apiKey = env('NIN_API_KEY');
+            $apiKey = env('IDENFY_API_KEY');
             if (!$apiKey) {
-                Log::error('CheckNINStatusJob: NIN_API_KEY is missing in .env');
+                Log::error('CheckNINStatusJob: IDENFY_API_KEY is missing in .env');
                 return;
             }
 
-            $url = 'https://s8v.ng/api/validation/status';
+            $baseUrl = env('IDENFY_API_BASE', 'https://www.idenfy.ng');
+            $url = rtrim($baseUrl, '/') . '/api/nin-validation-status';
+            
             $payload = [
-                'nin' => $this->agentService->nin,
-                'token' => $apiKey
+                'nin' => $this->agentService->nin
             ];
 
-            $response = Http::post($url, $payload);
+            $response = Http::withToken($apiKey)->post($url, $payload);
             $apiResponse = $response->json();
 
-            // Check if response failed but contains record not found error
-            if (!$response->successful()) {
-                $errorMsg = $apiResponse['error'] ?? $apiResponse['message'] ?? 'API Error';
-                if (stripos($errorMsg, 'record not found') !== false) {
-                    $this->agentService->update(['comment' => 'Record not found on S8V API']);
-                    return;
-                }
+            // Check if response failed
+            if (!$response->successful() && !isset($apiResponse['status'])) {
+                $errorMsg = $apiResponse['message'] ?? 'API Error';
                 throw new \Exception($errorMsg);
             }
 
@@ -68,20 +65,30 @@ class CheckNINStatusJob implements ShouldQueue
                 'comment' => $cleanResponse,
             ];
 
-            // Determine status from API response
+            // Determine status from API response (status is boolean, code indicates specific state)
             if (isset($apiResponse['status'])) {
-                $updateData['status'] = $this->normalizeStatus($apiResponse['status']);
+                if ($apiResponse['status'] === true) {
+                    if (isset($apiResponse['code']) && strtoupper($apiResponse['code']) === 'PENDING') {
+                        $updateData['status'] = 'processing';
+                    } else {
+                        $updateData['status'] = 'successful';
+                    }
+                } else {
+                    $updateData['status'] = 'failed';
+                }
             } elseif (isset($apiResponse['response'])) {
                 $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
             }
 
             // Update the agent service record
-            $this->agentService->update($updateData);
+            if (isset($updateData['status'])) {
+                $this->agentService->update($updateData);
 
-            Log::info("CheckNINStatusJob: Successfully updated status for NIN {$this->agentService->nin}", [
-                'id' => $this->agentService->id,
-                'status' => $this->agentService->status
-            ]);
+                Log::info("CheckNINStatusJob: Successfully updated status for NIN {$this->agentService->nin}", [
+                    'id' => $this->agentService->id,
+                    'status' => $this->agentService->status
+                ]);
+            }
 
         } catch (\Exception $e) {
             Log::error('CheckNINStatusJob Error: ' . $e->getMessage(), [
