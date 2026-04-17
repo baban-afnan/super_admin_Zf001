@@ -13,7 +13,10 @@ class GatewayBalanceController extends Controller
      */
     public function index()
     {
-        $palmpayBalance = Cache::get('palmpay_gateway_balance', 0);
+        $palmpayBalance = Cache::remember('palmpay_gateway_balance_real', 300, function() {
+            return (new \App\Services\PalmpayService())->queryBalance()['availableBalance'] ?? 0;
+        }) / 100;
+        
         return view('admin.gateway-balance', compact('palmpayBalance'));
     }
 

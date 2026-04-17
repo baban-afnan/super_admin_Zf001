@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\SupportTicket;
+use App\Models\AiChat;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -17,10 +17,10 @@ class TicketClosed extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param SupportTicket $ticket
+     * @param AiChat $ticket
      * @return void
      */
-    public function __construct(SupportTicket $ticket)
+    public function __construct(AiChat $ticket)
     {
         $this->ticket = $ticket;
     }
@@ -32,7 +32,7 @@ class TicketClosed extends Mailable
      */
     public function build()
     {
-        return $this->subject('Ticket #' . $this->ticket->ticket_reference . ' Closed')
+        return $this->subject('Support Conversation #' . $this->ticket->reference . ' Closed')
                     ->view('emails.support.closed');
     }
 }

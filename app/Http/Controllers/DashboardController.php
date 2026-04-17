@@ -154,8 +154,12 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        // Support Tickets Count (Open or Customer Reply)
-        $supportCount = \App\Models\SupportTicket::whereIn('status', ['open', 'customer_reply'])->count();
+        // Support Tickets & Global AI Count (Show All Statuses)
+        $supportCount = \App\Models\AiChat::whereIn('type', ['support', 'global'])
+            ->select('reference', 'user_id', 'type')
+            ->distinct()
+            ->get()
+            ->count();
 
         // Name and Photo Resolution (via Model Accessors)
         $firstName = $user->display_first_name;

@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'webhook/s8v-validation',
+            'palmpay/webhook',
         ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,

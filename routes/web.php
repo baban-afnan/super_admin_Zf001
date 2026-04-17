@@ -244,5 +244,6 @@ Route::get('/test-notification-generic', function () {
 });
 
 Route::post('/webhook/s8v-validation', [\App\Http\Controllers\ValidationController::class, 'webhook'])->name('validation.webhook');
+Route::post('/palmpay/webhook', [\App\Http\Controllers\PalmpayWebhookController::class, 'handle'])->name('palmpay.webhook');
 
 require __DIR__.'/auth.php';

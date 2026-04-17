@@ -68,7 +68,7 @@
                                 <button class="btn btn-primary btn-icon rounded-circle position-absolute bottom-0 end-0 shadow-sm border border-3 border-white p-2" 
                                         style="width: 42px; height: 42px;"
                                         data-bs-toggle="modal" data-bs-target="#photoModal">
-                                    <i class="ti ti-camera fs-5"></i>
+                                    <i class="ti ti-camera fs-20"></i>
                                 </button>
                             </div>
                         </div>

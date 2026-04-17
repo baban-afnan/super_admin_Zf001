@@ -39,26 +39,21 @@
 
             {{-- Total Credits / Total Bonus --}}
             <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
-                <div class="financial-card shadow-sm h-100 p-4" style="background: var(--success-gradient);">
+                @php
+                    $isApiSource = request('source') == 'api';
+                    $secondaryLabel = $isApiSource ? 'Total Bonus' : 'Total Credits';
+                    $secondaryVal = $isApiSource ? $totalBonus : $totalCredits;
+                    $secondaryGradient = $isApiSource ? 'var(--info-gradient)' : 'var(--success-gradient)';
+                    $secondaryIcon = $isApiSource ? 'ti-gift' : 'ti-arrow-down-left';
+                @endphp
+                <div class="financial-card shadow-sm h-100 p-4" style="background: {{ $secondaryGradient }};">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div>
-                            <p class="stats-label mb-1 text-light">
-                                @if(request('source') == 'api')
-                                    Total Bonus
-                                @else
-                                    Total Credits
-                                @endif
-                            </p>
-                            <h3 class="stats-value mb-0">
-                                @if(request('source') == 'api')
-                                    ₦{{ number_format($totalBonus, 2) }}
-                                @else
-                                    ₦{{ number_format($totalCredits, 2) }}
-                                @endif
-                            </h3>
+                            <p class="stats-label mb-1 text-light">{{ $secondaryLabel }}</p>
+                            <h3 class="stats-value mb-0">₦{{ number_format($secondaryVal, 2) }}</h3>
                         </div>
                         <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3">
-                            <i class="ti ti-arrow-down-left fs-24 text-white"></i>
+                            <i class="ti {{ $secondaryIcon }} fs-24 text-white"></i>
                         </div>
                     </div>
                 </div>
@@ -266,11 +261,19 @@
                                             $typeClass = 'bg-secondary-subtle text-secondary';
                                             $typeIcon = 'ti-dots';
                                             $typeName = ucfirst(str_replace('_', ' ', $transaction->type));
+                                            $isApiSource = request('source') == 'api';
 
                                             if (in_array($transaction->type, ['credit', 'manual_credit', 'bonus', 'refund'])) {
                                                 $typeClass = 'bg-success-subtle text-success';
                                                 $typeIcon = 'ti-arrow-down-left';
-                                                $typeName = $transaction->type == 'bonus' ? 'Bonus' : 'Credit';
+                                                
+                                                if ($transaction->type == 'bonus') {
+                                                    $typeName = $isApiSource ? 'Bonus' : 'Credit';
+                                                    $typeIcon = $isApiSource ? 'ti-gift' : 'ti-arrow-down-left';
+                                                    $typeClass = $isApiSource ? 'bg-info-subtle text-info' : 'bg-success-subtle text-success';
+                                                } else {
+                                                    $typeName = 'Credit';
+                                                }
                                             } elseif (in_array($transaction->type, ['debit', 'manual_debit'])) {
                                                 $typeClass = 'bg-danger-subtle text-danger';
                                                 $typeIcon = 'ti-arrow-up-right';

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\SupportTicket;
-use App\Models\SupportMessage;
+use App\Models\AiChat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -24,14 +23,30 @@ class AdminSupportController extends Controller
 
     public function index(Request $request)
     {
-        $query = SupportTicket::with('user');
+        // Subquery to get the latest message for EACH conversation group
+        // A conversation group is defined by its 'reference' if present, 
+        // OR by ('user_id' and 'type' if reference is null).
+        $latestMessagesSub = AiChat::select(
+                'user_id', 
+                'type', 
+                'reference', 
+                \DB::raw('MAX(id) as latest_id')
+            )
+            ->whereIn('type', ['support', 'global'])
+            ->groupBy('user_id', 'type', 'reference');
+
+        $query = AiChat::joinSub($latestMessagesSub, 'latest_msgs', function ($join) {
+                $join->on('ai_chats.id', '=', 'latest_msgs.latest_id');
+            })
+            ->with('user');
 
         // Search
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('ticket_reference', 'like', "%{$search}%")
-                  ->orWhere('subject', 'like', "%{$search}%")
+                $q->where('ai_chats.reference', 'like', "%{$search}%")
+                  ->orWhere('ai_chats.subject', 'like', "%{$search}%")
+                  ->orWhere('ai_chats.content', 'like', "%{$search}%") // Added content search
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('first_name', 'like', "%{$search}%")
                         ->orWhere('last_name', 'like', "%{$search}%")
@@ -42,66 +57,120 @@ class AdminSupportController extends Controller
 
         // Filter by Status
         if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
+            $query->where('ai_chats.status', $request->status);
         }
 
-        $tickets = $query->orderByRaw("FIELD(status, 'open', 'customer_reply', 'answered', 'closed')")
-            ->latest('updated_at')
-            ->paginate(10);
+        $tickets = $query->orderByRaw("FIELD(ai_chats.status, 'open', 'customer_reply', 'answered', 'closed') DESC")
+            ->latest('ai_chats.updated_at')
+            ->paginate(15);
 
-        // Statistics
-        $totalTickets = SupportTicket::count();
+        // Statistics (Support + Global AI)
+        $totalTickets = $this->countTotalConversations();
         
-        // Monthly Received (All tickets created this month)
-        $monthlyReceived = SupportTicket::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+        // Monthly Received
+        $monthlyReceived = $this->countTotalConversations(now()->month, now()->year);
             
-        // Monthly Open (Created this month and still open)
-        $monthlyOpen = SupportTicket::where('status', 'open')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+        // Monthly Open (Currently open/customer_reply)
+        $monthlyOpen = $this->countTotalConversations(now()->month, now()->year, ['open', 'customer_reply']);
 
-        // Monthly Closed (Created this month and closed)
-        $monthlyClosed = SupportTicket::where('status', 'closed')
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+        // Monthly Closed
+        $monthlyClosed = $this->countTotalConversations(now()->month, now()->year, ['closed']);
 
-        // Customer Reply (Updated this month with status customer_reply)
-        $customer_reply = SupportTicket::where('status', 'customer_reply')
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
-            ->count();
+        // Customer Reply
+        $customer_reply = $this->countTotalConversations(now()->month, now()->year, ['customer_reply'], 'updated_at');
 
-        return view('admin.support.index', compact('tickets', 'totalTickets', 'monthlyReceived', 'monthlyOpen', 'monthlyClosed', 'customer_reply'));
+        // Chart Data: Status Distribution
+        $latestStatusSub = AiChat::select('user_id', 'type', 'reference', \DB::raw('MAX(id) as latest_id'))
+            ->whereIn('type', ['support', 'global'])
+            ->groupBy('user_id', 'type', 'reference');
+            
+        $statusStats = AiChat::joinSub($latestStatusSub, 'ls', function($join) {
+                $join->on('ai_chats.id', '=', 'ls.latest_id');
+            })
+            ->select('status', \DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->get();
+
+        // Chart Data: Support Usage by User Role
+        $roleStats = AiChat::join('users', 'ai_chats.user_id', '=', 'users.id')
+            ->where('ai_chats.role', 'user')
+            ->whereIn('ai_chats.type', ['support', 'global'])
+            ->select('users.role', \DB::raw('count(distinct COALESCE(ai_chats.reference, CONCAT("global-", ai_chats.user_id))) as count'))
+            ->groupBy('users.role')
+            ->get();
+
+        return view('admin.support.index', compact(
+            'tickets', 'totalTickets', 'monthlyReceived', 'monthlyOpen', 'monthlyClosed', 'customer_reply',
+            'statusStats', 'roleStats'
+        ));
+    }
+
+    protected function countTotalConversations($month = null, $year = null, $statuses = [], $dateField = 'created_at')
+    {
+        $query = AiChat::whereIn('type', ['support', 'global']);
+
+        if ($month) {
+            $query->whereMonth($dateField, $month);
+        }
+        if ($year) {
+            $query->whereYear($dateField, $year);
+        }
+        if (!empty($statuses)) {
+            $query->whereIn('status', $statuses);
+        }
+
+        return $query->select('reference', 'user_id', 'type')
+            ->distinct()
+            ->get()
+            ->count();
     }
 
     public function fetchMessages($reference)
     {
-        $ticket = SupportTicket::where('ticket_reference', $reference)
-            ->with(['messages.user', 'user'])
-            ->firstOrFail();
+        $messages = $this->getConversationMessages($reference);
 
-        return view('admin.support.partials.messages', compact('ticket'))->render();
+        return view('admin.support.partials.messages', compact('messages', 'reference'))->render();
     }
 
     public function show($reference)
     {
-        $ticket = SupportTicket::where('ticket_reference', $reference)
-            ->with(['messages.user', 'user'])
-            ->firstOrFail();
+        $messages = $this->getConversationMessages($reference);
 
-        return view('admin.support.show', compact('ticket'));
+        if ($messages->isEmpty()) {
+            abort(404, 'Conversation not found.');
+        }
+
+        $ticket = $messages->first(); 
+        $ticket->messages = $messages; 
+
+        return view('admin.support.show', compact('ticket', 'messages', 'reference'));
+    }
+
+    protected function getConversationMessages($reference)
+    {
+        $query = AiChat::with('user')->orderBy('created_at', 'asc');
+
+        if (str_starts_with($reference, 'AI-USER-')) {
+            $userId = (int) str_replace('AI-USER-', '', $reference);
+            $query->where('user_id', $userId)->where('type', 'global')->whereNull('reference');
+        } else {
+            $query->where('reference', $reference);
+        }
+
+        return $query->get();
     }
 
     public function reply(Request $request, $reference)
     {
-        $ticket = SupportTicket::where('ticket_reference', $reference)->firstOrFail();
+        $messages = $this->getConversationMessages($reference);
+        $lastMessage = $messages->last();
 
-        if ($ticket->status == 'closed') {
-            return back()->with('error', 'Cannot reply to a closed ticket.');
+        if (!$lastMessage) {
+            abort(404);
+        }
+
+        if ($lastMessage->status == 'closed') {
+            return back()->with('error', 'Cannot reply to a closed conversation.');
         }
 
         $request->validate([
@@ -114,57 +183,77 @@ class AdminSupportController extends Controller
             $attachmentPath = $request->file('attachment')->store('support-attachments', 'public');
         }
 
-        SupportMessage::create([
-            'support_ticket_id' => $ticket->id,
-            'user_id' => Auth::id(), // Admin user ID
-            'message' => $request->message,
+        AiChat::create([
+            'user_id' => Auth::id(), 
+            'reference' => $lastMessage->reference, // Might be null for global
+            'type' => $lastMessage->type,
+            'subject' => $lastMessage->subject,
+            'status' => 'answered',
+            'role' => 'admin',
+            'content' => $request->message,
             'attachment' => $attachmentPath,
-            'is_admin_reply' => true,
         ]);
 
-        $ticket->update(['status' => 'answered', 'updated_at' => now()]);
+        // Update status for the whole conversation group
+        if ($lastMessage->reference) {
+            AiChat::where('reference', $lastMessage->reference)->update(['status' => 'answered', 'updated_at' => now()]);
+        } else {
+            AiChat::where('user_id', $lastMessage->user_id)->where('type', 'global')->whereNull('reference')
+                  ->update(['status' => 'answered', 'updated_at' => now()]);
+        }
 
         return back()->with('success', 'Reply sent successfully.');
     }
 
     public function close($reference)
     {
-        $ticket = SupportTicket::where('ticket_reference', $reference)
-            ->with(['messages', 'user'])
-            ->firstOrFail();
+        $messages = $this->getConversationMessages($reference);
 
-        if ($ticket->status == 'closed') {
-            return back()->with('info', 'Ticket is already closed.');
+        if ($messages->isEmpty()) {
+            abort(404);
         }
 
-        $ticket->update(['status' => 'closed', 'updated_at' => now()]);
+        $lastMessage = $messages->last();
+        if ($lastMessage->status == 'closed') {
+            return back()->with('info', 'Conversation is already closed.');
+        }
 
-        // Send email with chat history
-        if ($ticket->user && $ticket->user->email) {
-            try {
-                Mail::to($ticket->user->email)->send(new TicketClosed($ticket));
-            } catch (\Exception $e) {
-                // Log error but don't fail the request
-                // \Log::error('Failed to send ticket closed email: ' . $e->getMessage());
-                return back()->with('success', 'Ticket closed successfully, but failed to send email notification.');
+        if ($lastMessage->reference) {
+            AiChat::where('reference', $lastMessage->reference)->update(['status' => 'closed', 'updated_at' => now()]);
+        } else {
+            AiChat::where('user_id', $lastMessage->user_id)->where('type', 'global')->whereNull('reference')
+                  ->update(['status' => 'closed', 'updated_at' => now()]);
+        }
+
+        // Send email notification for formal support tickets
+        if ($lastMessage->type == 'support') {
+            $ticket = $messages->first();
+            $ticket->messages = $messages;
+
+            if ($ticket->user && $ticket->user->email) {
+                try {
+                    Mail::to($ticket->user->email)->send(new TicketClosed($ticket));
+                } catch (\Exception $e) {
+                    return back()->with('success', 'Conversation closed successfully, but failed to send email notification.');
+                }
             }
         }
 
-        return back()->with('success', 'Ticket closed and notification sent to user.');
+        return back()->with('success', 'Conversation status updated successfully.');
     }
     public function updates(Request $request, $reference)
     {
-        $ticket = SupportTicket::where('ticket_reference', $reference)->firstOrFail();
+        $query = AiChat::where('id', '>', $request->last_message_id ?? 0);
         
-        $messages = [];
-        if ($request->has('last_message_id')) {
-            $messages = $ticket->messages()
-                ->where('id', '>', $request->last_message_id)
-                ->get();
+        if (str_starts_with($reference, 'AI-USER-')) {
+            $userId = (int) str_replace('AI-USER-', '', $reference);
+            $query->where('user_id', $userId)->where('type', 'global')->whereNull('reference');
+        } else {
+            $query->where('reference', $reference);
         }
 
         return response()->json([
-            'messages' => $messages
+            'messages' => $query->get()
         ]);
     }
 }

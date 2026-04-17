@@ -175,17 +175,17 @@
                 </a>
             </div>
 
-            <!-- Pending Support -->
+            <!-- Support & AI Chats -->
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.2s;">
                 <a href="{{ route('admin.support.index') }}" class="text-decoration-none">
                     <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--danger-gradient);">
                         <div class="d-flex justify-content-between align-items-start position-relative z-1">
                             <div>
-                                <p class="stats-label mb-1" style="color: white;">Pending Support</p>
+                                <p class="stats-label mb-1" style="color: white;">Total Conversations</p>
                                 <h3 class="stats-value mb-0 text-white">{{ $supportCount ?? 0 }}</h3>
                             </div>
                             <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3 position-relative">
-                                <i class="ti ti-headset fs-24 text-white"></i>
+                                <i class="ti ti-messages fs-24 text-white"></i>
                             </div>
                         </div>
                     </div>

@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <!-- Summary Cards -->
+        <!-- Summary Cards: Financial Status -->
         <div class="row g-3 mb-4">
             <!-- Total Users Balance (Global Snapshot) -->
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.1s;">
@@ -56,8 +56,23 @@
                 </div>
             </div>
 
-            <!-- Monthly Revenue (Success) -->
+            <!-- PalmPay Merchant Balance (Primary) -->
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--indigo-gradient);">
+                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
+                        <div class="text-white">
+                            <p class="stats-label mb-2 text-white-50 fs-13 fw-medium">Gateway: PalmPay Balance</p>
+                            <h3 class="fw-bold mb-0 text-white">₦{{ number_format($palmpayBalance, 2) }}</h3>
+                        </div>
+                        <div class="avatar avatar-lg bg-opacity-20 rounded-3 flex-shrink-0">
+                            <i class="ti ti-building-bank fs-30 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Revenue (Success) -->
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.3s;">
                 <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--success-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div class="text-white">
@@ -72,7 +87,7 @@
             </div>
 
             <!-- Monthly Net Yield (Info) -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.4s;">
                 <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--info-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div class="text-white">
@@ -85,9 +100,12 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Monthly Service Spend (Warning) -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.4s;">
+        <!-- Summary Cards: Monthly Flows -->
+        <div class="row g-3 mb-4">
+             <!-- Monthly User App Spending (Warning) -->
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.5s;">
                 <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--warning-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div class="text-white">
@@ -100,12 +118,10 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row g-3 mb-4">
             <!-- Monthly Manual Funding (Indigo) -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.5s;">
-                <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--indigo-gradient);">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.6s;">
+                <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--purple-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div class="text-white">
                             <p class="stats-label mb-2 text-white-50 fs-13 fw-medium">Monthly: Manual Funding</p>
@@ -119,7 +135,7 @@
             </div>
 
             <!-- Monthly Automated Funding (Teal) -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.6s;">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.7s;">
                 <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--teal-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div class="text-white">
@@ -134,8 +150,8 @@
             </div>
 
             <!-- Monthly Refunds (Purple) -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.7s;">
-                <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--purple-gradient);">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.8s;">
+                <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--danger-gradient);">
                     <div class="d-flex justify-content-between align-items-start position-relative z-1">
                         <div class="text-white">
                             <p class="stats-label mb-2 text-white-50 fs-13 fw-medium">Monthly: Total Refunds</p>
@@ -143,21 +159,6 @@
                         </div>
                         <div class="avatar avatar-lg bg-opacity-20 rounded-3 flex-shrink-0">
                             <i class="ti ti-refresh fs-30 text-white"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Most Used Service (Orange) -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 fade-in-up" style="animation-delay: 0.8s;">
-                <div class="financial-card shadow-sm h-100 p-4 hover-lift" style="background: var(--orange-gradient);">
-                    <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                        <div class="text-white">
-                            <p class="stats-label mb-2 text-white-50 fs-13 fw-medium">Monthly: Top Service</p>
-                            <h3 class="fw-bold mb-0 text-white" title="{{ $mostUsedService }}">{{ \Illuminate\Support\Str::limit(strtoupper(str_replace('_', ' ', $mostUsedService)), 12) }}</h3>
-                        </div>
-                        <div class="avatar avatar-lg bg-opacity-20 rounded-3 flex-shrink-0">
-                            <span class="fw-bold text-white fs-30">{{ number_format($usageCount) }}</span>
                         </div>
                     </div>
                 </div>

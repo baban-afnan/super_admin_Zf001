@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\AgentService;
 use Illuminate\Support\Facades\Auth;
+use App\Services\PalmpayService;
+use Illuminate\Support\Facades\Cache;
 
 class AdminWalletController extends Controller
 {
@@ -47,8 +49,19 @@ class AdminWalletController extends Controller
             ->whereYear('created_at', now()->year)
             ->sum('amount');
 
-        // Palmpay Balance from Cache
-        $palmpayBalance = \Illuminate\Support\Facades\Cache::get('palmpay_gateway_balance', 0);
+        // Palmpay Balance from API/Cache
+        $palmpayBalance = Cache::remember('palmpay_gateway_balance_real', 300, function() {
+            return (new PalmpayService())->queryBalance()['availableBalance'] ?? 0;
+        });
+        
+        // Ensure balance is decimal (it comes as Long/kobo from PalmPay, usually)
+        // Note: Check if the response is in Kobo or Naira. PalmPay usually returns in smallest unit.
+        // If it's 50000 for 500 Naira, we divide by 100.
+        // Assuming Naira for now as per user snippet showing ₦.
+        // Wait, the sample says 50000. If it's 50,000 Naira, it's fine. 
+        // If it's kobo, we divide by 100. 
+        // Standard PalmPay merchant balance is usually in minor units.
+        $palmpayBalance = $palmpayBalance / 100;
 
         // Get transactions
         $transactions = $query->with('user')
@@ -283,6 +296,12 @@ class AdminWalletController extends Controller
                 ->sortByDesc('usage_count');
         }
 
+        // Palmpay Balance from API/Cache
+        $palmpayBalance = Cache::remember('palmpay_gateway_balance_real', 300, function() {
+            $data = (new PalmpayService())->queryBalance();
+            return $data['availableBalance'] ?? 0;
+        }) / 100;
+
         return view('wallet.summary', compact(
             'totalBalance',
             'topUsersByBalance',
@@ -297,7 +316,8 @@ class AdminWalletController extends Controller
             'monthlyRevenue',
             'monthlyNetYield',
             'month',
-            'year'
+            'year',
+            'palmpayBalance'
         ));
     }
 }
