@@ -142,7 +142,7 @@
                                     <tr>
                                         <td class="ps-4">{{ $tickets->firstItem() + $loop->index }}</td>
                                         <td>
-                                            <span class="badge bg-{{ $ticket->type == 'support' ? 'indigo' : 'purple' }}-transparent text-{{ $ticket->type == 'support' ? 'indigo' : 'purple' }} px-3 py-2 rounded-pill">
+                                            <span class="badge bg-{{ $ticket->type == 'support' ? 'primary' : 'purple' }}-transparent text-{{ $ticket->type == 'support' ? 'primary' : 'purple' }} px-3 py-2 rounded-pill">
                                                 <i class="ti ti-{{ $ticket->type == 'support' ? 'headset' : 'sparkles' }} me-1"></i>
                                                 {{ strtoupper($ticket->type) }}
                                             </span>
