@@ -130,7 +130,6 @@
                                     <th class="ps-4">S/N</th>
                                     <th>Type</th>
                                     <th>ID / Reference</th>
-                                    <th>Subject / Snippet</th>
                                     <th>User</th>
                                     <th>Status</th>
                                     <th>Update</th>
@@ -152,13 +151,7 @@
                                                 {{ $ticket->reference ?? 'AI-USER-' . $ticket->user_id }}
                                             </span>
                                         </td>
-                                        <td>
-                                            @if($ticket->type == 'support')
-                                                <div class="text-dark fw-medium lh-sm">{{ Str::limit($ticket->subject, 45) }}</div>
-                                            @else
-                                                <div class="text-muted italic small lh-sm">{{ Str::limit($ticket->content, 45) }}</div>
-                                            @endif
-                                        </td>
+                                       
                                         <td>
                                             @if($ticket->user)
                                                 <div class="d-flex align-items-center">
