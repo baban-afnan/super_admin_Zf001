@@ -60,8 +60,7 @@ class AdminSupportController extends Controller
             $query->where('ai_chats.status', $request->status);
         }
 
-        $tickets = $query->orderByRaw("FIELD(ai_chats.status, 'open', 'customer_reply', 'answered', 'closed') DESC")
-            ->latest('ai_chats.updated_at')
+        $tickets = $query->latest('ai_chats.updated_at')
             ->paginate(15);
 
         // Statistics (Support + Global AI)
