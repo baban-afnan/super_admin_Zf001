@@ -4,15 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use App\Models\Transaction;
-use App\Models\Wallet;
 use Illuminate\Http\Request;
 use App\Models\AgentService;
 use App\Models\User;
 use App\Models\Service;
 use App\Models\ServiceField;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -112,21 +108,14 @@ class ValidationController extends Controller
 
         try {
             $enrollment = AgentService::findOrFail($id);
-            $oldStatus = $enrollment->status;
             $user = User::find($enrollment->user_id);
 
             $enrollment->status = $request->status;
             $enrollment->comment = $request->comment;
             $enrollment->save();
 
-            // Handle refund logic if rejected
-            if ($request->status === 'rejected') {
-                if ($oldStatus !== 'rejected' || $request->force_refund) {
-                    $this->processRefund($enrollment, $request->force_refund);
-                }
-            }
-
             // Send email notification to user
+            $user = User::find($enrollment->user_id);
             if ($user && $user->email) {
                 $this->sendStatusUpdateEmail($user, $enrollment);
             }
@@ -141,88 +130,7 @@ class ValidationController extends Controller
         }
     }
 
-    /**
-     * Handle refund when a request is rejected
-     */
-    private function processRefund($enrollment, $forceRefund = false)
-    {
-        $serviceFieldId = $enrollment->service_field_id;
-        $user = User::find($enrollment->user_id);
 
-        if (!$user) {
-            throw new \Exception('User not found.');
-        }
-
-        if (!$serviceFieldId) {
-            throw new \Exception('Service field ID is missing.');
-        }
-
-        $serviceField = ServiceField::find($serviceFieldId);
-
-        if (!$serviceField) {
-            throw new \Exception('Service field not found.');
-        }
-
-        $role = strtolower($user->role ?? 'default');
-
-        // Check if refund already exists
-        $refundExists = Transaction::where('type', 'refund')
-            ->where('description', 'LIKE', "%Request ID #{$enrollment->id}%")
-            ->exists();
-
-        if ($refundExists && !$forceRefund) {
-            throw new \Exception('Refund already processed for this request.');
-        }
-
-        // Fetch price for role, fallback to base price
-        $servicePrice = DB::table('service_prices')
-            ->where('service_fields_id', $serviceFieldId)
-            ->where('user_type', $role)
-            ->value('price');
-
-        $basePrice = $servicePrice ?: $serviceField->base_price;
-
-        if (!$basePrice || $basePrice <= 0) {
-            throw new \Exception('No valid price found for refund.');
-        }
-
-        $refundAmount = round($basePrice * 0.8, 2);
-        $debitAmount = round($basePrice * 0.2, 2);
-
-        $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
-
-        if (!$wallet) {
-            throw new \Exception('Wallet not found for user.');
-        }
-
-        // Update wallet balance
-        $wallet->balance += $refundAmount;
-        $wallet->save();
-
-        // Create refund transaction
-        Transaction::create([
-            'transaction_ref' => strtoupper(Str::random(12)),
-            'user_id' => $user->id,
-            'performed_by' => Auth::user()->first_name . ' ' . (Auth::user()->last_name ?? ''),
-            'amount' => $refundAmount,
-            'fee' => 0.00,
-            'net_amount' => $refundAmount,
-            'description' => "Refund 80% for rejected service [{$serviceField->field_name}], Request ID #{$enrollment->id}",
-            'type' => 'refund',
-            'status' => 'completed',
-            'metadata' => json_encode([
-                'service_id' => $enrollment->service_id,
-                'service_field_id' => $serviceFieldId,
-                'field_code' => $serviceField->field_code,
-                'field_name' => $serviceField->field_name ?? null,
-                'user_role' => $role,
-                'base_price' => $basePrice,
-                'percentage_refunded' => 80,
-                'amount_debited_by_system' => $debitAmount,
-                'forced_refund' => $forceRefund,
-            ]),
-        ]);
-    }
 
     /**
      * Send custom email notification to user about status update
@@ -334,13 +242,14 @@ class ValidationController extends Controller
             return redirect()->back()->with('infoMessage', 'No pending or processing NIN Validation requests to sync.');
         }
 
-        foreach ($enrollments as $enrollment) {
-            // Update status to processing to indicate it's in queue
-            $enrollment->update([
+        // Bulk update status to processing to indicate it's in queue
+        AgentService::whereIn('id', $enrollments->pluck('id'))
+            ->update([
                 'status' => 'processing',
                 'comment' => 'Request is in queue for bulk status check.'
             ]);
 
+        foreach ($enrollments as $enrollment) {
             // Dispatch background job
             \App\Jobs\CheckNINStatusJob::dispatch($enrollment);
         }
@@ -348,94 +257,5 @@ class ValidationController extends Controller
         return redirect()->back()->with('successMessage', 'Bulk sync started. ' . $enrollments->count() . ' requests have been queued for processing.');
     }
 
-    /**
-     * Webhook receiver for S8v notifications
-     */
-    public function webhook(Request $request)
-    {
-        $data = $request->all();
 
-        Log::info('NIN Validation Webhook Received', $data);
-
-        $identifier = $data['nin'] ?? ($data['data']['nin'] ?? null);
-
-        if ($identifier) {
-            $submission = AgentService::where('nin', $identifier)
-                ->orderBy('created_at', 'desc')
-                ->first();
-
-            if ($submission) {
-                // Clean the webhook response
-                $cleanResponse = $this->cleanApiResponse($data);
-                
-                $updateData = [
-                    'comment' => $cleanResponse,
-                ];
-
-                if (isset($data['status'])) {
-                    if (is_bool($data['status'])) {
-                        if ($data['status'] === true) {
-                            if (isset($data['code']) && strtoupper($data['code']) === 'PENDING') {
-                                $updateData['status'] = 'processing';
-                            } else {
-                                $updateData['status'] = 'successful';
-                            }
-                        } else {
-                            $updateData['status'] = 'failed';
-                        }
-                    } else {
-                        $updateData['status'] = $this->normalizeStatus($data['status']);
-                    }
-                }
-
-                $submission->update($updateData);
-
-                Log::info('NIN Validation Updated via Webhook', [
-                    'submission_id' => $submission->id,
-                    'identifier' => $identifier,
-                    'new_status' => $updateData['status'] ?? 'unknown'
-                ]);
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Webhook received successfully'
-        ]);
-    }
-
-    /**
-     * Clean API response by removing unwanted characters
-     */
-    private function cleanApiResponse($response): string
-    {
-        if (is_array($response)) {
-            // If it's an array, try to extract specific info or make it a neat string
-            if (isset($response['message'])) return (string) $response['message'];
-            if (isset($response['response'])) return (string) $response['response'];
-            
-            return collect($response)
-                ->map(fn($v, $k) => is_array($v) ? "$k: " . json_encode($v) : "$k: $v")
-                ->implode(' | ');
-        }
-
-        return trim((string) $response);
-    }
-
-    /**
-     * Normalize status from various API response formats
-     */
-    private function normalizeStatus($status): string
-    {
-        $s = strtolower(trim((string) $status));
-        
-        return match ($s) {
-            'successful', 'success', 'resolved', 'approved', 'in-progress', 'completed' => 'successful',
-            'processing', 'pending', 'submitted', 'new' => 'processing',
-            'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
-            'query' => 'query',
-            'remark' => 'remark',
-            default => 'pending',
-        };
-    }
 }
