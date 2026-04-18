@@ -337,9 +337,20 @@ class NinIpeController extends Controller
     private function cleanApiResponse($response): string
     {
         if (is_array($response)) {
-            // If it's an array, try to extract specific info or make it a neat string
-            if (isset($response['message'])) return (string) $response['message'];
-            if (isset($response['response'])) return (string) $response['response'];
+            $message = $response['message'] ?? ($response['response'] ?? null);
+            $data = $response['data'] ?? [];
+            
+            $nin = $data['nin'] ?? null;
+            $reply = $data['reply'] ?? null;
+
+            $parts = [];
+            if ($message) $parts[] = (string) $message;
+            if ($nin) $parts[] = "NIN: $nin";
+            if ($reply) $parts[] = "Reply: $reply";
+
+            if (!empty($parts)) {
+                return implode(' | ', $parts);
+            }
             
             return collect($response)
                 ->map(fn($v, $k) => is_array($v) ? "$k: " . json_encode($v) : "$k: $v")
