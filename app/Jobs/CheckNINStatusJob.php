@@ -48,7 +48,7 @@ class CheckNINStatusJob implements ShouldQueue
                 'nin' => $this->agentService->nin
             ];
 
-            $response = Http::withToken($apiKey)->timeout(15)->post($url, $payload);
+            $response = Http::withToken($apiKey)->post($url, $payload);
             $apiResponse = $response->json();
 
             // Check if response failed
@@ -80,28 +80,20 @@ class CheckNINStatusJob implements ShouldQueue
                 $updateData['status'] = $this->normalizeStatus($apiResponse['response']);
             }
 
-            // Update the agent service record - Always update if we have data
-            if (!isset($updateData['status'])) {
-                $updateData['status'] = $response->successful() ? 'processing' : 'failed';
+            // Update the agent service record
+            if (isset($updateData['status'])) {
+                $this->agentService->update($updateData);
+
+                Log::info("CheckNINStatusJob: Successfully updated status for NIN {$this->agentService->nin}", [
+                    'id' => $this->agentService->id,
+                    'status' => $this->agentService->status
+                ]);
             }
-
-            $this->agentService->update($updateData);
-
-            Log::info("CheckNINStatusJob: Successfully processed NIN {$this->agentService->nin}", [
-                'id' => $this->agentService->id,
-                'status' => $this->agentService->status
-            ]);
 
         } catch (\Exception $e) {
             Log::error('CheckNINStatusJob Error: ' . $e->getMessage(), [
                 'id' => $this->agentService->id,
                 'nin' => $this->agentService->nin
-            ]);
-
-            // Ensure the record is updated with the failure reason so the user isn't left wondering
-            $this->agentService->update([
-                'status' => 'failed',
-                'comment' => 'System Error: ' . $e->getMessage()
             ]);
         }
     }
