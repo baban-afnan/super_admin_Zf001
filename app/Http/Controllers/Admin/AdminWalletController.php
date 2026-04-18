@@ -81,7 +81,7 @@ class AdminWalletController extends Controller
 
     public function fundView()
     {
-        $users = User::select('id', 'first_name', 'last_name', 'email')->get();
+        $users = User::with('wallet')->select('id', 'first_name', 'last_name', 'email')->get();
         return view('wallet.fund', compact('users'));
     }
 

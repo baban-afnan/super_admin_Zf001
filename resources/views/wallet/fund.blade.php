@@ -141,9 +141,14 @@
                                                                 <div id="userAvatar" class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle me-3 fw-bold" style="width:50px;height:50px;">
                                                                     U
                                                                 </div>
-                                                                <div class="flex-grow-1">
+                                                                 <div class="flex-grow-1">
                                                                     <h6 id="selectedUserName" class="fw-bold mb-1"></h6>
                                                                     <p id="selectedUserEmail" class="small mb-0"></p>
+                                                                    <div class="mt-1">
+                                                                        <span class="badge bg-success-transparent text-success">
+                                                                            <i class="ti ti-wallet me-1"></i> Balance: <span id="selectedUserBalance">₦0.00</span>
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                                 <button type="button" class="btn btn-light btn-sm" onclick="clearSelection()">
                                                                     <i class="ti ti-x"></i> Clear
@@ -241,6 +246,13 @@
         const allUsers = @json($users);
         let selectedUser = null;
 
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-NG', {
+                style: 'currency',
+                currency: 'NGN',
+            }).format(amount).replace('NGN', '₦');
+        };
+
         const searchInput = document.getElementById("userSearch");
         const searchBtn = document.getElementById("searchBtn");
         const searchResults = document.getElementById("searchResults");
@@ -282,7 +294,9 @@
                 return;
             }
 
-            userList.innerHTML = results.map(u => `
+            userList.innerHTML = results.map(u => {
+                const balance = u.wallet?.balance ?? 0;
+                return `
                 <div class="list-group-item list-group-item-action user-item" onclick="selectUser(${u.id})">
                     <div class="d-flex align-items-center">
                         <div class="avatar avatar-md bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width:40px;height:40px;">
@@ -291,11 +305,12 @@
                         <div class="flex-grow-1">
                             <h6 class="fw-semibold mb-1">${u.first_name} ${u.last_name}</h6>
                             <p class="small text-muted mb-0">${u.email}</p>
+                            <small class="text-success fw-medium">Balance: ${formatCurrency(balance)}</small>
                         </div>
                         <i class="ti ti-chevron-right text-muted"></i>
                     </div>
                 </div>
-            `).join("");
+            `;}).join("");
         }
 
         function selectUser(id) {
@@ -305,7 +320,8 @@
             document.getElementById("selectedUserId").value = id;
             document.getElementById("selectedUserName").textContent = selectedUser.first_name + " " + selectedUser.last_name;
             document.getElementById("selectedUserEmail").textContent = selectedUser.email;
-            document.getElementById("userAvatar").textContent = selectedUser.first_name.charAt(0).toUpperCase();
+            document.getElementById("selectedUserBalance").textContent = formatCurrency(selectedUser.wallet?.balance ?? 0);
+            document.getElementById("userAvatar").textContent = selectedUser.first_name?.charAt(0).toUpperCase() ?? 'U';
 
             document.getElementById("selectedUserCard").classList.remove("d-none");
             document.getElementById("submitBtn").disabled = false;

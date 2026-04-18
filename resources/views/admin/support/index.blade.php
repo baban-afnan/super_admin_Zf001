@@ -208,12 +208,13 @@
                 </div>
                 @if($tickets->hasPages())
                     <div class="card-footer bg-white border-top py-3">
-                        {{ $tickets->links() }}
+                        {{ $tickets->links('vendor.pagination.custom') }}
                     </div>
                 @endif
             </div>
         </div>
     </div>
+
 
     <style>
         :root {
