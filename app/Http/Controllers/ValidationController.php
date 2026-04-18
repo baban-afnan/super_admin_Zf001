@@ -412,9 +412,10 @@ class ValidationController extends Controller
         if (is_array($response)) {
             $message = $response['message'] ?? ($response['response'] ?? null);
             $data = $response['data'] ?? [];
+            if (!is_array($data)) $data = [];
             
-            $nin = $data['nin'] ?? null;
-            $reply = $data['reply'] ?? null;
+            $nin = $response['nin'] ?? ($data['nin'] ?? null);
+            $reply = $response['reply'] ?? ($data['reply'] ?? null);
 
             $parts = [];
             if ($message) $parts[] = (string) $message;
