@@ -49,20 +49,9 @@ class ValidationController extends Controller
             $query->where('agent_services.status', $statusFilter);
         }
 
-        // Apply custom status order + submission_date
+        // Apply simple descending order + pagination
         $enrollments = $query
-            ->orderByRaw("CASE agent_services.status
-                WHEN 'pending' THEN 1
-                WHEN 'processing' THEN 2
-                WHEN 'in-progress' THEN 3
-                WHEN 'query' THEN 4
-                WHEN 'resolved' THEN 5
-                WHEN 'successful' THEN 6
-                WHEN 'rejected' THEN 7
-                WHEN 'failed' THEN 8
-                WHEN 'remark' THEN 9
-                ELSE 999 END")
-            ->orderByDesc('agent_services.submission_date')
+            ->orderByDesc('agent_services.id')
             ->paginate(10);
 
         // Status counts filtered by service_type (Fixed to match all variants)

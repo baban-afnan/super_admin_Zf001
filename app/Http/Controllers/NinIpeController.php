@@ -52,20 +52,9 @@ class NinIpeController extends Controller
             $query->where('agent_services.bank', $bankFilter);
         }
 
-        // Apply custom status order + submission_date
+        // Apply simple descending order + pagination
         $enrollments = $query
-            ->orderByRaw("CASE agent_services.status
-                WHEN 'pending' THEN 1
-                WHEN 'processing' THEN 2
-                WHEN 'in-progress' THEN 3
-                WHEN 'query' THEN 4
-                WHEN 'resolved' THEN 5
-                WHEN 'successful' THEN 6
-                WHEN 'rejected' THEN 7
-                WHEN 'failed' THEN 8
-                WHEN 'remark' THEN 9
-                ELSE 999 END")
-            ->orderByDesc('agent_services.submission_date')
+            ->orderByDesc('agent_services.id')
             ->paginate(10);
 
         // Status counts filtered by service_type (comprehensive grouping)
@@ -337,16 +326,20 @@ class NinIpeController extends Controller
     private function cleanApiResponse($response): string
     {
         if (is_array($response)) {
-            $message = $response['message'] ?? ($response['response'] ?? null);
+            $message = $response['message'] ?? ($response['response'] ?? ($response['status'] ?? null));
             $data = $response['data'] ?? [];
             if (!is_array($data)) $data = [];
             
             $nin = $response['nin'] ?? ($data['nin'] ?? null);
             $reply = $response['reply'] ?? ($data['reply'] ?? null);
+            $name = $response['name'] ?? ($data['name'] ?? null);
+            $dob = $response['dob'] ?? ($data['dob'] ?? null);
 
             $parts = [];
             if ($message) $parts[] = (string) $message;
             if ($nin) $parts[] = "NIN: $nin";
+            if ($name) $parts[] = "Name: $name";
+            if ($dob) $parts[] = "DOB: $dob";
             if ($reply) $parts[] = "Reply: $reply";
 
             if (!empty($parts)) {

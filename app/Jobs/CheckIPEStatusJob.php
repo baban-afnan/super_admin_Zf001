@@ -102,16 +102,20 @@ class CheckIPEStatusJob implements ShouldQueue
     private function cleanApiResponse($response): string
     {
         if (is_array($response)) {
-            $message = $response['message'] ?? ($response['response'] ?? null);
+            $message = $response['message'] ?? ($response['response'] ?? ($response['status'] ?? null));
             $data = $response['data'] ?? [];
             if (!is_array($data)) $data = [];
             
             $nin = $response['nin'] ?? ($data['nin'] ?? null);
             $reply = $response['reply'] ?? ($data['reply'] ?? null);
+            $name = $response['name'] ?? ($data['name'] ?? null);
+            $dob = $response['dob'] ?? ($data['dob'] ?? null);
 
             $parts = [];
             if ($message) $parts[] = (string) $message;
             if ($nin) $parts[] = "NIN: $nin";
+            if ($name) $parts[] = "Name: $name";
+            if ($dob) $parts[] = "DOB: $dob";
             if ($reply) $parts[] = "Reply: $reply";
 
             if (!empty($parts)) {
